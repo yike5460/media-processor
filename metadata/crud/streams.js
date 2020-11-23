@@ -87,7 +87,9 @@ const createData = async (event) => {
   //add 3 day ttl to db
   let date = Date.now();
   item.TimeStamp = addDays(date, 3);
-  item.key=getSignKey(item.outdate,item.id);
+
+  let exp = (new Date(item.outdate).getTime() / 1000 | 0);
+  item.key=getSignKey(exp,item.id);
   console.log(date);
   let params = {
     TableName: tableName,

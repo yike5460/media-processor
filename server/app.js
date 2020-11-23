@@ -33,6 +33,14 @@ function getConfig() {
       port: 8000,
       allow_origin: "*",
     },
+    auth: {
+      api: true,
+      play: false,
+      api_user: 'admin',
+      api_pass: 'admin',
+      publish: true,
+      secret: 'nodemedia2017privatekey'
+    }
   };
 
   // https: {
@@ -40,14 +48,7 @@ function getConfig() {
   //   key:'./privatekey.pem',
   //   cert:'./certificate.pem',
   // },
-  // auth: {
-  //   api: true,
-  //   play: false,
-  //   api_user: 'admin',
-  //   api_pass: 'admin',
-  //   publish: true,
-  //   secret: 'nodemedia2017privatekey'
-  // },
+
 }
 
 // init RTMP server

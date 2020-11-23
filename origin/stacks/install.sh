@@ -104,8 +104,7 @@ service()
 fi
 }
 
-main() {
-ecr 
+all() { 
 welcome
 get-login
 # build
@@ -114,4 +113,26 @@ push
 service
 }
 
-main 
+case $1 in
+    get-login)
+    get-login
+    ;;
+    build)
+    build
+     ;;
+    tag)
+    tag
+    ;;
+    push)
+    push
+     ;;
+    service)
+    service
+        ;;
+    all)
+    all
+        ;;
+    *)
+        echo $"Usage: $0 {get-login|build|tag|push|service|}"
+        exit 1
+esac
