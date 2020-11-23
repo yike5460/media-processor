@@ -1,0 +1,30 @@
+<!-- Include Radiant Media Player JavaScript file in your <body> or <head> -->
+    <script src="https://cdn.radiantmediatechs.com/rmp/5.11.1/js/rmp.min.js"></script>
+    <!-- Player container element -->
+    <div id="rmpPlayer"></div>
+    <!-- Set up player configuration options -->
+    <script>
+    // HLS low latency streaming source
+    var src = {
+      hls: 'https://your-live-hls-url-optimised-for-low-latency.m3u8'
+    };
+    var settings = {
+      licenseKey: 'your-license-key',
+      src: src,
+      width: 640,
+      height: 360,
+      contentMetadata: {
+        poster: [
+          'https://your-poster-url.jpg'
+        ]
+      },
+      // Relevant low-latency settings
+      // We set a 10 seconds buffer target - 1 second fragment
+      hlsJSMaxBufferLength: 10,
+      // We set hlsJSLiveSyncDurationCount to the minimal possible duration (3 seconds - 1 second fragment)
+      hlsJSLiveSyncDurationCount: 3
+    };
+    var elementID = 'rmpPlayer';
+    var rmp = new RadiantMP(elementID);
+    rmp.init(settings);
+    </script>

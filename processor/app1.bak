@@ -1,0 +1,268 @@
+const NodeMediaServer = require("node-media-server");
+const _ = require("lodash");
+const { join } = require("path");
+const querystring = require("querystring");
+const fs = require("./lib/fs");
+const hls = require("./lib/hls");
+const abr = require("./lib/abr");
+const ecs = require("./lib/ecs");
+const cache = require("./lib/cache");
+const logger = require("./lib/logger");
+const utils = require("./lib/utils");
+
+const LOG_TYPE = 2;
+logger.setLogType(LOG_TYPE);
+
+// init RTMP server
+const init = async () => {
+  try {
+    // Fetch the container server address (IP:PORT)
+    // The IP is from the EC2 server.  The PORT is from the container.
+    const SERVER_ADDRESS =
+      process.env.NODE_ENV === "production" ? await ecs.getServer() : "";
+    const path = process.env.NODE_ENV === "production" ? "/dev/shm" : "media";
+    const inputURL =
+      process.env.INPUT_URL || "rtmp://58.200.131.2:1935/livetv/natlgeo";
+    //"rtmp://58.200.131.2:1935/livetv/natlgeo";
+    const segmentTime = process.env.SEGMENT_TIME || 30;
+    const motion = process.env.MOTION || true;
+    const video = process.env.VIDEO || false;
+    const image = process.env.IMAGE || false;
+    const imageTime = process.env.IMAGE_SEGMENT_TIME || 10;
+    const logLevel = process.env.LOG_LEVEL || "info";
+    const transCoding = process.env.TRANSCODING || "copy";
+    //push stream name
+    const videoName = inputURL.split("/").pop();
+
+    // Set the Node-Media-Server config.
+    const config = {
+      logType: LOG_TYPE,
+      rtmp: {
+        port: 1935,
+        chunk_size: 60000,
+        gop_cache: true,
+        ping: 30,
+        ping_timeout: 60,
+      },
+      http: {
+        port: 8080,
+        mediaroot: path,
+        allow_origin: "*",
+        api: true,
+      },
+      auth: {
+        api: false,
+      },
+      //pull media from stream server
+      relay: {
+        ffmpeg: process.env.FFMPEG_PATH || "/usr/local/bin/ffmpeg",
+        tasks: [
+          {
+            app: "stream",
+            mode: "static",
+            edge: inputURL,
+          },
+        ],
+      },
+      trans: {
+        ffmpeg: process.env.FFMPEG_PATH || "/usr/local/bin/ffmpeg",
+        tasks: [
+          {
+            app: "stream",
+            hls: true,
+            raw: [
+              "-f",
+              "hls",
+              "-hls_time",
+              "2",
+              "-hls_list_size",
+              "6",
+              "-hls_flags",
+              "delete_segments",
+              "-start_number",
+              "${timeInMilliseconds}",
+              "-strict",
+              "-2",
+              "-hls_segment_filename",
+              "${mediaroot}/hls/" + videoName + "/480p/%03d.ts",
+              "${mediaroot}/hls/" + videoName + "/480p/index.m3u8",
+
+              "-f",
+              "hls",
+              "-hls_time",
+              "60",
+              "-hls_list_size",
+              "5",
+              "-hls_flags",
+              "delete_segments",
+              "-start_number",
+              "${timeInMilliseconds}",
+              "-strict",
+              "-2",
+              "-hls_segment_filename",
+              "${mediaroot}/record/" + videoName + "/720p/%03d.ts",
+              "${mediaroot}/record/" + videoName + "/720p/index.m3u8",
+            ],
+            ouPaths: [
+              // '${mediaroot}/${streamName}/360p',
+              "${mediaroot}/hls/" + videoName + "/480p",
+              "${mediaroot}/record/" + videoName + "/720p/",
+            ],
+            hlsFlags: "",
+            cleanup: false,
+          },
+        ],
+      },
+    };
+
+    // Construct the NodeMediaServer
+    const nms = new NodeMediaServer(config);
+
+    // Create the maps we'll need to track the current streams.
+    this.dynamicSessions = new Map();
+    this.streams = new Map();
+
+    // Start the VOD S3 file watcher and sync.
+    hls.monitorDir(path, this.streams);
+
+    //
+    // HLS callbacks
+    //
+    hls.on("newHlsStream", async (name) => {
+      // Create the ABR HLS playlist file.
+      // Send the "stream key" <-> "IP:PORT" mapping to Redis
+      // This tells the Origin which Server has the HLS files
+    });
+
+    //
+    // RTMP callbacks
+    //
+    nms.on("preConnect", (id, args) => {
+      logger.log(
+        "[NodeEvent on preConnect]",
+        `id=${id} args=${JSON.stringify(args)}`
+      );
+      // Pre connect authorization
+      // let session = nms.getSession(id);
+      // session.reject();
+    });
+
+    nms.on("postConnect", (id, args) => {
+      logger.log(
+        "[NodeEvent on postConnect]",
+        `id=${id} args=${JSON.stringify(args)}`
+      );
+    });
+
+    nms.on("doneConnect", (id, args) => {
+      logger.log(
+        "[NodeEvent on doneConnect]",
+        `id=${id} args=${JSON.stringify(args)}`
+      );
+    });
+
+    nms.on("prePublish", (id, StreamPath, args) => {
+      logger.log(
+        "[NodeEvent on prePublish]",
+        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+      );
+      // Pre publish authorization
+      // let session = nms.getSession(id);
+      // session.reject();
+    });
+
+    nms.on("postPublish", async (id, StreamPath, args) => {
+      logger.log(
+        "[NodeEvent on postPublish]",
+        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+      );
+      if (StreamPath.indexOf("/stream/") != -1) {
+        // Set the "stream key" <-> "id" mapping for this RTMP/HLS session
+        // We use this when creating the DVR HLS playlist name on S3.
+        const name = videoName;
+        this.streams.set(name, id);
+        await abr.createPlaylist(config.http.mediaroot + "/hls", name);
+        await cache.set(videoName, SERVER_ADDRESS);
+      }
+    });
+
+    function ProcessStream() {}
+
+    nms.on("donePublish", async (id, StreamPath, args) => {
+      logger.log(
+        "[NodeEvent on donePublish]",
+        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+      );
+      if (StreamPath.indexOf("/stream/") != -1) {
+        // const name = StreamPath.split('/').pop();
+        const name = videoName;
+        // Delete the Redis cache key for this stream
+        await cache.del(name);
+        // Wait a few minutes before deleting the HLS files on this Server
+        // for this session
+        const timeoutMs = _.isEqual(process.env.NODE_ENV, "development")
+          ? 1000
+          : 2 * 60 * 1000;
+        await utils.timeout(timeoutMs);
+        if (!_.isEqual(await cache.get(name), SERVER_ADDRESS)) {
+          // Only clean up if the stream isn't running.
+          // The user could have terminated then started again.
+          try {
+            // Cleanup directory
+            logger.log(
+              "[Delete HLS Directory]",
+              `dir=${join(config.http.mediaroot + "/hls", name)}`
+            );
+            this.streams.delete(name);
+            fs.rmdirSync(join(config.http.mediaroot + "/hls", name));
+            fs.rmdirSync(join(config.http.mediaroot + "/record", name));
+          } catch (err) {
+            logger.error(err);
+          }
+        }
+      }
+      // else if (StreamPath.indexOf('/stream/') != -1) {
+      //   //
+      //   // Stop the Relay's
+      //   //
+      //   if (args.youtube) {
+      //     let session = this.dynamicSessions.get(`youtube-${id}`);
+      //     if (session) {
+      //       session.end();
+      //       this.dynamicSessions.delete(`youtube-${id}`);
+      //     }
+      //   }
+    });
+
+    nms.on("prePlay", (id, StreamPath, args) => {
+      logger.log(
+        "[NodeEvent on prePlay]",
+        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+      );
+      // Pre play authorization
+      // let session = nms.getSession(id);
+      // session.reject();
+    });
+
+    nms.on("postPlay", (id, StreamPath, args) => {
+      logger.log(
+        "[NodeEvent on postPlay]",
+        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+      );
+    });
+
+    nms.on("donePlay", (id, StreamPath, args) => {
+      logger.log(
+        "[NodeEvent on donePlay]",
+        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+      );
+    });
+
+    // Run the NodeMediaServer
+    nms.run();
+  } catch (err) {
+    logger.log("Can't start app", err);
+    process.exit();
+  }
+};
+init();
