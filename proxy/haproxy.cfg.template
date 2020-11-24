@@ -28,5 +28,5 @@ backend bk_rtmp
  mode tcp
  balance roundrobin
  <% servers.forEach(function(server, index) { %>
- server media<%= index %> <%= server %> check maxconn 1 weight 10
+ server media<%= index %> <%= server %>:1935 check maxconn 1 weight 10
  <% }); %>

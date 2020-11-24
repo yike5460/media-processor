@@ -5,7 +5,7 @@ const AWS = require('aws-sdk');
 const region = process.env.AWS_REGION || "cn-northwest-1";
 
 
-const ecs = new AWS.ECS();
+const ecs = new AWS.ECS({ region:region });
 
 const cluster = 'video-streaming';
 const serviceName = 'video-streaming-server';
