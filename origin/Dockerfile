@@ -1,4 +1,4 @@
-FROM nginx:1.17
+FROM nginx:1.19
 
 # Install deps
 RUN apt-get update && \

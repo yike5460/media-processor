@@ -2,11 +2,6 @@ const fs = require("fs");
 const config=require('./config');
 const path = require("path");
 
-
-
-
-// console.log("===="+year+"/"+month+"/"+day);
-
 function getVideoParams() {
   return [
     //   '-an',
@@ -90,7 +85,7 @@ function getMotionParams() {
   ];
 }
 
-function getLiveParams() {
+function getHLSParams() {
   return [
     "-f",
     "hls",
@@ -183,21 +178,43 @@ function getOnDemandParams() {
     // "-stream_loop",
     // "-1",
     "-i",
-    // 'rtsp://freja.hiof.no:1935/rtplive/definst/hessdalen03.stream',
     config.inputURL,
   ];
-  if (config.motion) params = params.concat(getMotionParams());
-  if (config.video) params = params.concat(getVideoParams());
-  if (config.image) params = params.concat(getImageParams());
-  if (config.isLive) params = params.concat(getLiveParams());
+  if (config.isMotion) params = params.concat(getMotionParams());
+  if (config.isVideo) params = params.concat(getVideoParams());
+  if (config.isImage) params = params.concat(getImageParams());
+  // if (config.isLive) params = params.concat(getLiveParams());
   if (config.isOnDemand) params = params.concat(getOnDemandParams());
-  if(config.isFLV)params = params.concat(getFlvParams());
+  // if(config.isFLV)params = params.concat(getFlvParams());
  // params=params.concat(['-y', 'pipe:1']);
- console.log("----ffmpeg params:"+params);
+ console.log("----ffmpeg record params:"+params);
   return params;
 };
 
 
+getLiveParams = function () {
+  var params = [
+    "-loglevel",
+    config.logLevel,
+    /* use hardware acceleration */
+    "-hwaccel",
+    "auto", //vda, videotoolbox, none, auto
+
+    "-abort_on",
+    "empty_output",
+    "-i",
+    // 'rtsp://freja.hiof.no:1935/rtplive/definst/hessdalen03.stream',
+    config.inputURL,
+  ];
+
+  if (config.isLive) params = params.concat(getHLSParams());
+  if(config.isFLV)params = params.concat(getFlvParams());
+ // params=params.concat(['-y', 'pipe:1']);
+ console.log("----ffmpeg live params:"+params);
+  return params;
+};
+
 module.exports = {
-  getParams
+  getParams,
+  getLiveParams,
 };

@@ -44,7 +44,7 @@ const init = async () => {
       process.env.NODE_ENV === "production" ? await ecs.getServer() : "";
     const basePath = config.basePath;
     const spawn = CP.spawn;
-    const motion = config.motion;
+    const motion = config.isMotion;
     //change this to /dev/shm/manifest.m3u8
     const pathToHLS = config.pathToHLS;
     //const pathToHLS = "/dev/shm/manifest.m3u8";
@@ -228,6 +228,7 @@ const init = async () => {
       nms.run();
     }
     //
+    if(config.isImage||config.isMotion||config.isVideo||config.isOnDemand){
     const ffmpeg = spawn("ffmpeg", options.getParams(), {
       stdio: ["pipe", "pipe", "pipe"],
     });
@@ -258,6 +259,44 @@ const init = async () => {
       var a = tData.split("\n");
       console.log(a);
     });
+    if (motion) ffmpeg.stdout.pipe(p2p).pipe(pd);
+    else ffmpeg.stdout;
+  }
+
+  if(config.isFLV||config.isLive){
+      const liveProcess = spawn("ffmpeg", options.getLiveParams(), {
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    liveProcess.on("data", function (data) {
+      logger.log("ffmpeg2 PARENT got message:", JSON.stringify(data));
+    });
+
+    liveProcess.on("exit", function (code, signal) {
+      //check status
+      logger.log(
+        "ffmpeg child process exited with code:" + code + " signal:" + signal
+      );
+    });
+
+    liveProcess.on("error", function (err) {
+      console.log(err);
+    });
+
+    liveProcess.on("close", function (code) {
+      //stop task
+      console.log("ffmpeg exited with code " + code);
+    });
+
+    liveProcess.stderr.on("data", function (data) {
+      // console.log('stderr: ' + data);
+      var tData = data.toString("utf8");
+      // var a = tData.split('[\\s\\xA0]+');
+      var a = tData.split("\n");
+      console.log(a);
+    });
+    if (motion) liveProcess.stdout.pipe(p2p).pipe(pd);
+    else liveProcess.stdout;
+  }
 
     this.streams = new Map();
     this.streams.set(config.streamChannel, Date.now());
@@ -267,8 +306,7 @@ const init = async () => {
       await abr.createPlaylist(config.basePath + "/hls", config.streamChannel);
       await cache.set(config.streamChannel, SERVER_ADDRESS);
     }
-    if (motion) ffmpeg.stdout.pipe(p2p).pipe(pd);
-    else ffmpeg.stdout;
+
   } catch (err) {
     logger.log("Can't start app", err);
     process.exit();

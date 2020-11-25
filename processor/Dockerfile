@@ -1,4 +1,4 @@
-FROM jrottenberg/ffmpeg:4.2-alpine
+FROM jrottenberg/ffmpeg:4-alpine
 
 #
 # node setup
@@ -204,7 +204,10 @@ RUN set -x \
 # forward request and error logs to docker log collector
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
-
+#time zone
+RUN apk add --no-cache tzdata \
+&& ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \ 
+&& echo "Asia/Shanghai" > /etc/timezone
 #
 # App setup
 #

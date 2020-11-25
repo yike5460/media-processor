@@ -9,11 +9,11 @@ module.exports = Object.freeze({
    
   pathToHLS: (process.env.NODE_ENV === "production" ? "/dev/shm" : "media") + "/index.m3u8",
   channel: process.env.CHANNEL || 'test05',
-  motion: (process.env.IS_MOTION || 'false')=== 'true',
-  video: (process.env.IS_VIDEO || 'false')=== 'true',
-  image: (process.env.IS_IMAGE|| 'false')=== 'true' ,
+  isMotion: (process.env.IS_MOTION || 'false')=== 'true',
+  isVideo: (process.env.IS_VIDEO || 'false')=== 'true',
+  isImage: (process.env.IS_IMAGE|| 'false')=== 'true' ,
   isOnDemand: (process.env.IS_ONDEMAND || 'false')=== 'true',
-  isLive: process.env.IS_HLS || 'true'=== 'true',
+  isLive: (process.env.IS_HLS || 'true')=== 'true',
   isFLV: (process.env.IS_FLV || 'true')=== 'true',
 
   imageTime: process.env.IMAGE_TIME || "10",
