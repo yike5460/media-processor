@@ -63,12 +63,14 @@ functions.rmdirSync = (path) => {
 
 
 functions.rmFile= (path) => {
+  console.log('---delete file'+path);
   if( fs.existsSync(path) ) {
-    fs.unlink(path,function(error){
+    fs.unlinkSync(path,function(error){
       if(error){
           console.log(error);
           return false;
       }
+      console.log('---delete file'+path);
   })
 }}
 

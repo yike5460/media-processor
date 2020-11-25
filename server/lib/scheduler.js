@@ -24,17 +24,17 @@ const invokeTask = async(event,callback) => {
         try {
            // logger.log("-----event----" + JSON.stringify(event));
             var deviceURL;
-            var deviceUUID;
+            var channelName;
             if (event.eventName == "start") {
                 deviceURL = event.url; //get media url
-                deviceUUID = event.id;
+                channelName = event.id;
                 metaData =event.metaData;
                // logger.log(event.eventName);
-                logger.log('Run task with deviceURL:' + deviceURL + "  DeviceUUID:" + deviceUUID);
+                logger.log('Run task with deviceURL:' + deviceURL + "  channelName:" + channelName);
                 //run ecs task
-                await ECS.runTask(getECSParam(deviceURL, deviceUUID)).promise().then(function(data) {
+                await ECS.runTask(getECSParam(deviceURL)).promise().then(function(data) {
                     var item = new Object();
-                    item.UUID = deviceUUID;
+                    item.UUID = channelName;
                     item.URL = deviceURL;
                     item.taskARN = data.tasks[0].taskArn;
                     //save task info into dynamodb
@@ -49,9 +49,9 @@ const invokeTask = async(event,callback) => {
             }
             if (event.eventName == "stop") {
                 deviceURL = event.url; //get media url 
-                deviceUUID = event.id;
+                channelName = event.id;
               //  logger.log(event.url);
-                await getItem(deviceUUID, callback).then(function(item) {
+                await getItem(channelName, callback).then(function(item) {
                     if (typeof(item) != 'undefined') {
                         logger.log("stop task with:" + JSON.stringify(item));
                         var params = {
@@ -62,11 +62,11 @@ const invokeTask = async(event,callback) => {
                         return ECS.stopTask(params).promise();
                     }
                 }).then(function(data) {
-                    logger.log("delete db record success:" + deviceUUID);
-                    return deleteItem(deviceUUID);
+                    logger.log("delete db record success:" + channelName);
+                    return deleteItem(channelName);
                 }).catch(function(error, data) {
                     logger.log("delete task error:" + error);
-                    return deleteItem(deviceUUID);
+                    return deleteItem(channelName);
                 });
             }
 
@@ -78,42 +78,53 @@ const invokeTask = async(event,callback) => {
     });
 };
 
-function getECSParam(deviceURL, deviceUUID) {
-    if (ecs_Type == "fargate")
-        return getFargateParams(deviceURL, deviceUUID);
-    else
-        return getEC2Params(deviceURL, deviceUUID);
+function getEnv(deviceURL)
+{
+  return  [
+    { name: "INPUT_URL", "value": deviceURL },
+    { name: "SEGMENT_FORMAT", "value": segmentFormat },
+    { name: "LOGLEVEL", "value": logLevel },
+    { name: "REGION", "value": region },
+    { name: "TRANSCODING", "value": transCoding },
+    { name: "SIZING", "value": sizing },
+    { name: "SEGMENT_TIME", "value": segmentTime },
+    { name: "CHANNEL", "value": metaData.channel },
+    { name: "IS_FLV", "value": metaData.isFlv },
+    { name: "IS_HLS", "value": metaData.isHls },
+    { name: "IS_VIDEO", "value": metaData.isVideo },
+    { name: "IS_IMAGE", "value": metaData.isImage },
+    { name: "IS_MOTION", "value": metaData.isMotion },
+    { name: "IS_ONDEMAND", "value": metaData.isOnDemand },
+    { name: "VIDEO_TIME", "value": metaData.video_time|| "30" },
+    { name: "IMAGE_TIME", "value": metaData.image_time|| "10" },
+    { name: "HLS_TIME", "value": metaData.hls_time || "2"},
+    { name: "HLS_LIST_SIZE", "value": metaData.hls_list_size|| "6" }, 
+//motion detect
+    { name: "MOTION_DURATION", "value": metaData.motion_duration|| "5000" },
+    { name: "MOTION_PERCENT", "value": metaData.motion_percent || "30"},
+    { name: "MOTION_TIMEOUT", "value": metaData.motion_timeout || "60"},
+    { name: "MOTION_DIFF", "value": metaData.motion_diff|| "10" },
+//ondemand video
+    { name: "ONDEMAND_LIST_SIZE", "value": metaData.ondemand_list_size || "3"},
+    { name: "ONDEMAND_TIME", "value": metaData.ondemand_time || "60"},
+]
 }
 
-function getEC2Params(deviceURL, deviceUUID) {
+function getECSParam(deviceURL) {
+    if (ecs_Type == "fargate")
+        return getFargateParams(deviceURL);
+    else
+        return getEC2Params(deviceURL);
+}
+
+function getEC2Params(deviceURL) {
     return {
         cluster: clusterName,
         taskDefinition: taskName,
         overrides: {
             containerOverrides: [{
                 name: containerName,
-                environment: [
-                    { name: "BUCKET_NAME", "value": bucketName },
-                    { name: "CAMERA_NAME", "value": deviceUUID },
-                    { name: "INPUT_URL", "value": deviceURL },
-                    { name: "SEGMENT_FORMAT", "value": segmentFormat },
-                    { name: "LOGLEVEL", "value": logLevel },
-                    { name: "REGION", "value": region },
-                    { name: "TRANSCODING", "value": transCoding },
-                    { name: "SIZING", "value": sizing },
-                    { name: "SEGMENT_TIME", "value": segmentTime },
-                    { name: "CHANNEL", "value": metaData.channel },
-                    { name: "IS_FLV", "value": metaData.isFlv },
-                    { name: "IS_HLS", "value": metaData.isHls },
-                    { name: "IS_VIDEO", "value": metaData.isVideo },
-                    { name: "IS_IMAGE", "value": metaData.isImage },
-                    { name: "IS_MOTION", "value": metaData.isMotion },
-                    { name: "IS_ONDEMAND", "value": metaData.isOnDemand },
-                    { name: "VIDEO_TIME", "value": metaData.video_time },
-                    { name: "IMAGE_TIME", "value": metaData.image_time },
-                    { name: "HLS_TIME", "value": metaData.hls_time },
-                    { name: "HLS_LIST_SIZE", "value": metaData.hls_list_size }
-                ]
+                environment:getEnv(deviceURL)
             }]
         },
         count: 1,
@@ -133,7 +144,7 @@ function getEC2Params(deviceURL, deviceUUID) {
 }
 
 
-function getFargateParams(deviceURL, deviceUUID) {
+function getFargateParams(deviceURL) {
     return {
         cluster: clusterName,
         taskDefinition: taskName,
@@ -151,28 +162,7 @@ function getFargateParams(deviceURL, deviceUUID) {
         overrides: {
             containerOverrides: [{
                 name: containerName,
-                environment: [
-                    { name: "BUCKET_NAME", "value": bucketName },
-                    { name: "CAMERA_NAME", "value": deviceUUID },
-                    { name: "INPUT_URL", "value": deviceURL },
-                    { name: "SEGMENT_FORMAT", "value": segmentFormat },
-                    { name: "LOGLEVEL", "value": logLevel },
-                    { name: "REGION", "value": region },
-                    { name: "TRANSCODING", "value": transCoding },
-                    { name: "SIZING", "value": sizing },
-                    { name: "SEGMENT_TIME", "value": segmentTime },
-                    { name: "CHANNEL", "value": metaData.channel },
-                    { name: "IS_FLV", "value": metaData.isFlv },
-                    { name: "IS_HLS", "value": metaData.isHls },
-                    { name: "IS_VIDEO", "value": metaData.isVideo },
-                    { name: "IS_IMAGE", "value": metaData.isImage },
-                    { name: "IS_MOTION", "value": metaData.isMotion },
-                    { name: "IS_ONDEMAND", "value": metaData.isOnDemand },
-                    { name: "VIDEO_TIME", "value": metaData.video_time },
-                    { name: "IMAGE_TIME", "value": metaData.image_time },
-                    { name: "HLS_TIME", "value": metaData.hls_time },
-                    { name: "HLS_LIST_SIZE", "value": metaData.hls_list_size }
-                ]
+                environment:getEnv()
             }]
         },
         count: 1,

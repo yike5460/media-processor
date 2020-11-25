@@ -10,7 +10,7 @@ const abr = require('./abr');
 const logger=require('./logger');
 
 const nodeEvent = new EventEmitter();
-const bucket_name=process.env.ASSETS_BUCKET||'video-streaming-assets-assetsbucket-1fnyx250eexwi'
+const bucket_name=process.env.ASSETS_BUCKET||'video-streaming-assets-assetsbucket-gciiiklafmpb'
 
 const on = (eventName, listener) => {
   nodeEvent.on(eventName, listener);

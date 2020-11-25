@@ -28,6 +28,9 @@ const generateTemplate = async () => {
   //console.log('output-------'+output);
   fs.writeFileSync(outputFile, output);
 };
+
+
+
 function mkdirsSync(dirname) {
   if (fs.existsSync(dirname)) {
     return true;
@@ -48,27 +51,28 @@ const init = async () => {
     //change this to /dev/shm/manifest.m3u8
     const pathToHLS = config.pathToHLS;
     //const pathToHLS = "/dev/shm/manifest.m3u8";
-    const timeout = process.env.WAIT_TIME || 5000;
+    const timeout = Number.parseInt(config.MOTION_DURATION)*1000;
     //10000 = 10 seconds of recorded video, includes buffer of time before motion triggered recording
     //set the directory for the jpegs and mp4 videos to be saved
-    const percent = process.env.PERCENT || 30;
-    const diff = process.env.DIFF || 10;
-
+    const percent = Number.parseInt(config.MOTION_PERCENT);
+    const diff = Number.parseInt(config.MOTION_DIFF);
+    const motionTimeout=Number.parseInt(config.MOTION_TIMEOUT);
+ 
     let p2p;
     let pd;
 
-   await mkdirsSync(config.basePath + "/hls/" + config.streamChannel + "/480p");
-   await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/720p");
-   await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/mp4");
-   await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/images");
-   await mkdirsSync(
+    await mkdirsSync(config.basePath + "/hls/" + config.streamChannel + "/480p");
+    await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/720p");
+    await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/mp4");
+    await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/images");
+    await mkdirsSync(
       config.basePath + "/record/" + config.streamChannel + "/motion/images"
     );
-  await mkdirsSync(
+    await mkdirsSync(
       config.basePath + "/record/" + config.streamChannel + "/motion/mp4"
     );
 
-  await fs.copyFileSync(
+    await fs.copyFileSync(
       "index.html",
       config.basePath + "/hls/" + config.streamChannel + "/index.html"
     );
@@ -94,7 +98,7 @@ const init = async () => {
       logger.log("recording finished");
     }
 
-    logger.log("ffmpeg params:" + options.getParams());
+//    logger.log("ffmpeg params:" + options.getParams());
 
     if (motion) {
       logger.log("start motion detector");
@@ -118,13 +122,12 @@ const init = async () => {
         }
         if (recordingStopper === null) {
           const date = new Date();
-          let name = `${date.getFullYear()}-${
-            date.getMonth() + 1
-          }-${date.getDate()}_${("0" + date.getHours()).substr(-2)}-${(
-            "0" + date.getMinutes()
-          ).substr(-2)}-${("0" + date.getSeconds()).substr(-2)}-${(
-            "00" + date.getMilliseconds()
-          ).substr(-3)}`;
+          let name = `${date.getFullYear()}-${date.getMonth() + 1
+            }-${date.getDate()}_${("0" + date.getHours()).substr(-2)}-${(
+              "0" + date.getMinutes()
+            ).substr(-2)}-${("0" + date.getSeconds()).substr(-2)}-${(
+              "00" + date.getMilliseconds()
+            ).substr(-3)}`;
           for (const region of data.trigger) {
             name += `_${region.name}-${region.percent}_`;
           }
@@ -151,8 +154,8 @@ const init = async () => {
               "-map",
               "1:v",
               //   "-an",
-              "-c:v",
-              "copy",
+              // "-c:v",
+              // "copy",
               //         "-s","320x240",
               "-movflags",
               "+faststart+empty_moov",
@@ -192,10 +195,9 @@ const init = async () => {
           }
           var interval = (Date.now() - beginTime) / 1000;
           // console.log("interval---" + interval);
-          if (interval < 30) {
+          if (interval < motionTimeout) {
             logger.log(
-              `due to continued motion, recording has been extended by ${
-                timeout / 1000
+              `due to continued motion, recording has been extended by ${timeout / 1000
               } seconds from now`
             );
             clearTimeout(recordingStopper);
@@ -228,75 +230,13 @@ const init = async () => {
       nms.run();
     }
     //
-    if(config.isImage||config.isMotion||config.isVideo||config.isOnDemand){
-    const ffmpeg = spawn("ffmpeg", options.getParams(), {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    ffmpeg.on("data", function (data) {
-      logger.log("ffmpeg2 PARENT got message:", JSON.stringify(data));
-    });
+    if (config.isImage || config.isMotion || config.isVideo || config.isOnDemand) {
+      runRecordProcess(spawn, motion, p2p, pd);
+    }
 
-    ffmpeg.on("exit", function (code, signal) {
-      //check status
-      logger.log(
-        "ffmpeg child process exited with code:" + code + " signal:" + signal
-      );
-    });
-
-    ffmpeg.on("error", function (err) {
-      console.log(err);
-    });
-
-    ffmpeg.on("close", function (code) {
-      //stop task
-      console.log("ffmpeg exited with code " + code);
-    });
-
-    ffmpeg.stderr.on("data", function (data) {
-      // console.log('stderr: ' + data);
-      var tData = data.toString("utf8");
-      // var a = tData.split('[\\s\\xA0]+');
-      var a = tData.split("\n");
-      console.log(a);
-    });
-    if (motion) ffmpeg.stdout.pipe(p2p).pipe(pd);
-    else ffmpeg.stdout;
-  }
-
-  if(config.isFLV||config.isLive){
-      const liveProcess = spawn("ffmpeg", options.getLiveParams(), {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-    liveProcess.on("data", function (data) {
-      logger.log("ffmpeg2 PARENT got message:", JSON.stringify(data));
-    });
-
-    liveProcess.on("exit", function (code, signal) {
-      //check status
-      logger.log(
-        "ffmpeg child process exited with code:" + code + " signal:" + signal
-      );
-    });
-
-    liveProcess.on("error", function (err) {
-      console.log(err);
-    });
-
-    liveProcess.on("close", function (code) {
-      //stop task
-      console.log("ffmpeg exited with code " + code);
-    });
-
-    liveProcess.stderr.on("data", function (data) {
-      // console.log('stderr: ' + data);
-      var tData = data.toString("utf8");
-      // var a = tData.split('[\\s\\xA0]+');
-      var a = tData.split("\n");
-      console.log(a);
-    });
-    if (motion) liveProcess.stdout.pipe(p2p).pipe(pd);
-    else liveProcess.stdout;
-  }
+    if (config.isFLV || config.isLive) {
+      runLiveProcess(spawn);
+    }
 
     this.streams = new Map();
     this.streams.set(config.streamChannel, Date.now());
@@ -312,4 +252,86 @@ const init = async () => {
     process.exit();
   }
 };
+
 init();
+/**
+ * 
+ * @param {*} spawn 
+ */
+function runLiveProcess(spawn) {
+  const liveProcess = spawn("ffmpeg", options.getLiveParams(), {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  liveProcess.on("data", function (data) {
+    logger.log("ffmpeg2 PARENT got message:", JSON.stringify(data));
+  });
+
+  liveProcess.on("exit", function (code, signal) {
+    //check status
+    logger.log(
+      "ffmpeg child process exited with code:" + code + " signal:" + signal
+    );
+  });
+
+  liveProcess.on("error", function (err) {
+    console.log(err);
+  });
+
+  liveProcess.on("close", function (code) {
+    //stop task
+    console.log("ffmpeg exited with code " + code);
+  });
+
+  liveProcess.stderr.on("data", function (data) {
+    // console.log('stderr: ' + data);
+    var tData = data.toString("utf8");
+    // var a = tData.split('[\\s\\xA0]+');
+    var a = tData.split("\n");
+    console.log(a);
+  });
+  liveProcess.stdout;
+}
+/**
+ * 
+ * @param {*} spawn 
+ * @param {*} motion 
+ * @param {*} p2p 
+ * @param {*} pd 
+ */
+function runRecordProcess(spawn, motion, p2p, pd) {
+  const ffmpeg = spawn("ffmpeg", options.getParams(), {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  ffmpeg.on("data", function (data) {
+    logger.log("ffmpeg2 PARENT got message:", JSON.stringify(data));
+  });
+
+  ffmpeg.on("exit", function (code, signal) {
+    //check status
+    logger.log(
+      "ffmpeg child process exited with code:" + code + " signal:" + signal
+    );
+  });
+
+  ffmpeg.on("error", function (err) {
+    console.log(err);
+  });
+
+  ffmpeg.on("close", function (code) {
+    //stop task
+    console.log("ffmpeg exited with code " + code);
+  });
+
+  ffmpeg.stderr.on("data", function (data) {
+    // console.log('stderr: ' + data);
+    var tData = data.toString("utf8");
+    // var a = tData.split('[\\s\\xA0]+');
+    var a = tData.split("\n");
+    console.log(a);
+  });
+  if (motion)
+    ffmpeg.stdout.pipe(p2p).pipe(pd);
+  else
+    ffmpeg.stdout;
+}
+

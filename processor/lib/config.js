@@ -9,17 +9,27 @@ module.exports = Object.freeze({
    
   pathToHLS: (process.env.NODE_ENV === "production" ? "/dev/shm" : "media") + "/index.m3u8",
   channel: process.env.CHANNEL || 'test05',
-  isMotion: (process.env.IS_MOTION || 'false')=== 'true',
+  isMotion: (process.env.IS_MOTION || 'true')=== 'true',
   isVideo: (process.env.IS_VIDEO || 'false')=== 'true',
   isImage: (process.env.IS_IMAGE|| 'false')=== 'true' ,
   isOnDemand: (process.env.IS_ONDEMAND || 'false')=== 'true',
-  isLive: (process.env.IS_HLS || 'true')=== 'true',
+  isLive: (process.env.IS_HLS || 'false')=== 'true',
   isFLV: (process.env.IS_FLV || 'true')=== 'true',
 
   imageTime: process.env.IMAGE_TIME || "10",
+
   videoTime: process.env.VIDEO_TIME || "30",
+  //
   hlsTime: process.env.HLS_TIME || "2",
-  hlsListSize: process.env.HLS_LIST_SIZE || "2",
+  hlsListSize: process.env.HLS_LIST_SIZE || "6",
+
+  ONDEMAND_TIME:process.env.ONDEMAND_TIME || "60",
+  ONDEMAND_LIST_SIZE:process.env.ONDEMAND_LIST_SIZE || "3",
+//
+  MOTION_TIMEOUT:process.env. MOTION_TIMEOUT || "60",
+  MOTION_DIFF:process.env. MOTION_DIFF || "10",
+  MOTION_PERCENT:process.env. MOTION_PERCENT || "30",
+  MOTION_DURATION:process.env. MOTION_DURATION || "5",
 
   logLevel: process.env.LOG_LEVEL || "warning",
   transCoding: process.env.TRANSCODING || "copy",
