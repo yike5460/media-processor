@@ -1,5 +1,5 @@
 const fs = require("fs");
-const config=require('./config');
+const config = require('./config');
 const path = require("path");
 
 function getVideoParams() {
@@ -18,7 +18,7 @@ function getVideoParams() {
     // "-vf","scale=-1:320",
     "-strftime",
     "1",
-    config.basePath + "/record/"+ config.streamChannel+"/mp4/capture-%03d-%Y-%m-%d_%H-%M-%S.mp4",
+    config.basePath + "/record/" + config.streamChannel + "/mp4/capture-%03d-%Y-%m-%d_%H-%M-%S.mp4",
   ];
 }
 
@@ -36,7 +36,7 @@ function getImageParams() {
     "-2",
     "-strftime",
     "1",
-    config.basePath +"/record/"+ config.streamChannel+"/images/capture-%Y-%m-%d_%H-%M-%S.jpg",
+    config.basePath + "/record/" + config.streamChannel + "/images/capture-%Y-%m-%d_%H-%M-%S.jpg",
   ];
 }
 
@@ -87,10 +87,10 @@ function getHLSParams() {
   return [
     "-f",
     "hls",
-  //  '-codec:v','libx264',
+    //  '-codec:v','libx264',
     // '-codec:a', 'mp3',
-    "-hls_init_time","1",
- //   "-preset","slow",
+    "-hls_init_time", "1",
+    //   "-preset","slow",
     "-tune",
     "zerolatency",
     "-fflags",
@@ -108,35 +108,77 @@ function getHLSParams() {
     "-strict",
     "-2",
     "-hls_segment_filename",
-    config.basePath+"/hls/" + config.streamChannel+ "/480p/%03d.ts",
-    config.basePath+"/hls/" + config.streamChannel + "/480p/index.m3u8"
+    config.basePath + "/hls/" + config.streamChannel + "/480p/%03d.ts",
+    config.basePath + "/hls/" + config.streamChannel + "/480p/index.m3u8"
   ];
 }
 
-function getFlvParams(){
-    return [
-      "-fflags",
-       "nobuffer",
-        "-f",
-        "flv",
-        "-y",
-        "-tune",
-        "zerolatency",
-        "-fflags",
-        "discardcorrupt",
-        "-flags",
-        "low_delay",
-        // "-r",
-        // "15",
-        // "-c:v",
-        // "libx264",
-        //  "-crf",
-        // "19",
-        "-c",
-        "copy",
-  //      config.basePath+"/hls/" + config.streamChannel + "/480p/live.flv",
-  "rtmp://localhost:1935/"+config.streamChannel+"/live"
-      ];
+function getDashParams() {
+return [
+    '-map', '0',
+    '-map', '0',
+    '-map', '0',
+    '-c:a', 'aac',
+    '-c:v', 'libx264',
+    '-b:v:0', '800k',
+    '-s:v:0', '1280x720',
+    '-profile:v:0', 'main',
+    '-b:v:1', '500k',
+    '-s:v:1', '640x340',
+    '-profile:v:1', 'main',
+    '-b:v:2', '300k',
+    '-s:v:2', '320x170',
+    '-profile:v:2', 'baseline',
+    '-bf', '1',
+    '-keyint_min', '120',
+    '-g', '120',
+    '-sc_threshold', '0',
+    '-b_strategy', '0',
+    '-ar:a:1', '22050',
+    '-use_timeline', '1',
+    '-use_template', '1',
+    '-window_size', '5',
+    '-adaptation_sets', 'id=0,streams=v id=1,streams=a',
+    '-hls_playlist', '1',
+    // "-tune", "zerolatency",
+    // "-flags","low_delay",
+    // '-seg_duration', '4',
+    '-streaming', '1',
+    '-remove_at_exit', '1',
+    '-f', 'dash',
+    // "-strict",
+    // "-2",
+    config.basePath + "/hls/" + config.streamChannel + "/manifest.mpd",
+    // config.basePath + "/hls/" + config.streamChannel + "/480p/index.m3u8"
+  ];
+
+
+}
+
+function getFlvParams() {
+  return [
+    "-fflags",
+    "nobuffer",
+    "-f",
+    "flv",
+    "-y",
+    "-tune",
+    "zerolatency",
+    "-fflags",
+    "discardcorrupt",
+    "-flags",
+    "low_delay",
+    // "-r",
+    // "15",
+    // "-c:v",
+    // "libx264",
+    //  "-crf",
+    // "19",
+    "-c",
+    "copy",
+    //      config.basePath+"/hls/" + config.streamChannel + "/480p/live.flv",
+    "rtmp://localhost:1935/" + config.streamChannel + "/live"
+  ];
 }
 
 function getOnDemandParams() {
@@ -154,12 +196,12 @@ function getOnDemandParams() {
     "-strict",
     "-2",
     "-hls_segment_filename",
-    config.basePath+"/record/" + config.streamChannel + "/720p/%03d.ts",
-    config.basePath+"/record/" + config.streamChannel + "/720p/index.m3u8"
+    config.basePath + "/record/" + config.streamChannel + "/720p/%03d.ts",
+    config.basePath + "/record/" + config.streamChannel + "/720p/index.m3u8"
   ];
 }
 
- getParams = function () {
+getParams = function () {
   var params = [
     "-loglevel",
     config.logLevel,
@@ -184,8 +226,8 @@ function getOnDemandParams() {
   // if (config.isLive) params = params.concat(getLiveParams());
   if (config.isOnDemand) params = params.concat(getOnDemandParams());
   // if(config.isFLV)params = params.concat(getFlvParams());
- // params=params.concat(['-y', 'pipe:1']);
- console.log("----ffmpeg record params:"+params);
+  // params=params.concat(['-y', 'pipe:1']);
+  console.log("----ffmpeg record params:" + params);
   return params;
 };
 
@@ -206,9 +248,10 @@ getLiveParams = function () {
   ];
 
   if (config.isLive) params = params.concat(getHLSParams());
-  if(config.isFLV)params = params.concat(getFlvParams());
- // params=params.concat(['-y', 'pipe:1']);
- console.log("----ffmpeg live params:"+params);
+  if (config.isFLV) params = params.concat(getFlvParams());
+  if (config.isDASH) params = params.concat(getDashParams());
+  // params=params.concat(['-y', 'pipe:1']);
+  console.log("----ffmpeg live params:" + params);
   return params;
 };
 

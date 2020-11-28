@@ -48,28 +48,7 @@ http {
     }
     <% }); %>
 
-    location ~ ^/(.*live\.m3u8)$ {
-      #
-      # Cache results on local disc
-      #
-      proxy_cache CONTENTCACHE;
-      proxy_cache_lock on;
-      proxy_cache_key $scheme$proxy_host$uri;
-      proxy_cache_valid 1m;
-      proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-
-      #
-      # CORS
-      #
-      include /etc/nginx/nginx.cors.conf;
-
-      #
-      # Proxy Pass
-      #
-      proxy_pass http://node-backend/$1$is_args$args;
-    }
-
-    location ~ ^/(.*index\.m3u8)$ {
+    location ~ ^/(.*\.m3u8)$ {
       #
       # Cache results on local disc
       #
@@ -90,45 +69,44 @@ http {
       proxy_pass http://node-backend/$1$is_args$args;
     }
 
+
     location ~ ^/(.*\.ts)$ {
-      #
-      # Cache results on local disc
-      #
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 60s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-
-      #
-      # CORS
-      #
       include /etc/nginx/nginx.cors.conf;
+      proxy_pass http://node-backend/$1$is_args$args;
+    }
+    
+    location ~ ^/(.*\.m4s)$ {
+      proxy_cache CONTENTCACHE;
+      proxy_cache_lock on;
+      proxy_cache_key $scheme$proxy_host$uri;
+      proxy_cache_valid 60s;
+      proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+      include /etc/nginx/nginx.cors.conf;
+      proxy_pass http://node-backend/$1$is_args$args;
+    }
 
-      #
-      # Proxy Pass
-      #
+    location ~ ^/(.*\.mpd)$ {
+      proxy_cache CONTENTCACHE;
+      proxy_cache_lock on;
+      proxy_cache_key $scheme$proxy_host$uri;
+      proxy_cache_valid 60s;
+      proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+      include /etc/nginx/nginx.cors.conf;
       proxy_pass http://node-backend/$1$is_args$args;
     }
 
       location ~ ^/(.*\.html)$ {
-      #
-      # Cache results on local disc
-      #
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 600s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-
-      #
-      # CORS
-      #
       include /etc/nginx/nginx.cors.conf;
-
-      #
-      # Proxy Pass
-      #
       proxy_pass http://node-backend/$1$is_args$args;
     }
 

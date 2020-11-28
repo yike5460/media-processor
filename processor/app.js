@@ -76,6 +76,16 @@ const init = async () => {
       "index.html",
       config.basePath + "/hls/" + config.streamChannel + "/index.html"
     );
+
+    await fs.copyFileSync(
+      "hls.html",
+      config.basePath + "/hls/" + config.streamChannel + "/hls.html"
+    );
+
+    await fs.copyFileSync(
+      "dash.html",
+      config.basePath + "/hls/" + config.streamChannel + "/dash.html"
+    );
     if (config.isFLV) {
       await generateTemplate();
       // await fs.copyFileSync(
@@ -231,21 +241,22 @@ const init = async () => {
     }
     //
     if (config.isImage || config.isMotion || config.isVideo || config.isOnDemand) {
+      logger.log('start recording process');
       runRecordProcess(spawn, motion, p2p, pd);
     }
 
-    if (config.isFLV || config.isLive) {
+    if (config.isFLV || config.isLive||config.isDASH) {
+      logger.log('start live process');
       runLiveProcess(spawn);
+      await abr.createPlaylist(config.basePath + "/hls", config.streamChannel);
+      logger.log('add channel:'+config.streamChannel+'- address:'+SERVER_ADDRESS);
+      await cache.set(config.streamChannel, SERVER_ADDRESS);
     }
 
     this.streams = new Map();
     this.streams.set(config.streamChannel, Date.now());
     // Start the VOD S3 file watcher and sync.
     hls.monitorDir(config.basePath, this.streams);
-    if (config.isLive || config.isFLV) {
-      await abr.createPlaylist(config.basePath + "/hls", config.streamChannel);
-      await cache.set(config.streamChannel, SERVER_ADDRESS);
-    }
 
   } catch (err) {
     logger.log("Can't start app", err);

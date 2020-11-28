@@ -108,6 +108,13 @@ if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]];
 fi
 }
 
+deploy()
+{
+build 
+tag
+push    
+}
+
 all() { 
 welcome
 get-login
@@ -120,6 +127,9 @@ service
 case $1 in
     get-login)
     get-login
+    ;;
+    deploy)
+    deploy
     ;;
     build)
     build
