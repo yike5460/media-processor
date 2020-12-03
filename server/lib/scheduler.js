@@ -7,7 +7,7 @@ const TABLE_NAME = process.env.TABLE_NAME || "video-streaming";
 var segmentTime = process.env.SEGMENT_TIME || "30";
 var segmentFormat = process.env.SEMMENT_FORMAT || "video";
 const bucketName = process.env.ASSETS_BUCKET || "video-streaming-assets-assetsbucket-1kf2tlxbhy4qz";
-var logLevel = process.env.LOG_LEVEL || "info";
+var logLevel = process.env.LOG_LEVEL || "warning";
 
 
 var transCoding = process.env.TRANSCODING || "copy";
@@ -83,18 +83,19 @@ function getEnv(deviceURL)
   return  [
     { name: "INPUT_URL", "value": deviceURL },
     { name: "SEGMENT_FORMAT", "value": segmentFormat },
-    { name: "LOGLEVEL", "value": logLevel },
+    { name: "LOG_LEVEL", "value": logLevel },
     { name: "REGION", "value": region },
     { name: "TRANSCODING", "value": transCoding },
     { name: "SIZING", "value": sizing },
     { name: "SEGMENT_TIME", "value": segmentTime },
     { name: "CHANNEL", "value": metaData.channel },
-    { name: "IS_FLV", "value": metaData.isFlv },
-    { name: "IS_HLS", "value": metaData.isHls },
-    { name: "IS_VIDEO", "value": metaData.isVideo },
-    { name: "IS_IMAGE", "value": metaData.isImage },
-    { name: "IS_MOTION", "value": metaData.isMotion },
-    { name: "IS_ONDEMAND", "value": metaData.isOnDemand },
+    { name: "IS_FLV", "value": metaData.isFlv || 'true'},
+    { name: "IS_HLS", "value": metaData.isHls || 'false'},
+    { name: "IS_VIDEO", "value": metaData.isVideo || 'false'},
+    { name: "IS_IMAGE", "value": metaData.isImage || 'false'},
+    { name: "IS_MOTION", "value": metaData.isMotion || 'false'},
+    { name: "IS_ONDEMAND", "value": metaData.isOnDemand || 'false'},
+    { name: "IS_CMAF", "value": metaData.isCMAF || 'false'},
     { name: "VIDEO_TIME", "value": metaData.video_time|| "30" },
     { name: "IMAGE_TIME", "value": metaData.image_time|| "10" },
     { name: "HLS_TIME", "value": metaData.hls_time || "2"},

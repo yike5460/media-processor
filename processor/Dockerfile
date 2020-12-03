@@ -1,10 +1,10 @@
-FROM jrottenberg/ffmpeg:4-alpine
+FROM jrottenberg/ffmpeg:4.1-alpine
 
 #
 # node setup
 # From https://github.com/nodejs/docker-node/blob/d071b895dd1b8da6c566f45b971825fe5b087b21/10/alpine3.11/Dockerfile
 # 
-ENV NODE_VERSION 10.20.1
+ENV NODE_VERSION 13.12.0
 
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
@@ -16,7 +16,7 @@ RUN addgroup -g 1000 node \
       && case "${alpineArch##*-}" in \
         x86_64) \
           ARCH='x64' \
-          CHECKSUM="a6376dd6e736a74098d1050d6653c346fde1d5416d83f063cb66510cdfea7a6d" \
+          CHECKSUM="2be1914d44aafdb6d0b41b8f78eb19dc7cbec21738e1f06d37ac2d06405c260f" \
           ;; \
         *) ;; \
       esac \
@@ -102,8 +102,10 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 # NGINX Setup
 # From https://github.com/nginxinc/docker-nginx/blob/2ef3fa66f2a434cd5e44e35a02f4ac502cf50808/mainline/alpine/Dockerfile
 #
-ENV NGINX_VERSION 1.19.0
-ENV NJS_VERSION   0.4.1
+LABEL maintainer="NGINX Docker Maintainers <docker-maint@nginx.com>"
+
+ENV NGINX_VERSION 1.19.5
+ENV NJS_VERSION   0.4.4
 ENV PKG_RELEASE   1
 
 RUN set -x \
@@ -203,7 +205,7 @@ RUN set -x \
     && apk add --no-cache curl ca-certificates \
 # forward request and error logs to docker log collector
     && ln -sf /dev/stdout /var/log/nginx/access.log \
-    && ln -sf /dev/stderr /var/log/nginx/error.log
+    && ln -sf /dev/stderr /var/log/nginx/error.log 
 #time zone
 RUN apk add --no-cache tzdata \
 && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \ 

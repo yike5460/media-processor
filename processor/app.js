@@ -14,10 +14,10 @@ const utils = require("./lib/utils");
 const options = require("./lib/ffmpeg");
 const path = require("path");
 const NodeMediaServer = require("node-media-server");
+const spawn = CP.spawn;
 
 const generateTemplate = async () => {
   const channel = config.inputURL.split("/").pop();
-  //console.log('generateTemplate');
   console.log(JSON.stringify(process.argv));
   const templateFile = "flv.template";
   const outputFile =
@@ -29,35 +29,39 @@ const generateTemplate = async () => {
   fs.writeFileSync(outputFile, output);
 };
 
+//
+const nmsConfig = {
+  rtmp: {
+    port: 1935,
+    chunk_size: 80000,
+    gop_cache: true,
+    ping: 30,
+    ping_timeout: 60,
+  },
+  http: {
+    port: 8080,
+    allow_origin: "*",
+  },
+};
 
 
-function mkdirsSync(dirname) {
-  if (fs.existsSync(dirname)) {
-    return true;
-  } else {
-    if (mkdirsSync(path.dirname(dirname))) {
-      fs.mkdirSync(dirname);
-      return true;
-    }
-  }
-}
 const init = async () => {
   try {
     const SERVER_ADDRESS =
       process.env.NODE_ENV === "production" ? await ecs.getServer() : "";
     const basePath = config.basePath;
-    const spawn = CP.spawn;
+
     const motion = config.isMotion;
     //change this to /dev/shm/manifest.m3u8
     const pathToHLS = config.pathToHLS;
     //const pathToHLS = "/dev/shm/manifest.m3u8";
-    const timeout = Number.parseInt(config.MOTION_DURATION)*1000;
+    const timeout = Number.parseInt(config.MOTION_DURATION) * 1000;
     //10000 = 10 seconds of recorded video, includes buffer of time before motion triggered recording
     //set the directory for the jpegs and mp4 videos to be saved
     const percent = Number.parseInt(config.MOTION_PERCENT);
     const diff = Number.parseInt(config.MOTION_DIFF);
-    const motionTimeout=Number.parseInt(config.MOTION_TIMEOUT);
- 
+    const motionTimeout = Number.parseInt(config.MOTION_TIMEOUT);
+
     let p2p;
     let pd;
 
@@ -108,7 +112,7 @@ const init = async () => {
       logger.log("recording finished");
     }
 
-//    logger.log("ffmpeg params:" + options.getParams());
+    //    logger.log("ffmpeg params:" + options.getParams());
 
     if (motion) {
       logger.log("start motion detector");
@@ -219,21 +223,6 @@ const init = async () => {
         }
       });
     }
-    //
-    const nmsConfig = {
-      rtmp: {
-        port: 1935,
-        chunk_size: 80000,
-        gop_cache: true,
-        ping: 30,
-        ping_timeout: 60,
-      },
-      http: {
-        port: 8080,
-        allow_origin: "*",
-      },
-    };
-
     //start flv server
     if (config.isFLV) {
       var nms = new NodeMediaServer(nmsConfig);
@@ -242,22 +231,19 @@ const init = async () => {
     //
     if (config.isImage || config.isMotion || config.isVideo || config.isOnDemand) {
       logger.log('start recording process');
-      runRecordProcess(spawn, motion, p2p, pd);
+      runRecordProcess(motion, p2p, pd);
     }
-
-    if (config.isFLV || config.isLive||config.isDASH) {
+    if (config.isFLV || config.isLive || config.isCMAF) {
       logger.log('start live process');
-      runLiveProcess(spawn);
+      runLiveProcess();
       await abr.createPlaylist(config.basePath + "/hls", config.streamChannel);
-      logger.log('add channel:'+config.streamChannel+'- address:'+SERVER_ADDRESS);
+      logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
       await cache.set(config.streamChannel, SERVER_ADDRESS);
     }
-
     this.streams = new Map();
     this.streams.set(config.streamChannel, Date.now());
     // Start the VOD S3 file watcher and sync.
     hls.monitorDir(config.basePath, this.streams);
-
   } catch (err) {
     logger.log("Can't start app", err);
     process.exit();
@@ -269,7 +255,7 @@ init();
  * 
  * @param {*} spawn 
  */
-function runLiveProcess(spawn) {
+function runLiveProcess() {
   const liveProcess = spawn("ffmpeg", options.getLiveParams(), {
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -278,10 +264,8 @@ function runLiveProcess(spawn) {
   });
 
   liveProcess.on("exit", function (code, signal) {
-    //check status
-    logger.log(
-      "ffmpeg child process exited with code:" + code + " signal:" + signal
-    );
+    logger.log("waiting 30s to restart live process");
+    setTimeout(runLiveProcess, config.retryTimeout);
   });
 
   liveProcess.on("error", function (err) {
@@ -290,7 +274,8 @@ function runLiveProcess(spawn) {
 
   liveProcess.on("close", function (code) {
     //stop task
-    console.log("ffmpeg exited with code " + code);
+   // setTimeout(runLiveProcess, config.retryTimeout);
+    console.log("ffmpeg stream closed with code " + code);
   });
 
   liveProcess.stderr.on("data", function (data) {
@@ -309,7 +294,7 @@ function runLiveProcess(spawn) {
  * @param {*} p2p 
  * @param {*} pd 
  */
-function runRecordProcess(spawn, motion, p2p, pd) {
+function runRecordProcess(motion, p2p, pd) {
   const ffmpeg = spawn("ffmpeg", options.getParams(), {
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -320,8 +305,9 @@ function runRecordProcess(spawn, motion, p2p, pd) {
   ffmpeg.on("exit", function (code, signal) {
     //check status
     logger.log(
-      "ffmpeg child process exited with code:" + code + " signal:" + signal
+      "media stream recording process exited with code:" + code + " signal:" + signal
     );
+    setTimeout(runRecordProcess, config.retryTimeout);
   });
 
   ffmpeg.on("error", function (err) {
@@ -346,3 +332,13 @@ function runRecordProcess(spawn, motion, p2p, pd) {
     ffmpeg.stdout;
 }
 
+function mkdirsSync(dirname) {
+  if (fs.existsSync(dirname)) {
+    return true;
+  } else {
+    if (mkdirsSync(path.dirname(dirname))) {
+      fs.mkdirSync(dirname);
+      return true;
+    }
+  }
+}

@@ -12,13 +12,13 @@ module.exports = Object.freeze({
   isMotion: (process.env.IS_MOTION || 'false')=== 'true',
   isVideo: (process.env.IS_VIDEO || 'false')=== 'true',
   isImage: (process.env.IS_IMAGE|| 'false')=== 'true' ,
-  isOnDemand: (process.env.IS_ONDEMAND || 'false')=== 'true',
+  isOnDemand: (process.env.IS_ONDEMAND || 'true')=== 'true',
   isLive: (process.env.IS_HLS || 'false')=== 'true',
   isFLV: (process.env.IS_FLV || 'false')=== 'true',
-  isDASH: (process.env.IS_DASH || 'true')=== 'true',
+  isCMAF: (process.env.IS_CMAF || 'false')=== 'true',
+  isWatermark: (process.env.IS_WATERMARK || 'false')=== 'true',
 
   imageTime: process.env.IMAGE_TIME || "10",
-
   videoTime: process.env.VIDEO_TIME || "30",
   //
   hlsTime: process.env.HLS_TIME || "2",
@@ -32,10 +32,11 @@ module.exports = Object.freeze({
   MOTION_PERCENT:process.env. MOTION_PERCENT || "30",
   MOTION_DURATION:process.env. MOTION_DURATION || "5",
 
-  logLevel: process.env.LOG_LEVEL || "warning",
+  logLevel: process.env.LOG_LEVEL || "info",
   transCoding: process.env.TRANSCODING || "copy",
   pixFmt: process.env.PIX_FORMAT || "rgb24",
   buckName:process.env.ASSETS_BUCKET||'video-streaming-assets-assetsbucket-1kf2tlxbhy4qz',
+  retryTimeout:30000,
   regions: [
     {
       name: "region1",

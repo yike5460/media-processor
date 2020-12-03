@@ -36,7 +36,7 @@ const fetchServers = async () => {
       const ip = task.containers[0].networkInterfaces[0].privateIpv4Address;
       return `${ip}:${containerPort}`;
     });
-    console.log(JSON.stringify(servers, null, 3));
+   // console.log(JSON.stringify(servers, null, 3));
 
 
     return servers;
@@ -53,7 +53,7 @@ const fetchServers = async () => {
 const generateTemplate = async () => {
   //console.log('generateTemplate');
   const servers = await fetchServers();
-  console.log(JSON.stringify(process.argv));
+ // console.log(JSON.stringify(process.argv));
   const templateFile = process.argv[2];
   const outputFile = process.argv[3];
   const template = fs.readFileSync(templateFile, 'utf8');

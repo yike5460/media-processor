@@ -89,6 +89,10 @@ function getHLSParams() {
     "hls",
     //  '-codec:v','libx264',
     // '-codec:a', 'mp3',
+    '-profile:v',
+    'baseline',
+    '-level',
+    '3.0',
     "-hls_init_time", "1",
     //   "-preset","slow",
     "-tune",
@@ -97,6 +101,8 @@ function getHLSParams() {
     "nobuffer",
     "-flags",
     "low_delay",
+    "-movflags",
+    "faststart",
     "-hls_time",
     config.hlsTime,
     "-hls_list_size",
@@ -113,10 +119,12 @@ function getHLSParams() {
   ];
 }
 
-function getDashParams() {
-return [
+function getCMAFParams() {
+  return [
     '-map', '0',
     '-map', '0',
+    // '-c:v', 'h264_videotoolbox',
+    // '-allow_sw', '1',
     '-map', '0',
     '-c:a', 'aac',
     '-c:v', 'libx264',
@@ -124,17 +132,17 @@ return [
     '-s:v:0', '1280x720',
     '-profile:v:0', 'main',
     '-b:v:1', '500k',
-    '-s:v:1', '640x340',
+    '-s:v:1', '720x576',
     '-profile:v:1', 'main',
     '-b:v:2', '300k',
     '-s:v:2', '320x170',
     '-profile:v:2', 'baseline',
-    '-bf', '1',
-    '-keyint_min', '120',
+    // '-bf', '1',
+    // '-keyint_min', '120',
     '-g', '120',
     '-sc_threshold', '0',
     '-b_strategy', '0',
-    '-ar:a:1', '22050',
+    // '-ar:a:1', '22050',
     '-use_timeline', '1',
     '-use_template', '1',
     '-window_size', '5',
@@ -142,14 +150,13 @@ return [
     '-hls_playlist', '1',
     // "-tune", "zerolatency",
     // "-flags","low_delay",
-    // '-seg_duration', '4',
+    '-seg_duration', '4',
     '-streaming', '1',
     '-remove_at_exit', '1',
     '-f', 'dash',
     // "-strict",
     // "-2",
     config.basePath + "/hls/" + config.streamChannel + "/manifest.mpd",
-    // config.basePath + "/hls/" + config.streamChannel + "/480p/index.m3u8"
   ];
 
 
@@ -201,6 +208,13 @@ function getOnDemandParams() {
   ];
 }
 
+function getWatermark(){
+  return [
+    '-vf',
+    "drawtext=text=‘test’:x=10:y=10:fontsize=24:fontcolor=white:shadowy=2"
+  ];
+}
+
 getParams = function () {
   var params = [
     "-loglevel",
@@ -220,6 +234,7 @@ getParams = function () {
     "-i",
     config.inputURL,
   ];
+  if(config.isWatermark) params=params.concat(getWatermark());
   if (config.isMotion) params = params.concat(getMotionParams());
   if (config.isVideo) params = params.concat(getVideoParams());
   if (config.isImage) params = params.concat(getImageParams());
@@ -246,10 +261,10 @@ getLiveParams = function () {
     // 'rtsp://freja.hiof.no:1935/rtplive/definst/hessdalen03.stream',
     config.inputURL,
   ];
-
+  if(config.isWatermark) params=params.concat(getWatermark());
   if (config.isLive) params = params.concat(getHLSParams());
   if (config.isFLV) params = params.concat(getFlvParams());
-  if (config.isDASH) params = params.concat(getDashParams());
+  if (config.isCMAF) params = params.concat(getCMAFParams());
   // params=params.concat(['-y', 'pipe:1']);
   console.log("----ffmpeg live params:" + params);
   return params;
