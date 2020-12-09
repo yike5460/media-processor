@@ -1,5 +1,6 @@
 const config = require("./lib/config");
 const _ = require("lodash");
+const axios = require('axios');
 const ejs = require("ejs");
 const fs = require("fs");
 const CP = require("child_process");
@@ -9,6 +10,7 @@ const hls = require("./lib/hls");
 const abr = require("./lib/abr");
 const ecs = require("./lib/ecs");
 const cache = require("./lib/cache");
+const http = require("./lib/http");
 const logger = require("./lib/logger");
 const utils = require("./lib/utils");
 const options = require("./lib/ffmpeg");
@@ -255,7 +257,8 @@ init();
  * 
  * @param {*} spawn 
  */
-function runLiveProcess() {
+const runLiveProcess = async () =>{
+// function runLiveProcess() {
   const liveProcess = spawn("ffmpeg", options.getLiveParams(), {
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -264,8 +267,21 @@ function runLiveProcess() {
   });
 
   liveProcess.on("exit", function (code, signal) {
-    logger.log("waiting 30s to restart live process");
-    setTimeout(runLiveProcess, config.retryTimeout);
+    //logger.log("waiting 30s to restart live process");
+    var serverStatus ;
+    const serverUrl='http://'+config.address+':8000/api/server';
+    console.log("Checking Server Status...");
+   // Make a request for a user with a given ID
+    axios.get(serverUrl, {timeout: 2000})
+    .then(function (response) {
+      logger.log("check status success,waiting 30s to restart live process");
+      setTimeout(runLiveProcess, config.retryTimeout); 
+    })
+    .catch(function (error) {
+      //invoke task stop
+    ecs.shutdown();
+    console.log("check status false,ffmpeg stream exit with code " + code);
+    })
   });
 
   liveProcess.on("error", function (err) {
@@ -274,7 +290,7 @@ function runLiveProcess() {
 
   liveProcess.on("close", function (code) {
     //stop task
-   // setTimeout(runLiveProcess, config.retryTimeout);
+    // setTimeout(runLiveProcess, config.retryTimeout);
     console.log("ffmpeg stream closed with code " + code);
   });
 

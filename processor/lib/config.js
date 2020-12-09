@@ -6,7 +6,8 @@ module.exports = Object.freeze({
   )
     .split("/")
     .pop(),
-   
+  address: process.env.ADDRESS || "127.0.0.1",
+
   pathToHLS: (process.env.NODE_ENV === "production" ? "/dev/shm" : "media") + "/index.m3u8",
   channel: process.env.CHANNEL || 'test05',
   isMotion: (process.env.IS_MOTION || 'false')=== 'true',
@@ -33,6 +34,7 @@ module.exports = Object.freeze({
   MOTION_DURATION:process.env. MOTION_DURATION || "5",
 
   logLevel: process.env.LOG_LEVEL || "info",
+  // "quiet" "panic"  "fatal" "error"  , "warning", "info" , "verbose", "debug"  , "trace" 
   transCoding: process.env.TRANSCODING || "copy",
   pixFmt: process.env.PIX_FORMAT || "rgb24",
   buckName:process.env.ASSETS_BUCKET||'video-streaming-assets-assetsbucket-1kf2tlxbhy4qz',

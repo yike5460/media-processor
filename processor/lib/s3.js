@@ -1,10 +1,30 @@
 const AWS = require("aws-sdk");
 const logger=require("./logger");
+const fs = require('fs');
 
 const region = process.env.AWS_REGION || "cn-northwest-1";
 const s3 = new AWS.S3({ region:region });
 
 var functions = {};
+
+functions.downloadObject=(bucket, fileKey, filePath)=> {
+  console.log('downloading', bucket, fileKey, filePath);
+  return new Promise(function (resolve, reject) {
+    const file = fs.createWriteStream(filePath),
+      stream = s3.getObject({
+        Bucket: bucket,
+        Key: fileKey
+      }).createReadStream();
+    stream.on('error', reject);
+    file.on('error', reject);
+    file.on('finish', function () {
+      console.log('downloaded', bucket, fileKey);
+      resolve(filePath);
+    });
+    stream.pipe(file);
+  }); 
+}
+
 functions.putObject = (params) => {
   //  console.log("s3.putObject");
  // console.log(JSON.stringify(params, null, 2));

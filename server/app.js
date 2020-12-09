@@ -121,6 +121,7 @@ const init = async () => {
         const params = {
           id: name,
           url: url,
+          address:SERVER_ADDRESS,
           eventName: "start",
           metaData: metaData,
         };
@@ -146,7 +147,7 @@ const init = async () => {
         // We use this when creating the DVR HLS playlist name on S3.
         const timeoutMs = _.isEqual(process.env.NODE_ENV, "development")
           ? 1000
-          : 5 * 1000;
+          : 2 * 1000;
         logger.log("remove from cache:" + name);
         await cache.del(name);
         //waiting for processing video stream

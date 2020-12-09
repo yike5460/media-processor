@@ -18,6 +18,7 @@ const clusterName = process.env.ECS_CLUSTER_NAME || 'video-streaming';
 const taskName = process.env.ECS_TASK_NAME || 'video-streaming-processor:1'
 const containerName = process.env.ECS_CONTAINER_NAME || 'video-streaming-processor';
 var metaData;
+var address;
 
 const invokeTask = async(event,callback) => {
     return new Promise(async(resolve, reject) => {
@@ -29,6 +30,7 @@ const invokeTask = async(event,callback) => {
                 deviceURL = event.url; //get media url
                 channelName = event.id;
                 metaData =event.metaData;
+                address=event.address;
                // logger.log(event.eventName);
                 logger.log('Run task with deviceURL:' + deviceURL + "  channelName:" + channelName);
                 //run ecs task
@@ -48,7 +50,6 @@ const invokeTask = async(event,callback) => {
                 });
             }
             if (event.eventName == "stop") {
-                deviceURL = event.url; //get media url 
                 channelName = event.id;
               //  logger.log(event.url);
                 await getItem(channelName, callback).then(function(item) {
@@ -82,6 +83,7 @@ function getEnv(deviceURL)
 {
   return  [
     { name: "INPUT_URL", "value": deviceURL },
+    { name: "ADDRESS", "value": address },
     { name: "SEGMENT_FORMAT", "value": segmentFormat },
     { name: "LOG_LEVEL", "value": logLevel },
     { name: "REGION", "value": region },
@@ -163,7 +165,7 @@ function getFargateParams(deviceURL) {
         overrides: {
             containerOverrides: [{
                 name: containerName,
-                environment:getEnv()
+                environment:getEnv(deviceURL)
             }]
         },
         count: 1,
