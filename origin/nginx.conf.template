@@ -22,7 +22,7 @@ http {
 
   gzip on;
 
-  proxy_cache_path /tmp/cache/ levels=1:2 keys_zone=CONTENTCACHE:10m max_size=15g inactive=10m use_temp_path=off;
+  proxy_cache_path /tmp/cache/ levels=1:2 keys_zone=CONTENTCACHE:10m max_size=10g inactive=10m use_temp_path=off;
 
   ignore_invalid_headers off;
 
@@ -111,13 +111,10 @@ http {
     }
 
     location ~ ^/(.*\.flv)$ {
-      add_header Content-Type "video/x-flv";
-      add_header Connection "close";
-      add_header Cache-Control "no-cache";
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
-      proxy_cache_valid 1s;
+      proxy_cache_valid 3s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
     include /etc/nginx/nginx.cors.conf;
     proxy_pass http://node-backend/$1$is_args$args;

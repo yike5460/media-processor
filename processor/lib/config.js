@@ -1,12 +1,10 @@
 module.exports = Object.freeze({
   inputURL: process.env.INPUT_URL || "rtmp://58.200.131.2:1935/livetv/natlgeo",
   basePath: process.env.NODE_ENV === "production" ? "/dev/shm" : "media",
-  streamChannel: (
-    process.env.INPUT_URL || "rtmp://58.200.131.2:1935/livetv/natlgeo"
-  )
-    .split("/")
-    .pop(),
+  streamChannel: process.env.CHANNEL_NAME || "natlgeo",
+
   address: process.env.ADDRESS || "127.0.0.1",
+  isMaster: (process.env.IS_MASTER || 'false')=== 'true',
 
   pathToHLS: (process.env.NODE_ENV === "production" ? "/dev/shm" : "media") + "/index.m3u8",
   channel: process.env.CHANNEL || 'test05',

@@ -15,7 +15,7 @@ var sizing = process.env.SIZING || "default";
 //
 var ecs_Type = process.env.ECS_TYPE || "fargate";
 const clusterName = process.env.ECS_CLUSTER_NAME || 'video-streaming';
-const taskName = process.env.ECS_TASK_NAME || 'video-streaming-processor:1'
+const taskName = process.env.ECS_TASK_NAME || 'video-streaming-processor:4'
 const containerName = process.env.ECS_CONTAINER_NAME || 'video-streaming-processor';
 var metaData;
 var address;
@@ -90,7 +90,7 @@ function getEnv(deviceURL)
     { name: "TRANSCODING", "value": transCoding },
     { name: "SIZING", "value": sizing },
     { name: "SEGMENT_TIME", "value": segmentTime },
-    { name: "CHANNEL", "value": metaData.channel },
+    { name: "CHANNEL_NAME", "value": metaData.channel },
     { name: "IS_FLV", "value": metaData.isFlv || 'true'},
     { name: "IS_HLS", "value": metaData.isHls || 'false'},
     { name: "IS_VIDEO", "value": metaData.isVideo || 'false'},

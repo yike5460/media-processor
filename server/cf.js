@@ -1,3 +1,4 @@
+const { CognitoSync } = require('aws-sdk');
 var AWS = require('aws-sdk');
  
 

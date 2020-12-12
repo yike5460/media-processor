@@ -16,7 +16,7 @@ functions.checkOnServer = async () => {
     .catch(function (error) {
        return serverStatus = false;
     })
- ;
+ 
 }
 
 module.exports = functions;

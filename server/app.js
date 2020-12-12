@@ -7,10 +7,12 @@ const lambda = require("./lib/lambda");
 const logger = require("./lib/logger");
 const utils = require("./lib/utils");
 const cache = require("./lib/cache");
-const scheduler = require("./lib/scheduler");
+const scheduler = require("./lib/task");
 const db = require("./lib/db");
+const { isInteger } = require("lodash");
 
 const LOG_TYPE = 3;
+
 var metaData;
 var isAuth = true;
 logger.setLogType(LOG_TYPE);
@@ -110,7 +112,6 @@ const init = async () => {
       );
       const name = StreamPath.split("/").pop();
       const metaData = await db.getItem(name);
-
       if (StreamPath.indexOf("/stream/") != -1 && !_.isEmpty(metaData)) {
         logger.log("---begin to run ecs task---");
         logger.log("channel's metadata:" + JSON.stringify(metaData));
@@ -118,18 +119,14 @@ const init = async () => {
         if (metaData.isRtmps == "true")
           url = "rtmps://" + SERVER_ADDRESS + ":1938/stream/" + name;
         else url = "rtmp://" + SERVER_ADDRESS + ":1935/stream/" + name;
-        const params = {
-          id: name,
-          url: url,
-          address:SERVER_ADDRESS,
-          eventName: "start",
-          metaData: metaData,
-        };
-        //await lambda.invokeLambda(params);
-        await scheduler.invokeTask(params);
-        logger.log(params);
-        //await abr.createPlaylist(config.http.mediaroot+'/hls', name);
-        // await cache.set(name, SERVER_ADDRESS);
+        // const params = {
+        //   id: name,
+        //   url: url,
+        //   address: SERVER_ADDRESS,
+        //   eventName: "start",
+        //   metaData: metaData,
+        // };
+        await startTasks(name, url, SERVER_ADDRESS, metaData).catch(error => console.log(error.message));
       }
     });
 
@@ -138,7 +135,6 @@ const init = async () => {
         "[NodeEvent on donePublish]",
         `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
       );
-
       const name = StreamPath.split("/").pop();
       const metaData = await db.getItem(name);
       if (StreamPath.indexOf("/stream/") != -1 && !_.isEmpty(metaData)) {
@@ -148,18 +144,22 @@ const init = async () => {
         const timeoutMs = _.isEqual(process.env.NODE_ENV, "development")
           ? 1000
           : 2 * 1000;
-        logger.log("remove from cache:" + name);
-        await cache.del(name);
+
+        await removeCache(name, metaData).catch(error => console.log(error.message));
+        // const values = await cache.smembers(name);
+        // await values.forEach(element => {
+        //   cache.srem(element);
+        // });
+        // await cache.del(name);
         //waiting for processing video stream
-        await utils.timeout(timeoutMs);
+        // await utils.timeout(timeoutMs);
         //const url=SERVER_ADDRESS+"/stream/"+name;
 
         // if(isRtmps)
         //  url = "rtmps://" + SERVER_ADDRESS + "/stream/" + name;
         //  else
         url = "rtmp://" + SERVER_ADDRESS + "/stream/" + name;
-        const params = { id: name, url: url, eventName: "stop" };
-        await scheduler.invokeTask(params);
+        await stopTasks(name, url, metaData).catch(error => console.log(error.message));;
         logger.log(url);
       }
     });
@@ -192,4 +192,110 @@ const init = async () => {
     process.exit();
   }
 };
+/**
+ * 
+ * @param {*} channelName 
+ * @param {*} metaData 
+ */
+const removeCache = async (channelName, metaData) => {
+  const isCluster = (metaData.isCluster || 'false') === 'true';
+  let clusterNumber = new Number(metaData.clusterNumber || '5');
+  clusterNumber--;
+  logger.log("remove channel " + channelName + " from cache");
+  var channels = new Array();
+  channels.push(channelName);
+  if (isCluster) {
+    for (let index = 0; index < clusterNumber; index++) {
+      channels.push(channelName + "-" + index)
+    }
+  }
+  channels.forEach(async channel => {
+    await cache.del(channel);
+  });
+}
+
+
+/**
+ * 
+ * @param {*} channelName 
+ * @param {*} inputURL 
+ * @param {*} address 
+ * @param {*} metaData 
+ */
+const startTasks = async (channelName, inputURL, address, metaData) => {
+
+  const isCluster = (metaData.isCluster || 'false') === 'true';
+  let clusterNumber = new Number(metaData.clusterNumber || '5');
+  clusterNumber--;
+  var params = new Array();
+   params.push({
+    id: channelName,
+    url: inputURL,
+    address: address,
+    eventName: "start",
+    metaData: metaData,
+    isMaster: 'true',//is a master task
+  });
+  if (isCluster) {
+    for (let index = 0; index < clusterNumber; index++) {
+      const param = {
+        id: channelName + "-" + index,
+        url: inputURL,
+        address: address,
+        eventName: "start",
+        metaData: metaData,
+        isMaster: 'false',
+      };
+       params.push(param);
+    }
+  }
+  //  for (const param of params) {
+  //   await utils.timeout(2000);
+  //   await scheduler.invokeTask(param);
+  //  }
+   await params.forEach(async param => {
+    logger.log(param.id);
+    await scheduler.invokeTask(param);
+  });
+}
+/**
+ * 
+ * @param {*} channelName 
+ * @param {*} inputURL 
+ * @param {*} metaData 
+ */
+const stopTasks = async (channelName, inputURL, metaData) => {
+
+  const isCluster = (metaData.isCluster || 'false') === 'true';
+  let clusterNumber = new Number(metaData.clusterNumber || '5');
+  clusterNumber--;
+  // logger.log("stop task:" + param.id);
+  var params = new Array();
+   params.push({
+    id: channelName,
+    url: inputURL,
+    eventName: "stop",
+  });
+  if (isCluster) {
+    for (let index = 0; index < clusterNumber; index++) {
+      const param = {
+        id: channelName + "-" + index,
+        url: inputURL,
+        eventName: "stop",
+      };
+        params.push(param);
+    }
+  }
+  // for (const param of params) {
+    
+  //   await scheduler.invokeTask(param);
+  //  }
+  await params.forEach(async param => {
+    logger.log(param.id);
+    await scheduler.invokeTask(param);
+  });
+}
+/**
+ * start app
+ */
 init();

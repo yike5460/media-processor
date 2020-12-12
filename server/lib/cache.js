@@ -9,9 +9,13 @@ cache.on('error', (err) => {
 const set = promisify(cache.set).bind(cache);
 const del = promisify(cache.del).bind(cache);
 const get = promisify(cache.get).bind(cache);
+const smembers=promisify(cache.smembers).bind(cache);
+const srem=promisify(cache.srem).bind(cache);
 
 module.exports = {
   set,
   del,
-  get
+  get,
+  smembers,
+  srem
 };

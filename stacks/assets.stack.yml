@@ -12,6 +12,12 @@ Resources:
     Properties:
       AccessControl: 'Private'
 
+  StaticBucket:
+    Description: S3 Bucket
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: 'Private'
+
 Outputs:
   AssetsBucket:
     Value: !Ref 'AssetsBucket'
