@@ -67,6 +67,13 @@ case $1 in
         --capabilities CAPABILITY_IAM \
         ${PROFILE}
         ;;
+    efs)
+        aws cloudformation deploy \
+        --template-file efs.stack.yml \
+        --stack-name video-streaming-efs \
+        --capabilities CAPABILITY_IAM \
+        ${PROFILE}
+        ;;
     *)
         echo $"Usage: $0 {vpc|assets|proxy-dns|ecs|redis|security|dynamodb}"
         exit 1

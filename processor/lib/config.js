@@ -15,7 +15,13 @@ module.exports = Object.freeze({
   isLive: (process.env.IS_HLS || 'false')=== 'true',
   isFLV: (process.env.IS_FLV || 'false')=== 'true',
   isCMAF: (process.env.IS_CMAF || 'false')=== 'true',
+
   isWatermark: (process.env.IS_WATERMARK || 'false')=== 'true',
+  waterMarkText: process.env.WATERMARK_TEXT || '水印',
+  waterMarkFontSize: process.env.WATERMARK_FONT_SIZE || '20',
+  waterMarkFontColor: process.env.WATERMARK_FONT_COLOR || 'red',
+  waterMarkTop: process.env.WATERMARK_FONT_TOP || '10',
+  waterMarkLeft: process.env.WATERMARK_FONT_LEFT || '100',
 
   imageTime: process.env.IMAGE_TIME || "10",
   videoTime: process.env.VIDEO_TIME || "30",

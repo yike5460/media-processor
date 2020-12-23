@@ -151,9 +151,9 @@ Resources:
             - Name: ECS_CLUSTER_NAME
               Value: 'video-streaming'
             - Name: ECS_TASK_NAME
-              Value:
-                Fn::ImportValue:
-                  !Sub "video-streaming-processor-TaskDefinition"
+              Value: ’video-streaming-processor‘
+                # Fn::ImportValue:
+                #   !Sub "video-streaming-processor-TaskDefinition"
             - Name: ECS_CONTAINER_NAME
               Value: 'video-streaming-processor'
             - Name: SUBNET_ID1

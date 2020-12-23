@@ -1,5 +1,6 @@
 const NodeMediaServer = require("node-media-server");
 const _ = require("lodash");
+const axios = require('axios');
 const { join } = require("path");
 const querystring = require("querystring");
 const ecs = require("./lib/ecs");
@@ -9,7 +10,7 @@ const utils = require("./lib/utils");
 const cache = require("./lib/cache");
 const scheduler = require("./lib/task");
 const db = require("./lib/db");
-const { isInteger } = require("lodash");
+
 
 const LOG_TYPE = 3;
 
@@ -21,10 +22,10 @@ function getConfig() {
     logType: LOG_TYPE,
     rtmp: {
       port: 1935,
-      chunk_size: 61440,
+      chunk_size: 10240,
       gop_cache: true,
-      ping: 30,
-      ping_timeout: 60,
+      ping: 10,
+      ping_timeout: 5,
       ssl: {
         port: 1938,
         key: "./privatekey.pem",
@@ -36,10 +37,10 @@ function getConfig() {
       allow_origin: "*",
     },
     auth: {
-      api: true,
+      // api: true,
       play: false,
-      api_user: 'admin',
-      api_pass: 'admin',
+      // api_user: 'admin',
+      // api_pass: 'admin',
       publish: true,
       secret: 'nodemedia2017privatekey'
     }
@@ -60,9 +61,7 @@ const init = async () => {
       process.env.NODE_ENV === "production"
         ? await ecs.getServer()
         : "127.0.0.1";
-
     const path = process.env.NODE_ENV === "production" ? "/dev/shm" : "media";
-
     // Set the Node-Media-Server config.
     const config = getConfig();
     // Construct the NodeMediaServer
@@ -70,26 +69,26 @@ const init = async () => {
     //
     // RTMP callbacks
     //
-    nms.on("preConnect", async (id, StreamPath, args) => {
-      logger.log(
-        "[NodeEvent on preConnect]",
-        `id=${id} args=${JSON.stringify(args)}`
-      );
-    });
+    // nms.on("preConnect", async (id, StreamPath, args) => {
+    //   logger.log(
+    //     "[NodeEvent on preConnect]",
+    //     `id=${id} args=${JSON.stringify(args)}`
+    //   );
+    // });
 
-    nms.on("postConnect", (id, args) => {
-      logger.log(
-        "[NodeEvent on postConnect]",
-        `id=${id} args=${JSON.stringify(args)}`
-      );
-    });
+    // nms.on("postConnect", (id, args) => {
+    //   logger.log(
+    //     "[NodeEvent on postConnect]",
+    //     `id=${id} args=${JSON.stringify(args)}`
+    //   );
+    // });
 
-    nms.on("doneConnect", (id, args) => {
-      logger.log(
-        "[NodeEvent on doneConnect]",
-        `id=${id} args=${JSON.stringify(args)}`
-      );
-    });
+    // nms.on("doneConnect", (id, args) => {
+    //   logger.log(
+    //     "[NodeEvent on doneConnect]",
+    //     `id=${id} args=${JSON.stringify(args)}`
+    //   );
+    // });
 
     nms.on("prePublish", async (id, StreamPath, args) => {
       logger.log(
@@ -126,6 +125,14 @@ const init = async () => {
         //   eventName: "start",
         //   metaData: metaData,
         // };
+      //  await axios.get('http://localhost:8000/api/streams/stream/'+name, { timeout: 2000 })
+      //   .then(function (response) {
+      //     logger.log(response.data);
+      //   })
+      //   .catch(function (error) {
+      //     //invoke task stop
+      //     console.log("get api status error: " + error);
+      //   })
         await startTasks(name, url, SERVER_ADDRESS, metaData).catch(error => console.log(error.message));
       }
     });
@@ -164,26 +171,26 @@ const init = async () => {
       }
     });
 
-    nms.on("prePlay", (id, StreamPath, args) => {
-      logger.log(
-        "[NodeEvent on prePlay]",
-        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
-      );
-    });
+    // nms.on("prePlay", (id, StreamPath, args) => {
+    //   logger.log(
+    //     "[NodeEvent on prePlay]",
+    //     `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    //   );
+    // });
 
-    nms.on("postPlay", (id, StreamPath, args) => {
-      logger.log(
-        "[NodeEvent on postPlay]",
-        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
-      );
-    });
+    // nms.on("postPlay", (id, StreamPath, args) => {
+    //   logger.log(
+    //     "[NodeEvent on postPlay]",
+    //     `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    //   );
+    // });
 
-    nms.on("donePlay", (id, StreamPath, args) => {
-      logger.log(
-        "[NodeEvent on donePlay]",
-        `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
-      );
-    });
+    // nms.on("donePlay", (id, StreamPath, args) => {
+    //   logger.log(
+    //     "[NodeEvent on donePlay]",
+    //     `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`
+    //   );
+    // });
 
     // Run the NodeMediaServer
     nms.run();
@@ -213,8 +220,6 @@ const removeCache = async (channelName, metaData) => {
     await cache.del(channel);
   });
 }
-
-
 /**
  * 
  * @param {*} channelName 

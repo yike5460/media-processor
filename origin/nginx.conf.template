@@ -111,6 +111,9 @@ http {
     }
 
     location ~ ^/(.*\.flv)$ {
+      add_header Content-Type "video/x-flv";
+      add_header Connection "close";
+      add_header Cache-Control "no-cache";
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
@@ -137,7 +140,6 @@ http {
 
     location /nginx_status {
       stub_status on;
-
       access_log off;
       allow 127.0.0.1;
       deny all;

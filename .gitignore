@@ -1,2 +1,14 @@
 origin/server/server.bak
 server/docker-compose.yml
+.idea/.gitignore
+.gitignore
+.idea/aws.xml
+.idea/jsLibraryMappings.xml
+.idea/media-processor.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea/httpRequests/2020-12-23T172627.200.json
+.idea/httpRequests/http-client.cookies
+.idea/httpRequests/http-requests-log.http
+server/lib/task.json

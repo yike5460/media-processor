@@ -13,7 +13,7 @@
     "push": "docker push 741040131740.dkr.ecr.us-east-1.amazonaws.com/video-streaming-origin:latest",
     "deploy": "yarn run build && yarn run tag && yarn run push"
   },
-  "author": "",
+  "author": "heyang",
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.680.0",

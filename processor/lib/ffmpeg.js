@@ -22,6 +22,10 @@ function getVideoParams() {
   ];
 }
 
+/**
+ * get image params
+ * @returns {string[]}
+ */
 function getImageParams() {
   // cmd=$cmd" -map 0:v -vf fps=1/${IMAGE_SEGMENT_TIME}  -strict -2 \
   // -strftime 1 $BASEpath/capture-%Y-%m-%d_%H-%M-%S.jpg"
@@ -40,6 +44,10 @@ function getImageParams() {
   ];
 }
 
+/**
+ * get motion params
+ * @returns {(string|string|*)[]}
+ */
 function getMotionParams() {
   return [
     //   "-map", "0:v",
@@ -83,6 +91,10 @@ function getMotionParams() {
   ];
 }
 
+/**
+ * get HLS params
+ * @returns {(string|*|number)[]}
+ */
 function getHLSParams() {
   return [
     "-f",
@@ -119,6 +131,10 @@ function getHLSParams() {
   ];
 }
 
+/**
+ * get cmaf params
+ * @returns {string[]}
+ */
 function getCMAFParams() {
   return [
     '-map', '0',
@@ -162,10 +178,23 @@ function getCMAFParams() {
 
 }
 
+function getTransParam()
+{
+  if(config.isWatermark)
+    return "libx264";
+  else return "copy"
+}
+
+/**
+ * get flv params
+ * @returns {string[]}
+ */
 function getFlvParams() {
   return [
     "-fflags",
     "nobuffer",
+    "-vprofile",
+    "baseline",
     "-f",
     "flv",
     "-y",
@@ -181,13 +210,17 @@ function getFlvParams() {
     // "libx264",
     //  "-crf",
     // "19",
-    "-c",
-    "copy",
+    "-c:v",
+    getTransParam(),
     //      config.basePath+"/hls/" + config.streamChannel + "/480p/live.flv",
     "rtmp://localhost:1935/" + config.streamChannel + "/live"
   ];
 }
 
+/**
+ * on demand param
+ * @returns {(string|*|number)[]}
+ */
 function getOnDemandParams() {
   return [
     "-f",
@@ -208,13 +241,21 @@ function getOnDemandParams() {
   ];
 }
 
+/**
+ * watermark parameter
+ * @returns {string[]}
+ */
 function getWatermark(){
   return [
     '-vf',
-    "drawtext=text=‘test’:x=10:y=10:fontsize=24:fontcolor=white:shadowy=2"
+    `drawtext=fontfile=simhei.ttf: text=‘${config.waterMarkText}’:x=${config.waterMarkLeft}:y=${config.waterMarkTop}:fontsize=${config.waterMarkFontSize}:fontcolor=${config.waterMarkFontColor}:shadowy=2`
   ];
 }
 
+/**
+ * return params according to medadata
+ * @returns {(string|*)[]}
+ */
 getParams = function () {
   var params = [
     "-loglevel",
@@ -254,7 +295,6 @@ getLiveParams = function () {
     /* use hardware acceleration */
     "-hwaccel",
     "auto", //vda, videotoolbox, none, auto
-
     "-abort_on",
     "empty_output",
     "-i",

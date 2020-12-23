@@ -19,13 +19,13 @@ var sizing = process.env.SIZING || "default";
 //
 var ecs_Type = process.env.ECS_TYPE || "fargate";
 const clusterName = process.env.ECS_CLUSTER_NAME || 'video-streaming';
-const taskName = process.env.ECS_TASK_NAME || 'video-streaming-processor:4'
+const taskName = process.env.ECS_TASK_NAME || 'video-streaming-processor'
 const containerName = process.env.ECS_CONTAINER_NAME || 'video-streaming-processor';
 const taskNumber=1;
 
 const invokeTask = async (event, callback) => {
     // return new Promise(async (resolve, reject) => {
-            // logger.log("-----event----" + JSON.stringify(event));
+
             if (event.eventName == "start") {
                await startTasks(event)
             }
@@ -196,6 +196,14 @@ function getEnv(event)
 //ondemand video
     { name: "ONDEMAND_LIST_SIZE", "value": metaData.ondemand_list_size || "3"},
     { name: "ONDEMAND_TIME", "value": metaData.ondemand_time || "60"},
+
+    //water mark env
+    { name: "IS_WATERMARK", "value": metaData.isWaterMark || "false"},
+    { name: "WATERMARK_TEXT", "value": metaData.WaterMarkText || "test"},
+    { name: "WATERMARK_FONT_SIZE", "value": metaData.WaterMarkFontSize || "test"},
+    { name: "WATERMARK_FONT_COLOR", "value": metaData.WaterMarkFontColor || "red"},
+    { name: "WATERMARK_FONT_TOP", "value": metaData.WaterMarkTop || "10"},
+    { name: "WATERMARK_FONT_LEFT", "value": metaData.WaterMarkLeft || "10"}
 ]
 }
 

@@ -210,6 +210,7 @@ RUN set -x \
 RUN apk add --no-cache tzdata \
 && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \ 
 && echo "Asia/Shanghai" > /etc/timezone
+
 #
 # App setup
 #
@@ -238,6 +239,7 @@ RUN mkdir /var/logs
 RUN touch /var/logs/supervisord.log
 RUN chmod a+rw /var/logs/supervisord.log
 ADD supervisord.conf /etc/supervisord.conf
+RUN apk add wqy-zenhei --update-cache --repository http://nl.alpinelinux.org/alpine/edge/testing --allow-untrusted
 
 ENTRYPOINT  []
 CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]

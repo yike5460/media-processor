@@ -35,7 +35,7 @@ const generateTemplate = async () => {
 const nmsConfig = {
   rtmp: {
     port: 1935,
-    chunk_size: 80000,
+    chunk_size: 20480,
     gop_cache: true,
     ping: 30,
     ping_timeout: 60,
@@ -229,6 +229,7 @@ const init = async () => {
     if (config.isFLV) {
       var nms = new NodeMediaServer(nmsConfig);
       nms.run();
+
     }
     //
     if (config.isMaster) {
@@ -242,7 +243,16 @@ const init = async () => {
       runLiveProcess();
       await abr.createPlaylist(config.basePath + "/hls", config.streamChannel);
       logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
+      //add channel and ip to cache
       await cache.set(config.streamChannel, SERVER_ADDRESS);
+      await axios.get('http://localhost:8000/api/server', { timeout: 2000 })
+        .then(function (response) {
+          logger.log(response.data);
+        })
+        .catch(function (error) {
+          //invoke task stop
+          console.log("get api status error: " + error);
+        })
     }
     this.streams = new Map();
     this.streams.set(config.streamChannel, Date.now());
