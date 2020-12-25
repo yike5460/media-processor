@@ -2,7 +2,7 @@
 
 The solution is based on AWS ECS's highly available, resilient, end-to-end video streaming live, cloud storage, and on-demand solutions
 
-<img src="./images/image-20201225114954302.png" alt="image-20201225114954302" style="zoom:50%;" />
+<img src="./images/image-20201225114954302.png" alt="image-20201225114954302" width="300" height="200" />
 
 #### Feature ：
 
