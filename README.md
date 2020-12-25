@@ -30,12 +30,7 @@ The solution is based on AWS ECS's highly available, resilient, end-to-end video
 
 Please note that this project has only been tested on macOS. Windows  users may need to update some of the scripts. Pull requests are welcome  to add Windows support.
 
-1. Install and configure the 
-
-   AWS Command Line Interface
-
-   - Ensure that the aws cli region is the same as what you define in `api/config.yml`
-   - Please configure your `output` format to be `json`. [Instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-output.html)
+1. Install and configure the AWS Command Line Interface，please configure your `output` format to be `json`. [Instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-output.html)
 
 2. [jq](https://stedolan.github.io/jq/) to process command-line JSON.
 
