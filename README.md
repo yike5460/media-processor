@@ -1,11 +1,8 @@
----
-
-typora-copy-images-to: ./images
----
-
 ## AWS  Video Stream Solution
 
+The solution is based on AWS ECS's highly available, resilient, end-to-end video streaming live, cloud storage, and on-demand solutions
 
+<img src="./images/image-20201225114954302.png" alt="image-20201225114954302" style="zoom:50%;" />
 
 #### Feature ：
 
@@ -15,7 +12,7 @@ typora-copy-images-to: ./images
 
 **Video processing:** live broadcast transcoding, live broadcast recording, live broadcast screenshot, video movement detection, etc.
 
-**Video storage and VOD：**video storage, support recording HLS chip storage, voD
+**Video storage and VOD**:video storage, support recording HLS chip storage, voD
 
 **management console:** provide API management and graphical management;
 
@@ -76,6 +73,10 @@ Please note that this project has only been tested on macOS. Windows  users may 
    $ sam deploy
    ```
 
+------
+
+
+
 ## Application Walkthrough
 
 1. Create video stream metadata
@@ -109,6 +110,17 @@ Please note that this project has only been tested on macOS. Windows  users may 
      ```bash
      rtmp://NLB_DomainName/stream/98724e64-bcd1-4887-af4a-60be440709aa?sign=1670544000-63497837275539bdb8e21800887e2db9
      ```
+
+     then you can use OBS to push video stream
+
+     ![image-20201225114304543](./images/image-20201225114304543.png)
+
+     Encoder ： x264
+     Rate Control ：CBR
+     Bitrate ： 1000 (or lower)
+     Keyframe Interval (seconds, 0=auto) ：2
+     CPU Usage Preset (higher = less CPU) ：veryfast, 
+     Tune ： zerolatency
 
 3. pull stream
 
