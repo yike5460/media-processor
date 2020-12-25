@@ -93,7 +93,7 @@ Please note that this project has only been tested on macOS. Windows  users may 
 
    - Get your stream id and signed key
 
-     ![image-20201225111416141](./images/image-20201225111416141.png)
+     <img src="./images/image-20201225111416141.png" alt="image-20201225111416141" style="zoom:50%;" />
 
    
 
@@ -142,5 +142,5 @@ Please note that this project has only been tested on macOS. Windows  users may 
      http://cloudfront_dns/98724e64-bcd1-4887-af4a-60be440709aa/flv.html
      ```
 
-     ![image-20201225113539846](./images/flv_example.png)
+     <img src="./images/flv_example.png" alt="image-20201225113539846" style="zoom:50%;" />
 
