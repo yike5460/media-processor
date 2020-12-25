@@ -33,15 +33,15 @@ Parameters:
 
   TLD:
     Type: String
-    Default: finbits.io
+    Default: xxx.io
 
   Domain:
     Type: String
-    Default: live.finbits.io
+    Default: live.xxx.io
 
-  SSLArn:
-    Type: String
-    Default: 'arn:aws:acm-pca:us-east-1:741040131740:certificate-authority/326cdf5b-8db4-4fb4-abd3-a59c14f3f874'
+  # SSLArn:
+  #   Type: String
+  #   Default: 'arn:aws:acm-pca:us-east-1:account_id:certificate-authority/326cdf5b-8db4-4fb4-abd3-a59c14f3f874'
 
 Resources:
 

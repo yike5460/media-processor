@@ -191,6 +191,8 @@ function getTransParam()
  */
 function getFlvParams() {
   return [
+    "-preset",
+    "veryfast",
     "-fflags",
     "nobuffer",
     "-vprofile",
@@ -251,7 +253,15 @@ function getWatermark(){
     `drawtext=fontfile=simhei.ttf: text=‘${config.waterMarkText}’:x=${config.waterMarkLeft}:y=${config.waterMarkTop}:fontsize=${config.waterMarkFontSize}:fontcolor=${config.waterMarkFontColor}:shadowy=2`
   ];
 }
+ //"color=color=black, drawtext=enable='gte(t,3)':fontfile=Vera.ttf:fontcolor=white:textfile=text.txt:reload=1:y=h-line_h-10:x=(W/tw)*n"
 
+ function getDynamicText(){
+  return [
+    "-vf",
+    "color=color=black, drawtext=enable='gte(t,3)':fontfile=simhei.ttf:fontcolor=white:textfile=text.txt:reload=1:y=h-line_h-10:x=(W/tw)*n"
+  ];
+
+ }
 /**
  * return params according to medadata
  * @returns {(string|*)[]}
@@ -286,6 +296,7 @@ getParams = function () {
   console.log("----ffmpeg record params:" + params);
   return params;
 };
+
 
 
 getLiveParams = function () {

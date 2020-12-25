@@ -51,7 +51,11 @@
             var videoElement = document.getElementById('videoElement');
             var flvPlayer = flvjs.createPlayer({
                 type: 'flv',
-                url: '/<%= channel%>/live.flv'
+                url: '/<%= channel%>/live.flv',
+                enableWorker: true,
+                enableStashBuffer: false,
+                stashInitialSize: 128,
+                isLive: true
             });
             flvPlayer.attachMediaElement(videoElement);
             flvPlayer.load();

@@ -1,20 +1,20 @@
 {
   "name": "live-streaming-server",
   "version": "1.0.15",
-  "description": "Ingest RTMP - Transcode into HLS  - Live Streaming",
+  "description": "Live Streaming",
   "main": "app.js",
   "scripts": {
     "test": "NODE_ENV=development node app.js",
     "start": "node app.js",
-    "get-login": "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 741040131740.dkr.ecr.us-east-1.amazonaws.com",
+    "get-login": "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com",
     "build": "docker build -t video-streaming-server .",
-    "tag": "docker tag video-streaming-server:latest 741040131740.dkr.ecr.us-east-1.amazonaws.com/video-streaming-server:latest",
-    "push": "docker push 741040131740.dkr.ecr.us-east-1.amazonaws.com/video-streaming-server:latest",
+    "tag": "docker tag video-streaming-server:latest $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/video-streaming-server:latest",
+    "push": "docker push $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/video-streaming-server:latest",
     "deploy": "yarn run build && yarn run tag && yarn run push"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rgfindl/live-streaming-server.git"
+    "url": "git+https://github.com/superyhee/media-processor.git"
   },
   "keywords": [
     "rtmp",
@@ -23,9 +23,9 @@
   ],
   "author": "He Yang",
   "bugs": {
-    "url": "https://github.com/rgfindl/live-streaming-server/issues"
+    "url": "https://github.com/superyhee/media-processor/issues"
   },
-  "homepage": "https://github.com/rgfindl/live-streaming-server#readme",
+  "homepage": "https://github.com/superyhee/media-processor",
   "dependencies": {
     "aws-sdk": "^2.672.0",
     "axios": "^0.19.2",

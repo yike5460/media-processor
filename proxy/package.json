@@ -6,10 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate-config": "node index.js",
-    "get-login": "aws ecr get-login --registry-ids 741040131740 --no-include-email --profile bluefin",
+    "get-login": "aws ecr get-login --registry-ids $ACCOUNT_ID --no-include-email --profile bluefin",
     "build": "docker build -t video-streaming-proxy .",
-    "tag": "docker tag video-streaming-proxy 741040131740.dkr.ecr.us-east-1.amazonaws.com/video-streaming-proxy:latest",
-    "push": "docker push 741040131740.dkr.ecr.us-east-1.amazonaws.com/video-streaming-proxy:latest",
+    "tag": "docker tag video-streaming-proxy $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/video-streaming-proxy:latest",
+    "push": "docker push $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/video-streaming-proxy:latest",
     "deploy": "yarn run build && yarn run tag && yarn run push"
   },
   "dependencies": {

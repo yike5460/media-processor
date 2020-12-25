@@ -7,10 +7,10 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "generate-config": "node index.js",
     "start": "node server/server.js",
-    "get-login": "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 741040131740.dkr.ecr.us-east-1.amazonaws.com",
+    "get-login": "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com",
     "build": "docker build -t video-streaming-origin .",
-    "tag": "docker tag video-streaming-origin 741040131740.dkr.ecr.us-east-1.amazonaws.com/video-streaming-origin:latest",
-    "push": "docker push 741040131740.dkr.ecr.us-east-1.amazonaws.com/video-streaming-origin:latest",
+    "tag": "docker tag video-streaming-origin $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/video-streaming-origin:latest",
+    "push": "docker push $ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/video-streaming-origin:latest",
     "deploy": "yarn run build && yarn run tag && yarn run push"
   },
   "author": "heyang",
