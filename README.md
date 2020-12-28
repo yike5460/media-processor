@@ -96,7 +96,7 @@ Please note that this project has only been tested on macOS. Windows  users may 
 
    - Get push stream address from ELB console
 
-     ![image-20201225105634511](/Users/yanghaws/live-streaming-server/media-processor/images/streaming-lb.png)
+     ![image-20201225105634511](./images/streaming-lb.png)
 
    - For example:
 
@@ -120,6 +120,7 @@ Please note that this project has only been tested on macOS. Windows  users may 
 
      **CPU Usage Preset** (higher = less CPU) ：veryfast, 
      **Tune** ： zerolatency
+
 
 3. pull stream
 
