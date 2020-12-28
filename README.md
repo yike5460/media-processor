@@ -110,12 +110,16 @@ Please note that this project has only been tested on macOS. Windows  users may 
 
      ![image-20201225114304543](./images/image-20201225114304543.png)
 
-     Encoder ： x264
-     Rate Control ：CBR
-     Bitrate ： 1000 (or lower)
-     Keyframe Interval (seconds, 0=auto) ：2
-     CPU Usage Preset (higher = less CPU) ：veryfast, 
-     Tune ： zerolatency
+     **Encoder** ： x264
+
+     **Rate Control** ：CBR
+
+     **Bitrate** ： 1000 (or lower)
+
+     **Keyframe Interval** (seconds, 0=auto) ：2
+
+     **CPU Usage Preset** (higher = less CPU) ：veryfast, 
+     **Tune** ： zerolatency
 
 3. pull stream
 
