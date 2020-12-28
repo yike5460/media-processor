@@ -65,7 +65,7 @@ Please note that this project has only been tested on macOS. Windows  users may 
    ```bash
    $ cd metadata
    $ sam build
-   $ sam deploy --guided
+   $ sam deploy
    ```
 
 ------
