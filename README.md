@@ -52,27 +52,14 @@ Please note that this project has only been tested on macOS. Windows  users may 
    $ git clone https://github.com/superyhee/media-processor.git
    ```
 
-5. Build Docker Images
-
-   ```bash
-   $ cd server/stacks
-   $ ./install.sh build
-   $ cd proxy/stacks
-   $ ./install.sh build
-   $ cd origion/stacks
-   $ ./install.sh build
-   $ cd processor/stacks
-   $ ./install.sh build
-   ```
-
-6. Deploy the backend
+5. Deploy the backend
 
    ```bash
    $ cd stacks
    $./setup.sh
    ```
 
-7. Deploy Managment API
+6. Deploy Managment API
 
    ```bash
    $ cd metadata
