@@ -34,6 +34,10 @@ Please note that this project has only been tested on macOS. Windows  users may 
 
 2. [jq](https://stedolan.github.io/jq/) to process command-line JSON.
 
+   ```
+   sudo yum -y install jq gettext bash-completion moreutils
+   ```
+
 3. [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) to build serverless application on was
 
 4. [npm](https://www.npmjs.com/get-npm) the node package manager
@@ -47,10 +51,14 @@ Please note that this project has only been tested on macOS. Windows  users may 
 6. Build Docker Images
 
    ```bash
-   $ ./server/stacks/install.sh build
-   $ ./proxy/stacks/install.sh build
-   $ ./origion/stacks/install.sh build
-   $ ./processor/stacks/install.sh build
+   $ cd server/stacks
+   $ ./install.sh build
+   $ cd proxy/stacks
+   $ ./install.sh build
+   $ cd origion/stacks
+   $ ./install.sh build
+   $ cd processor/stacks
+   $ ./install.sh build
    ```
 
 7. Deploy the backend
