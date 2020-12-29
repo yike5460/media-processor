@@ -93,8 +93,6 @@ logger "red" "*****************create ecr********************************"
 service()
 {
 
- logger "red" "*****************create service********************************"
-
 if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]];
       then
         aws cloudformation deploy \
