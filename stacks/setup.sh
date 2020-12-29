@@ -54,24 +54,21 @@ welcome() {
 
 vpc(){
 logger "red" "*** create vpc ***"
-./stack-up.sh vpc >> "${LOG_OUTPUT}" 2>&1 
-  errorcheck ${FUNCNAME}
+./stack-up.sh vpc 
 logger "red" "*** create vpc succeed ***"
 }
 
 assets()
 {
 logger "red" "*** create assets ***"
-./stack-up.sh assets  >> "${LOG_OUTPUT}" 2>&1 
- errorcheck ${FUNCNAME}
+./stack-up.sh assets 
 logger "red" "*** create assets succeed ***"
 }
 
 dynamodb()
 {
 logger "red" "*** create dynamodb ***"
-./stack-up.sh dynamodb >> "${LOG_OUTPUT}" 2>&1 
-errorcheck ${FUNCNAME}
+./stack-up.sh dynamodb 
 logger "red" "*** create dynamodb succeed ***"
 }
 
