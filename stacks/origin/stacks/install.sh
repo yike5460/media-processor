@@ -109,7 +109,7 @@ service()
         --parameter-overrides \
         Version=1.0.11 \
         DesiredCount=1 \
-        Domain=live.finbits.io \
+        Domain=live.xxx.io \
         ${PROFILE}
       else
         aws cloudformation deploy \
@@ -119,19 +119,18 @@ service()
         --parameter-overrides \
         Version=1.0.11 \
         DesiredCount=1 \
-        Domain=live.finbits.io \
+        Domain=live.xxx.io \
         ${PROFILE}
 fi
 }
 
 main() {
 welcome
-ecr 
-
+# ecr 
 # get-login
 # build
-tag
-push
+# tag
+# push
 service
 }
 

@@ -129,9 +129,9 @@ fi
 
 main() {
 welcome
-ecr
-tag
-push
+# ecr
+# tag
+# push
 service
 }
 

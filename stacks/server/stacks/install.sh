@@ -97,7 +97,7 @@ if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]];
         DesiredCount=1 \
         RedisStack=video-streaming-redis \
         ${PROFILE}
-      else
+  else
         aws cloudformation deploy \
         --template-file server/stacks/service.stack.yml \
         --stack-name video-streaming-server \
@@ -112,9 +112,9 @@ fi
 
 main() {
 welcome
-ecr 
-tag
-push
+# ecr 
+# tag
+# push
 service
 }
 
