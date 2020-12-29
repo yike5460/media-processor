@@ -32,23 +32,27 @@ Please note that this project has only been tested on macOS. Windows  users may 
 
 1. Install and configure the AWS Command Line Interface，please configure your `output` format to be `json`. [Instructions](https://docs.aws.amazon.com/cli/latest/userguide/cli-usage-output.html)
 
+   ```
+   sudo pip install --upgrade awscli && hash -r
+   ```
+
 2. [jq](https://stedolan.github.io/jq/) to process command-line JSON.
 
    ```
    sudo yum -y install jq gettext bash-completion moreutils
    ```
 
-3. [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) to build serverless application on was
+3. [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) to build serverless application on aws
 
-4. [npm](https://www.npmjs.com/get-npm) the node package manager
+   
 
-5. Clone the repository
+4. Clone the repository
 
    ```bash
    $ git clone https://github.com/superyhee/media-processor.git
    ```
 
-6. Build Docker Images
+5. Build Docker Images
 
    ```bash
    $ cd server/stacks
@@ -61,24 +65,25 @@ Please note that this project has only been tested on macOS. Windows  users may 
    $ ./install.sh build
    ```
 
-7. Deploy the backend
+6. Deploy the backend
 
    ```bash
    $ cd stacks
    $./setup.sh
    ```
 
-8. Deploy Managment API
+7. Deploy Managment API
 
    ```bash
    $ cd metadata
    $ sam build
    $ sam deploy --guided
+   
    ```
 
 ------
 
-
+![image-20201229140846150](./images/image-20201229140846150.png)
 
 ## Application Walkthrough
 
