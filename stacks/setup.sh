@@ -44,71 +44,71 @@ errorcheck() {
 }
 
 welcome() {
-  logger "red" "******************install live stream server*****************"
-  logger "green" "These are the environment settings that are going to be used:"
+  logger "red" "*** install live stream server ***"
+#   logger "green" "These are the environment settings that are going to be used:"
   logger "yellow" "AWS Region   : $REGION"
   logger "yellow" "Account ID   : $ACCOUNT_ID"
 }
 
 vpc(){
-logger "red" "******************create vpc******************"
+logger "red" "*** create vpc ***"
 ./stack-up.sh vpc
-logger "red" "******************create vpc succeed******************"
+logger "red" "*** create vpc succeed ***"
 }
 
 assets()
 {
-logger "red" "******************create assets******************"
+logger "red" "*** create assets ***"
 ./stack-up.sh assets
-logger "red" "******************create assets succeed******************"
+logger "red" "*** create assets succeed ***"
 }
 
 dynamodb()
 {
-logger "red" "******************create dynamodb******************"
+logger "red" "*** create dynamodb ***"
 ./stack-up.sh dynamodb
-logger "red" "******************create dynamodb succeed******************"
+logger "red" "*** create dynamodb succeed ***"
 }
 
 security()
 {
-logger "red" "******************create security group******************"
+logger "red" "*** create security ***"
 ./stack-up.sh security
-logger "red" "******************create security group succeed******************"
+logger "red" "*** create security succeed ***"
 }
 
 redis()
 {
-logger "red" "******************create redis ******************"
+logger "red" "*** create ecs ***"
 ./stack-up.sh redis
-logger "red" "******************create redis succeed******************"
+logger "red" "*** create redis succeed ***"
 }
 
 ecs()
 {
-logger "red" "******************create ecs******************"
+logger "red" "*** create ecs ***"
 ./stack-up.sh ecs
-logger "red" "******************create ecs succeed******************"
+logger "red" "*** create ecs succeed ***"
 }
 
 proxy(){
 proxy/stacks/install.sh
-logger "red" "******************create proxy service succeed******************"
+logger "red" "*** create proxy service succeed ***"
 }
 
 server(){
 server/stacks/install.sh
-logger "red" "******************create media server service succeed******************"
+logger "red" "*** create server service succeed ***"
 }
 
 processor(){
 processor/stacks/install.sh
-logger "red" "******************create processor service succeed******************"
+logger "red" "*** create processor service succeed ***"
 }
 
 origin(){
 origin/stacks/install.sh
-logger "red" "******************create origion service succeed******************"
+logger "red" "*** create origin service succeed ***"
 }
 
 get-login()
