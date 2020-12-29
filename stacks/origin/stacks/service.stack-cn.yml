@@ -113,7 +113,7 @@ Resources:
       Memory: 0.5GB
       ContainerDefinitions:
         - Name: !Ref AWS::StackName
-          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com.cn/${AWS::StackName}:latest"
+          Image: "public.ecr.aws/l6z1v6o9/video-streaming-origin"
           PortMappings:
             - ContainerPort: 80
           Environment:
