@@ -79,7 +79,7 @@ logger "red" "*** create security succeed ***"
 
 redis()
 {
-logger "red" "*** create ecs ***"
+logger "red" "*** create redis ***"
 ./stack-up.sh redis
 logger "red" "*** create redis succeed ***"
 }
