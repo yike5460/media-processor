@@ -1,6 +1,8 @@
 #!/bin/bash
 : ${REGION:=$(aws configure get region)}
 : ${ACCOUNT_ID:=$(aws sts get-caller-identity|jq -r ".Account")}
+
+export LOG_OUTPUT="media_processor.log"
 ###########################################################
 ###########                                     ###########
 ###########################################################
@@ -52,21 +54,24 @@ welcome() {
 
 vpc(){
 logger "red" "*** create vpc ***"
-./stack-up.sh vpc
+./stack-up.sh vpc >> "${LOG_OUTPUT}" 2>&1 
+  errorcheck ${FUNCNAME}
 logger "red" "*** create vpc succeed ***"
 }
 
 assets()
 {
 logger "red" "*** create assets ***"
-./stack-up.sh assets
+./stack-up.sh assets  >> "${LOG_OUTPUT}" 2>&1 
+ errorcheck ${FUNCNAME}
 logger "red" "*** create assets succeed ***"
 }
 
 dynamodb()
 {
 logger "red" "*** create dynamodb ***"
-./stack-up.sh dynamodb
+./stack-up.sh dynamodb >> "${LOG_OUTPUT}" 2>&1 
+errorcheck ${FUNCNAME}
 logger "red" "*** create dynamodb succeed ***"
 }
 
