@@ -51,54 +51,64 @@ welcome() {
 }
 
 vpc(){
-logger "red" "create vpc"
+logger "red" "******************create vpc******************"
 ./stack-up.sh vpc
+logger "red" "******************create vpc succeed******************"
 }
 
 assets()
 {
-logger "red" "create s3"
+logger "red" "******************create assets******************"
 ./stack-up.sh assets
+logger "red" "******************create assets succeed******************"
 }
 
 dynamodb()
 {
-logger "red" "create dynamodb"
+logger "red" "******************create dynamodb******************"
 ./stack-up.sh dynamodb
+logger "red" "******************create dynamodb succeed******************"
 }
 
 security()
 {
-logger "red" "create security group"
+logger "red" "******************create security group******************"
 ./stack-up.sh security
+logger "red" "******************create security group succeed******************"
 }
 
 redis()
 {
-logger "red" "create redis "
+logger "red" "******************create redis ******************"
 ./stack-up.sh redis
+logger "red" "******************create redis succeed******************"
 }
 
 ecs()
 {
-logger "red" "create ecs "
+logger "red" "******************create ecs******************"
 ./stack-up.sh ecs
+logger "red" "******************create ecs succeed******************"
 }
 
 proxy(){
 proxy/stacks/install.sh
+logger "red" "******************create proxy service succeed******************"
 }
 
 server(){
 server/stacks/install.sh
+logger "red" "******************create media server service succeed******************"
 }
 
 processor(){
 processor/stacks/install.sh
+logger "red" "******************create processor service succeed******************"
 }
 
 origin(){
 origin/stacks/install.sh
+logger "red" "******************create origion service succeed******************"
 }
 
 get-login()
