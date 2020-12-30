@@ -36,15 +36,13 @@ Please note that this project has only been tested on macOS. Windows  users may 
    sudo pip install --upgrade awscli && hash -r
    ```
 
-2. [jq](https://stedolan.github.io/jq/) to process command-line JSON.
+2. Install [jq](https://stedolan.github.io/jq/) to process command-line JSON.
 
    ```
    sudo yum -y install jq gettext bash-completion moreutils
    ```
 
-3. [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) to build serverless application on aws
-
-   
+3. Install [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) to build serverless application on aws
 
 4. Clone the repository
 
@@ -80,19 +78,19 @@ Please note that this project has only been tested on macOS. Windows  users may 
 
      ![image-20201225110157183](./images/image-20201225110157183.png)
 
-   - Post metadata by curl
+   - Post video stream metadata by curl
 
      ```bash
      curl -d '{"isFlv":"true", "isHls":"false","isVideo":"false", "isImage":"false","isMotion":"false", "isOnDemand":"false","isCMAF":"false","video_time":"60","image_time":"30","hls_time":"2","hls_list_size":"5", "outdate":"2022-12-09"}' -H "Content-Type: application/json" -X POST https://xxxxx.execute-api.cn-northwest-1.amazonaws.com.cn/Prod/videostream
      ```
 
-   - Get your stream id and signed key
+   - Get your stream id and signed key from Dynamodb console
 
      <img src="./images/image-20201225111416141.png" alt="image-20201225111416141" style="zoom:50%;" />
 
    
 
-2. Get push video stream URL:
+2. Get push  stream URL:
 
    - Get push stream address from ELB console
 
