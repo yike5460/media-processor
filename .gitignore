@@ -12,4 +12,4 @@ server/docker-compose.yml
 .idea/httpRequests/http-client.cookies
 .idea/httpRequests/http-requests-log.http
 server/lib/task.json
-web
+
