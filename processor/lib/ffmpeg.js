@@ -1,6 +1,7 @@
 const fs = require("fs");
 const config = require('./config');
 const path = require("path");
+const logger = require("./logger");
 
 function getVideoParams() {
   return [
@@ -102,11 +103,11 @@ function getHLSParams() {
     //  '-codec:v','libx264',
     // '-codec:a', 'mp3',
     '-profile:v',
-    'baseline',
+    'main',
     '-level',
     '3.0',
     "-hls_init_time", "1",
-    //   "-preset","slow",
+    "-preset", "veryfast",
     "-tune",
     "zerolatency",
     "-fflags",
@@ -152,7 +153,7 @@ function getCMAFParams() {
     '-profile:v:1', 'main',
     '-b:v:2', '300k',
     '-s:v:2', '320x170',
-    '-profile:v:2', 'baseline',
+    '-profile:v:2', 'main',
     // '-bf', '1',
     // '-keyint_min', '120',
     '-g', '120',
@@ -174,16 +175,14 @@ function getCMAFParams() {
     // "-2",
     config.basePath + "/hls/" + config.streamChannel + "/manifest.mpd",
   ];
-
-
 }
 
-function getTransParam()
-{
-  if(config.isWatermark)
+function getTransParam() {
+  if (config.isWatermark)
     return "libx264";
   else return "copy"
 }
+
 
 /**
  * get flv params
@@ -192,11 +191,11 @@ function getTransParam()
 function getFlvParams() {
   return [
     "-preset",
-    "veryfast",
-    "-fflags",
-    "nobuffer",
+    "medium",
     "-vprofile",
     "baseline",
+    "-fflags",
+    "nobuffer",
     "-f",
     "flv",
     "-y",
@@ -204,8 +203,8 @@ function getFlvParams() {
     "zerolatency",
     "-fflags",
     "discardcorrupt",
-    "-flags",
-    "low_delay",
+    // "-flags",
+    // "low_delay",
     // "-r",
     // "15",
     // "-c:v",
@@ -247,21 +246,23 @@ function getOnDemandParams() {
  * watermark parameter
  * @returns {string[]}
  */
-function getWatermark(){
+function getWatermark() {
   return [
     '-vf',
-    `drawtext=fontfile=simhei.ttf: text=‘${config.waterMarkText}’:x=${config.waterMarkLeft}:y=${config.waterMarkTop}:fontsize=${config.waterMarkFontSize}:fontcolor=${config.waterMarkFontColor}:shadowy=2`
+    `drawtext=fontfile=simhei.ttf: text=${config.waterMarkText}:x=${config.waterMarkLeft}:y=${config.waterMarkTop}:fontsize=${config.waterMarkFontSize}:fontcolor=${config.waterMarkFontColor}`
   ];
 }
- //"color=color=black, drawtext=enable='gte(t,3)':fontfile=Vera.ttf:fontcolor=white:textfile=text.txt:reload=1:y=h-line_h-10:x=(W/tw)*n"
+//"color=color=black, drawtext=enable='gte(t,3)':fontfile=Vera.ttf:fontcolor=white:textfile=text.txt:reload=1:y=h-line_h-10:x=(W/tw)*n"
 
- function getDynamicText(){
+function getDynamicText() {
   return [
     "-vf",
     "color=color=black, drawtext=enable='gte(t,3)':fontfile=simhei.ttf:fontcolor=white:textfile=text.txt:reload=1:y=h-line_h-10:x=(W/tw)*n"
   ];
+  // 如果要指定水印的大小，比如 384x216：
 
- }
+  // ffmpeg -i input.mp4 -i wm.png -filter_complex "[1:v]scale=384:216[wm];[0:v][wm]overlay=0:0"
+}
 /**
  * return params according to medadata
  * @returns {(string|*)[]}
@@ -285,7 +286,7 @@ getParams = function () {
     "-i",
     config.inputURL,
   ];
-  if(config.isWatermark) params=params.concat(getWatermark());
+  if (config.isWatermark) params = params.concat(getWatermark());
   if (config.isMotion) params = params.concat(getMotionParams());
   if (config.isVideo) params = params.concat(getVideoParams());
   if (config.isImage) params = params.concat(getImageParams());
@@ -293,7 +294,7 @@ getParams = function () {
   if (config.isOnDemand) params = params.concat(getOnDemandParams());
   // if(config.isFLV)params = params.concat(getFlvParams());
   // params=params.concat(['-y', 'pipe:1']);
-  console.log("----ffmpeg record params:" + params);
+  logger.log("----ffmpeg record params:" + params);
   return params;
 };
 
@@ -312,16 +313,52 @@ getLiveParams = function () {
     // 'rtsp://freja.hiof.no:1935/rtplive/definst/hessdalen03.stream',
     config.inputURL,
   ];
-  if(config.isWatermark) params=params.concat(getWatermark());
+  if (config.isWatermark) params = params.concat(getWatermark());
   if (config.isLive) params = params.concat(getHLSParams());
   if (config.isFLV) params = params.concat(getFlvParams());
   if (config.isCMAF) params = params.concat(getCMAFParams());
   // params=params.concat(['-y', 'pipe:1']);
-  console.log("----ffmpeg live params:" + params);
+
+  logger.log("----ffmpeg live params:" + params);
   return params;
 };
+
+getRelayParams = function () {
+  var params = [
+    "-loglevel",
+    config.logLevel,
+    /* use hardware acceleration */
+    "-hwaccel",
+    "auto", //vda, videotoolbox, none, auto
+    "-abort_on",
+    "empty_output",
+    "-i",
+    config.inputURL,
+    "-preset",
+    "veryfast",
+    "-fflags",
+    "nobuffer",
+    "-vprofile",
+    "baseline",
+    "-f",
+    "flv",
+    "-y",
+    "-tune",
+    "zerolatency",
+    "-fflags",
+    "discardcorrupt",
+    "-flags",
+    "low_delay",
+    "-c:v",
+    "copy",
+    config.RELAY_URL
+  ];
+  logger.log("----ffmpeg relay params:" + params);
+  return params;
+}
 
 module.exports = {
   getParams,
   getLiveParams,
+  getRelayParams
 };

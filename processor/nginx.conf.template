@@ -82,7 +82,7 @@ http {
       deny all;
     }
 
-    location /api/server/ {
+    location location /<%= channel%>/api/server/ {
       proxy_pass http://node-backend/api/server/;
     }
 
@@ -100,8 +100,7 @@ http {
     #   proxy_pass http://node-backend/$is_args$args;
     # }
     location ~ \.flv {
-      # add_header Cache-Control "max-age=1";
-      add_header Cache-Control "no-cache";
+      add_header Cache-Control "max-age=2";
       proxy_pass http://node-backend;
     }
 

@@ -87,7 +87,6 @@ const createData = async (event) => {
   //add 3 day ttl to db
   let date = Date.now();
   item.TimeStamp = addDays(date, 3);
-
   let exp = (new Date(item.outdate).getTime() / 1000 | 0);
   item.key=getSignKey(exp,item.id);
   console.log(date);
@@ -106,7 +105,7 @@ const createData = async (event) => {
     })
     .promise()
     .then(() => {
-      return params.Item.id;
+      return item;
     });
 };
 //Update data using uuid

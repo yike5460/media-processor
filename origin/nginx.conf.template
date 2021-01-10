@@ -49,23 +49,14 @@ http {
     <% }); %>
 
     location ~ ^/(.*\.m3u8)$ {
-      #
-      # Cache results on local disc
-      #
+
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 1s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
 
-      #
-      # CORS
-      #
       include /etc/nginx/nginx.cors.conf;
-
-      #
-      # Proxy Pass
-      #
       proxy_pass http://node-backend/$1$is_args$args;
     }
 
@@ -117,14 +108,12 @@ http {
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
-      proxy_cache_valid 3s;
+      proxy_cache_valid 1s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
     include /etc/nginx/nginx.cors.conf;
     proxy_pass http://node-backend/$1$is_args$args;
     }
-
     location ~ ^/(.*\.js)$ {
-
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
@@ -134,10 +123,19 @@ http {
       proxy_pass http://node-backend/$1$is_args$args;
     }
 
+    location / {
+      proxy_cache CONTENTCACHE;
+      proxy_cache_lock on;
+      proxy_cache_key $scheme$proxy_host$uri;
+      proxy_cache_valid 60s;
+      proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
+      include /etc/nginx/nginx.cors.conf;
+      proxy_pass http://node-backend;
+    }
+
     location /healthcheck {
       proxy_pass http://node-backend/healthcheck$is_args$args;
     }
-
     location /nginx_status {
       stub_status on;
       access_log off;

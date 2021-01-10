@@ -88,6 +88,7 @@ const handleMedia = async (path, mediaRoot) => {
     ContentType: 'video/MP2T',
     CacheControl: 'max-age=31536000'
   };
+  
   await s3.putObject(params);
   await fs.rmFile(join(mediaRoot, path));
 };

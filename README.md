@@ -1,6 +1,6 @@
 ## AWS  Video Stream Solution
 
-The solution is based on AWS ECS's highly available, resilient, end-to-end video streaming live, cloud storage, and on-demand solutions
+The solution is a highly available, resilient, end-to-end video streaming live, cloud storage, and on-demand solution based on AWS ECS.
 
 <img src="./images/image-20201225114954302.png" alt="image-20201225114954302" width="300" height="200" />
 
@@ -42,7 +42,7 @@ Please note that this project has only been tested on macOS. Windows  users may 
    sudo yum -y install jq gettext bash-completion moreutils
    ```
 
-3. Install [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) to build serverless application on aws
+3. Install [sam](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html) cli to build serverless application on aws
 
 4. Clone the repository
 
@@ -140,5 +140,5 @@ Please note that this project has only been tested on macOS. Windows  users may 
      http://cloudfront_dns/98724e64-bcd1-4887-af4a-60be440709aa/flv.html
      ```
 
-     <img src="./images/flv_example.png" alt="image-20201225113539846" style="zoom:50%;" />
+     <img src="./images/flv_example.png" alt="image-20201225113539846" style="zoom:40%;" />
 

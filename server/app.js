@@ -22,7 +22,7 @@ function getConfig() {
     logType: LOG_TYPE,
     rtmp: {
       port: 1935,
-      chunk_size: 10240,
+      chunk_size: 20480,
       gop_cache: true,
       ping: 10,
       ping_timeout: 5,

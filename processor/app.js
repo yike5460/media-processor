@@ -4,15 +4,12 @@ const axios = require('axios');
 const ejs = require("ejs");
 const fs = require("fs");
 const CP = require("child_process");
-const P2P = require("pipe2pam");
-const PD = require("pam-diff");
 const hls = require("./lib/hls");
 const abr = require("./lib/abr");
 const ecs = require("./lib/ecs");
 const cache = require("./lib/cache");
-const http = require("./lib/http");
 const logger = require("./lib/logger");
-const utils = require("./lib/utils");
+const motionDetect = require("./lib/motion");
 const options = require("./lib/ffmpeg");
 const path = require("path");
 const NodeMediaServer = require("node-media-server");
@@ -35,7 +32,7 @@ const generateTemplate = async () => {
 const nmsConfig = {
   rtmp: {
     port: 1935,
-    chunk_size: 20480,
+    chunk_size: 60000,
     gop_cache: true,
     ping: 30,
     ping_timeout: 60,
@@ -51,21 +48,6 @@ const init = async () => {
   try {
     const SERVER_ADDRESS =
       process.env.NODE_ENV === "production" ? await ecs.getServer() : "";
-    const basePath = config.basePath;
-
-    const motion = config.isMotion;
-    //change this to /dev/shm/manifest.m3u8
-    const pathToHLS = config.pathToHLS;
-    //const pathToHLS = "/dev/shm/manifest.m3u8";
-    const timeout = Number.parseInt(config.MOTION_DURATION) * 1000;
-    //10000 = 10 seconds of recorded video, includes buffer of time before motion triggered recording
-    //set the directory for the jpegs and mp4 videos to be saved
-    const percent = Number.parseInt(config.MOTION_PERCENT);
-    const diff = Number.parseInt(config.MOTION_DIFF);
-    const motionTimeout = Number.parseInt(config.MOTION_TIMEOUT);
-
-    let p2p;
-    let pd;
 
     await mkdirsSync(config.basePath + "/hls/" + config.streamChannel + "/480p");
     await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/720p");
@@ -83,164 +65,48 @@ const init = async () => {
       config.basePath + "/hls/" + config.streamChannel + "/index.html"
     );
 
-    await fs.copyFileSync(
-      "hls.html",
-      config.basePath + "/hls/" + config.streamChannel + "/hls.html"
-    );
 
-    await fs.copyFileSync(
-      "dash.html",
-      config.basePath + "/hls/" + config.streamChannel + "/dash.html"
-    );
-    if (config.isFLV) {
+      await fs.copyFileSync(
+        "hls.html",
+        config.basePath + "/hls/" + config.streamChannel + "/hls.html"
+      );
+      await fs.copyFileSync(
+        "dash.html",
+        config.basePath + "/hls/" + config.streamChannel + "/dash.html"
+      );
+  
       await generateTemplate();
-      // await fs.copyFileSync(
-      //   "flv.js",
-      //   config.basePath + "/hls/" + config.streamChannel + "/flv.js"
-      // );
-    }
-
-    let recordingStopper = null; //timer used to finish the mp4 recording with sigint after enough time passed with no additional motion events
-    let motionRecorder = null; //placeholder for spawned ffmpeg process that will record video to disc
-    let bufferReady = false; //flag to allow time for video source to create manifest.m3u8
-
-    function setTimeoutCallback() {
-      if (motionRecorder && motionRecorder.kill(0)) {
-        motionRecorder.kill();
-        motionRecorder = null;
-        recordingStopper = null;
-      }
-      start = true;
-      logger.log("recording finished");
-    }
-
-    //    logger.log("ffmpeg params:" + options.getParams());
-
-    if (motion) {
-      logger.log("start motion detector");
-      var start = true;
-      var beginTime;
-      p2p = new P2P();
-      p2p.on("pam", (data) => {
-        // console.log(data);
-        //  console.log('get image frame');
-      });
-      pd = new PD({ difference: diff, percent: percent }).on("diff", (data) => {
-        //console.log("diff");
-
-        if (fs.existsSync(pathToHLS) !== true) {
-          return;
-        }
-        //wait just a moment to give ffmpeg a chance to write manifest.mpd
-        if (bufferReady === false) {
-          bufferReady = true;
-          return;
-        }
-        if (recordingStopper === null) {
-          const date = new Date();
-          let name = `${date.getFullYear()}-${date.getMonth() + 1
-            }-${date.getDate()}_${("0" + date.getHours()).substr(-2)}-${(
-              "0" + date.getMinutes()
-            ).substr(-2)}-${("0" + date.getSeconds()).substr(-2)}-${(
-              "00" + date.getMilliseconds()
-            ).substr(-3)}`;
-          for (const region of data.trigger) {
-            name += `_${region.name}-${region.percent}_`;
-          }
-          const jpeg = `${name}.jpeg`;
-          const jpegPath = `${basePath}/record/${config.streamChannel}/motion/images/${jpeg}`;
-          //logger.log(jpegPath);
-          const mp4 = `${name}.mp4`;
-          const mp4Path = `${basePath}/record/${config.streamChannel}/motion/mp4/${mp4}`;
-          //logger.log(mp4Path);
-          motionRecorder = spawn(
-            "ffmpeg",
-            [
-              "-loglevel",
-              "info",
-              "-f",
-              "pam_pipe",
-              "-c:v",
-              "pam",
-              "-i",
-              "pipe:0",
-              "-re",
-              "-i",
-              pathToHLS,
-              "-map",
-              "1:v",
-              //   "-an",
-              // "-c:v",
-              // "copy",
-              //         "-s","320x240",
-              "-movflags",
-              "+faststart+empty_moov",
-              mp4Path,
-              "-map",
-              "0:v",
-              "-an",
-              "-c:v",
-              "mjpeg",
-              "-pix_fmt",
-              "yuvj422p",
-              "-q:v",
-              "1",
-              "-huffman",
-              "optimal",
-              jpegPath,
-            ],
-            { stdio: ["pipe", "pipe", "ignore"] }
-          )
-            .on("error", (error) => {
-              logger.log(error);
-            })
-            .on("exit", (code, signal) => {
-              if (code !== 0 && code !== 255) {
-                logger.log("motionRecorder", code, signal);
-                motionRecorder = null;
-                recordingStopper = null;
-              }
-            });
-          motionRecorder.stdin.end(data.pam);
-          recordingStopper = setTimeout(setTimeoutCallback, timeout);
-          logger.log(`recording started for video ${mp4}`);
-        } else {
-          if (start === true) {
-            beginTime = Date.now();
-            start = false;
-          }
-          var interval = (Date.now() - beginTime) / 1000;
-          // console.log("interval---" + interval);
-          if (interval < motionTimeout) {
-            logger.log(
-              `due to continued motion, recording has been extended by ${timeout / 1000
-              } seconds from now`
-            );
-            clearTimeout(recordingStopper);
-            recordingStopper = setTimeout(setTimeoutCallback, timeout);
-          } else {
-            clearTimeout(recordingStopper);
-            setTimeoutCallback();
-          }
-        }
-      });
-    }
+  
+    const motion = config.isMotion;
+    let p2p;
+    let pd;
+    const result = motionDetect.motionDetect(motion, p2p, pd);
+    p2p = result.p2p;
+    pd = result.pd;
     //start flv server
     if (config.isFLV) {
       var nms = new NodeMediaServer(nmsConfig);
       nms.run();
-
     }
     //
     if (config.isMaster) {
       if (config.isImage || config.isMotion || config.isVideo || config.isOnDemand) {
         logger.log('start recording process');
-        runRecordProcess(motion, p2p, pd);
+        await runRecordProcess(motion, p2p, pd);
+        this.streams = new Map();
+        this.streams.set(config.streamChannel, Date.now());
+        // Start the VOD S3 file watcher and sync.
+        await hls.monitorDir(config.basePath, this.streams);
       }
     }
+    if (config.IS_RELAY) {
+      logger.log('start relay process');
+      await runRelayProcess();
+    }
+     
     if (config.isFLV || config.isLive || config.isCMAF) {
-      logger.log('start live process');
-      runLiveProcess();
+      logger.log('*** start live process ***');
+      await runLiveProcess();
       await abr.createPlaylist(config.basePath + "/hls", config.streamChannel);
       logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
       //add channel and ip to cache
@@ -254,10 +120,7 @@ const init = async () => {
           console.log("get api status error: " + error);
         })
     }
-    this.streams = new Map();
-    this.streams.set(config.streamChannel, Date.now());
-    // Start the VOD S3 file watcher and sync.
-    hls.monitorDir(config.basePath, this.streams);
+
   } catch (err) {
     logger.log("Can't start app", err);
     process.exit();
@@ -265,6 +128,7 @@ const init = async () => {
 };
 
 init();
+
 /**
  * 
  * @param {*} spawn 
@@ -322,7 +186,7 @@ const runLiveProcess = async () => {
  * @param {*} p2p 
  * @param {*} pd 
  */
-function runRecordProcess(motion, p2p, pd) {
+const runRecordProcess= async (motion, p2p, pd) => {
   const ffmpeg = spawn("ffmpeg", options.getParams(), {
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -358,6 +222,57 @@ function runRecordProcess(motion, p2p, pd) {
     ffmpeg.stdout.pipe(p2p).pipe(pd);
   else
     ffmpeg.stdout;
+}
+
+/**
+ * 
+ * @param {*} spawn 
+ */
+const runRelayProcess = async () => {
+  // function runLiveProcess() {
+  const relayProcess = spawn("ffmpeg", options.getRelayParams(), {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  relayProcess.on("data", function (data) {
+    logger.log("ffmpeg PARENT got message:", JSON.stringify(data));
+  });
+
+  relayProcess.on("exit", function (code, signal) {
+    //logger.log("waiting 30s to restart live process");
+    var serverStatus;
+    const serverUrl = 'http://' + config.address + ':8000/api/server';
+    console.log("Checking Server Status...");
+    // Make a request for a user with a given ID
+    axios.get(serverUrl, { timeout: 2000 })
+      .then(function (response) {
+        logger.log("check status success,waiting 30s to restart live process");
+        setTimeout(runLiveProcess, config.retryTimeout);
+      })
+      .catch(function (error) {
+        //invoke task stop
+        ecs.shutdown();
+        console.log("check status false,ffmpeg stream exit with code " + code);
+      })
+  });
+
+  relayProcess.on("error", function (err) {
+    console.log(err);
+  });
+
+  relayProcess.on("close", function (code) {
+    //stop task
+    // setTimeout(runLiveProcess, config.retryTimeout);
+    console.log("ffmpeg relay stream closed with code " + code);
+  });
+
+  relayProcess.stderr.on("data", function (data) {
+    // console.log('stderr: ' + data);
+    var tData = data.toString("utf8");
+    // var a = tData.split('[\\s\\xA0]+');
+    var a = tData.split("\n");
+    console.log(a);
+  });
+  relayProcess.stdout;
 }
 
 function mkdirsSync(dirname) {

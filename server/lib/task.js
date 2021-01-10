@@ -39,7 +39,7 @@ const startTasks = async (event) => {
     try {
        const inputUrl = event.url; //get media url
        const streamChannel = event.id;
-        logger.log('Run task with deviceURL:' + inputUrl + "  UUID:" + streamChannel);
+        logger.log('Run task with stream URL:' + inputUrl + "  stream channel:" + streamChannel);
         //run ecs task
         const data = await ECS.runTask(getECSParam(event)).promise();
         const arns = _.map(data.tasks, (task) => {
@@ -170,43 +170,45 @@ function getEnv(event)
     { name: "INPUT_URL", "value": event.url },
     { name: "ADDRESS", "value": event.address },
     { name: "SEGMENT_FORMAT", "value": segmentFormat },
-    { name: "LOG_LEVEL", "value": logLevel },
+    { name: "LOG_LEVEL", "value": metaData.logLevel|| 'warning' },
     { name: "REGION", "value": region },
     { name: "TRANSCODING", "value": transCoding },
     { name: "SIZING", "value": sizing },
     { name: "SEGMENT_TIME", "value": segmentTime },
     { name: "CHANNEL_NAME", "value": event.id },
-    { name: "IS_MASTER", "value": event.isMaster },
-    { name: "IS_FLV", "value": metaData.isFlv || 'true'},
-    { name: "IS_HLS", "value": metaData.isHls || 'false'},
-    { name: "IS_VIDEO", "value": metaData.isVideo || 'false'},
-    { name: "IS_IMAGE", "value": metaData.isImage || 'false'},
-    { name: "IS_MOTION", "value": metaData.isMotion || 'false'},
-    { name: "IS_ONDEMAND", "value": metaData.isOnDemand || 'false'},
-    { name: "IS_CMAF", "value": metaData.isCMAF || 'false'},
-    { name: "VIDEO_TIME", "value": metaData.video_time|| "30" },
-    { name: "IMAGE_TIME", "value": metaData.image_time|| "10" },
-    { name: "HLS_TIME", "value": metaData.hls_time || "2"},
-    { name: "HLS_LIST_SIZE", "value": metaData.hls_list_size|| "6" }, 
+    { name: "IS_MASTER", "value": String(event.isMaster || 'true')},
+    { name: "IS_FLV", "value": String(metaData.isFlv || 'false')},
+    { name: "IS_HLS", "value": String(metaData.isHls || 'false')},
+    { name: "IS_VIDEO", "value": String(metaData.isVideo || 'false')},
+    { name: "IS_IMAGE", "value": String(metaData.isImage || 'false')},
+    { name: "IS_MOTION", "value": String(metaData.isMotion || 'false')},
+    { name: "IS_ONDEMAND", "value": String(metaData.isOnDemand || 'false')},
+    { name: "IS_CMAF", "value": String(metaData.isCMAF || 'false')},
+    { name: "VIDEO_TIME", "value": String(metaData.video_time|| "30") },
+    { name: "IMAGE_TIME", "value": String(metaData.image_time|| "10") },
+    { name: "HLS_TIME", "value": String(metaData.hls_time || "2")},
+    { name: "HLS_LIST_SIZE", "value": String(metaData.hls_list_size|| "6") }, 
 //motion detect
-    { name: "MOTION_DURATION", "value": metaData.motion_duration|| "5000" },
-    { name: "MOTION_PERCENT", "value": metaData.motion_percent || "30"},
-    { name: "MOTION_TIMEOUT", "value": metaData.motion_timeout || "60"},
-    { name: "MOTION_DIFF", "value": metaData.motion_diff|| "10" },
+    { name: "MOTION_DURATION", "value": String(metaData.motion_duration|| "5000") },
+    { name: "MOTION_PERCENT", "value": String(metaData.motion_percent || "30")},
+    { name: "MOTION_TIMEOUT", "value": String(metaData.motion_timeout || "60")},
+    { name: "MOTION_DIFF", "value": String(metaData.motion_diff|| "10") },
 //ondemand video
-    { name: "ONDEMAND_LIST_SIZE", "value": metaData.ondemand_list_size || "3"},
-    { name: "ONDEMAND_TIME", "value": metaData.ondemand_time || "60"},
+    { name: "ONDEMAND_LIST_SIZE", "value": String(metaData.ondemand_list_size || "3")},
+    { name: "ONDEMAND_TIME", "value": String(metaData.ondemand_time || "60")},
 
-    //water mark env
-    { name: "IS_WATERMARK", "value": metaData.isWaterMark || "false"},
-    { name: "WATERMARK_TEXT", "value": metaData.WaterMarkText || "test"},
-    { name: "WATERMARK_FONT_SIZE", "value": metaData.WaterMarkFontSize || "test"},
-    { name: "WATERMARK_FONT_COLOR", "value": metaData.WaterMarkFontColor || "red"},
-    { name: "WATERMARK_FONT_TOP", "value": metaData.WaterMarkTop || "10"},
-    { name: "WATERMARK_FONT_LEFT", "value": metaData.WaterMarkLeft || "10"}
+//water mark env
+    { name: "IS_WATERMARK", "value": String(metaData.isWaterMark || "false")},
+    { name: "WATERMARK_TEXT", "value": String(metaData.WaterMarkText || "test")},
+    { name: "WATERMARK_FONT_SIZE", "value": String(metaData.WaterMarkFontSize || "test")},
+    { name: "WATERMARK_FONT_COLOR", "value":String (metaData.WaterMarkFontColor || "red")},
+    { name: "WATERMARK_FONT_TOP", "value": String(metaData.WaterMarkTop || "10")},
+    { name: "WATERMARK_FONT_LEFT", "value": String(metaData.WaterMarkLeft || "10")},
+//relay  env
+    { name: "IS_RELAY", "value": String(metaData.isRelay || "false")},
+    { name: "RELAY_URL", "value": String(metaData.relayURL || "rtmp://localhost:1935")}
 ]
 }
-
 
 function saveItem(item) {
     const params = {

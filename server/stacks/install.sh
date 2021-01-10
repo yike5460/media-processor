@@ -106,6 +106,13 @@ push
 service
 }
 
+deploy()
+{
+build 
+tag
+push    
+}
+
 
 case $1 in
     get-login)
@@ -125,6 +132,9 @@ case $1 in
         ;;
     all)
     all
+        ;;
+    deploy)
+    deploy
         ;;
     *)
         echo $"Usage: $0 {get-login|build|tag|push|service|}"

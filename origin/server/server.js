@@ -10,7 +10,7 @@ app.get('/healthcheck', async (req, res) => {
 });
 
 app.get('/*', async (req, res) => {
- // console.log(req.path);
+   console.log("path:"+req.path);
   // Validate stream.
   const pathParts = _.split(_.trim(req.path, '/'), '/');
   const streamName = _.nth(pathParts, 0);
