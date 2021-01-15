@@ -143,7 +143,7 @@ proxy
 processor
 server
 origin
-web
+#web
 }
 
 main
