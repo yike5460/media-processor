@@ -102,7 +102,7 @@ Resources:
       Memory: 2GB
       ContainerDefinitions:
         - Name: "video-streaming-web"
-          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AWS::StackName}:latest"
+          Image: "public.ecr.aws/l6z1v6o9/video-streaming-web:latest"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
           Environment:
@@ -121,7 +121,7 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
         - Name: "video-streaming-web-server"
-          Image: !Sub "${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${AWS::StackName}-server:latest"
+          Image: "public.ecr.aws/l6z1v6o9/video-streaming-web-server:latest"
           PortMappings:
             - ContainerPort: 8080
           Environment:
