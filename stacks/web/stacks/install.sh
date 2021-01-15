@@ -102,7 +102,13 @@ fi
 ecr()
 {
 logger "red" "*****************create ecr********************************"
- ./stack-up.sh ecr   
+        aws cloudformation deploy \
+        --template-file web/stacks/ecr.stack.yml \
+        --stack-name video-streaming-web-ecr \
+        --capabilities CAPABILITY_IAM \
+        --parameter-overrides \
+        RepositoryName=video-streaming-web \
+        ${PROFILE} 
 }
 
 service()
@@ -112,9 +118,23 @@ service()
 
 if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]];
       then
- ./stack-up.sh service-cn
+        aws cloudformation deploy \
+        --template-file web/stacks/service.stack-cn.yml \
+        --stack-name video-streaming-web \
+        --capabilities CAPABILITY_NAMED_IAM \
+        --parameter-overrides \
+        Version=1.0.9 \
+        DesiredCount=1 \
+        ${PROFILE}
       else
- ./stack-up.sh service
+        aws cloudformation deploy \
+        --template-file web/stacks/service.stack.yml \
+        --stack-name video-streaming-web \
+        --capabilities CAPABILITY_NAMED_IAM \
+        --parameter-overrides \
+        Version=1.0.9 \
+        DesiredCount=1 \
+        ${PROFILE}
 fi
 
 }
