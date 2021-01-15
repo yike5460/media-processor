@@ -49,7 +49,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Ref AWS::StackName
-      RetentionInDays: 365
+
 
   # Task Role
   TaskRole:
@@ -129,12 +129,7 @@ Resources:
               Value: 
                 Fn::ImportValue:
                   !Sub "${RedisStack}-RedisCluster"
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-group: !Ref AWS::StackName
-              awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: ecs
+
 
   #
   # Load Balancers

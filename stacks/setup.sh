@@ -113,6 +113,11 @@ origin/stacks/install.sh
 logger "red" "*** create origin service succeed ***"
 }
 
+web(){
+web/stacks/install.sh
+logger "red" "*** create origin service succeed ***"
+}
+
 get-login()
 {
 
@@ -138,6 +143,7 @@ proxy
 processor
 server
 origin
+web
 }
 
 main

@@ -82,7 +82,7 @@ logger "red" "create redis "
 ecs()
 {
 logger "red" "create ecs "
-./stack-up.sh ecs
+./stack-up.sh ecs-ec2
 }
 
 proxy(){
@@ -126,6 +126,7 @@ proxy
 processor
 server
 origin
+web
 }
 
 main
