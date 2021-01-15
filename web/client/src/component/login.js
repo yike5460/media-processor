@@ -169,10 +169,11 @@ export default function Login({ setToken }) {
                 payload: event.target.value
             });
         }
+        
     return (
         <form className={classes.container} noValidate autoComplete="off">
             <Card className={classes.card}>
-                <CardHeader className={classes.header} title="系统登陆页" />
+                <CardHeader className={classes.header} title="管理系统登陆" />
                 <CardContent>
                     <div>
                         <TextField
@@ -180,8 +181,8 @@ export default function Login({ setToken }) {
                             fullWidth
                             id="username"
                             type="email"
-                            label="用户名"
-                            placeholder="Username"
+                            label="用户"
+                            placeholder="用户"
                             margin="normal"
                             onChange={handleUsernameChange}
                             onKeyPress={handleKeyPress}
@@ -192,7 +193,7 @@ export default function Login({ setToken }) {
                             id="password"
                             type="password"
                             label="密码"
-                            placeholder="Password"
+                            placeholder="密码"
                             margin="normal"
                             helperText={state.helperText}
                             onChange={handlePasswordChange}

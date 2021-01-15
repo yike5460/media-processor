@@ -6,14 +6,15 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import App from './table';
 import { Container } from "@material-ui/core";
 // import DNSEditor from './dnsEditor';
 import AppsIcon from '@material-ui/icons/Apps';
-
 import { Toolbar } from "@material-ui/core";
-
-
+import App from './metadata';
+import StoreMetaData from './store-metadata';
+import WaterMark from './watermark.js';
+import Motion from './motion.js';
+import DnsForm from './dnsEditor.js';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -64,9 +65,8 @@ export default function ScrollableTabsButtonAuto() {
     };
 
     return (
-        <div className={classes.root}>
-
-            <AppBar position="static" >
+        <div className={classes.root} >
+            <AppBar position="static" color="inherit">
                 <Toolbar>
                     <AppsIcon />
                     <Typography variant="h5" color="inherit">
@@ -82,8 +82,11 @@ export default function ScrollableTabsButtonAuto() {
                         aria-label="scrollable auto tabs example"
                     >
                         <Tab label="配置管理" {...a11yProps(0)} />
-                        <Tab label="域名管理" {...a11yProps(1)} />
-                        <Tab label="直播" {...a11yProps(2)} />
+                        <Tab label="录制管理" {...a11yProps(1)} />
+                        <Tab label="水印配置" {...a11yProps(2)} />
+                        <Tab label="移动侦测" {...a11yProps(3)} />
+                        {/* <Tab label="域名配置" {...a11yProps(4)} /> */}
+
                     </Tabs>
                 </Toolbar>
             </AppBar>
@@ -91,17 +94,23 @@ export default function ScrollableTabsButtonAuto() {
                 <App />
             </TabPanel>
             <TabPanel value={value} index={1}>
-
+                <StoreMetaData />
             </TabPanel>
             <TabPanel value={value} index={2}>
-                sadfasdf
+                <WaterMark />
             </TabPanel>
-            <AppBar position="static"  >
+            <TabPanel value={value} index={3}>
+                <Motion />
+            </TabPanel>
+            {/* <TabPanel value={value} index={4}>
+              <DnsForm/>
+            </TabPanel> */}
+
+            <AppBar position="static" color="inherit">
                 <Container maxWidth="md">
                     <Toolbar>
-                        <Typography variant="body1" color="inherit">
-                            Copyright © Your Website 2021.
-                                    </Typography>
+                        <Typography align="center" variant="body1" >
+                        </Typography>
                     </Toolbar>
                 </Container>
             </AppBar>

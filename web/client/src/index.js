@@ -1,17 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-
 import App from './component/app';
-
 import * as serviceWorker from './serviceWorker';
-// import { AppBar, Toolbar, Typography, Container } from "@material-ui/core";
 
 
 ReactDOM.render(
-  
   <div>
-        <App/>
+      <App/>
   </div>,
 document.getElementById('root')
 );
