@@ -45,10 +45,9 @@ errorcheck() {
 }
 
 welcome() {
-  logger "red" "*****************intall proxy server********************************"
-  logger "green" "These are the environment settings that are going to be used:"
-  logger "yellow" "AWS Region   : $REGION"
-  logger "yellow" "Account ID   : $ACCOUNT_ID"
+  logger "red" "********************************"
+  logger "red" "***  install web service  ***"
+  logger "red" "********************************"
 }
 
 get-login()
