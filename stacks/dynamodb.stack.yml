@@ -24,16 +24,13 @@ Resources:
   #   Properties: 
   #     AttributeDefinitions: 
   #       - 
-  #         AttributeName: "channel"
+  #         AttributeName: "id"
   #         AttributeType: "S"
   #     KeySchema: 
   #       - 
-  #         AttributeName: "channel"
+  #         AttributeName: "id"
   #         KeyType: "HASH"
-  #       # - 
-  #       #   AttributeName: "Artist"
-  #       #   KeyType: "RANGE"
   #     ProvisionedThroughput: 
-  #       ReadCapacityUnits: "5"
-  #       WriteCapacityUnits: "5"
+  #       ReadCapacityUnits: "1"
+  #       WriteCapacityUnits: "1"
   #     TableName: "video-metadata"
