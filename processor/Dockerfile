@@ -5,7 +5,7 @@ FROM jrottenberg/ffmpeg:4.1-alpine
 # From https://github.com/nodejs/docker-node/blob/d071b895dd1b8da6c566f45b971825fe5b087b21/10/alpine3.11/Dockerfile
 # 
 ENV NODE_VERSION 13.12.0
-
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN addgroup -g 1000 node \
     && adduser -u 1000 -G node -s /bin/sh -D node \
     && apk add --no-cache \
@@ -239,7 +239,11 @@ RUN mkdir /var/logs
 RUN touch /var/logs/supervisord.log
 RUN chmod a+rw /var/logs/supervisord.log
 ADD supervisord.conf /etc/supervisord.conf
-RUN apk add wqy-zenhei --update-cache --repository http://nl.alpinelinux.org/alpine/edge/testing --allow-untrusted
-
+ADD simhei.ttf /usr/share/fonts/
+ # Character Set
+ENV LANG en_US.UTF-8
+ # Install the font software
+RUN apk add ttf-dejavu fontconfig && rm -rf /var/cache/apk/*
+#RUN apk add wqy-zenhei --update-cache --repository http://nl.alpinelinux.org/alpine/edge/testing --allow-untrusted
 ENTRYPOINT  []
 CMD ["supervisord", "--nodaemon", "-c", "/etc/supervisord.conf"]
