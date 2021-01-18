@@ -8,12 +8,22 @@ function getVideoParams() {
     //   '-an',
     "-c:v",
     config.transCoding,
+    // "-map",
+    // "0",
     "-f",
     "segment",
     "-segment_time",
     config.videoTime,
-    "-segment_format",
-    "mp4",
+    // "-segment_format",
+    // "mp4",
+    "-segment_list",
+    config.basePath + "/record/" + config.streamChannel + "/mp4/vod-index.m3u8",
+    "-force_key_frames",
+    "expr:gte(t,n_forced*1)",
+    "-segment_format_options",
+    "movflags=+faststart",
+    "-reset_timestamps",
+    "1", 
     "-strict",
     "-2",
     // "-vf","scale=-1:320",
@@ -63,7 +73,7 @@ function getMotionParams() {
     // "copy",
     "-f",
     "hls",
-    //   "-s","320x240",
+    // "-s","320x240",
     "-hls_time",
     "3",
     "-hls_list_size",
@@ -75,7 +85,7 @@ function getMotionParams() {
     "+delete_segments+omit_endlist",
     config.pathToHLS,
     /* output pam image that is used as source for motion detection analysis */
-    //    "-map",  "0:v",
+    "-map",  "0:v",
     "-an",
     "-c:v",
     "pam",
@@ -84,10 +94,10 @@ function getMotionParams() {
     config.pixFmt,
     "-f",
     "image2pipe",
-    "-vf",
-    "fps=2,scale=320:-1",
-    //'-frames',
-    //'1000',
+    '-vf',
+    'fps=1,scale=iw*1/6:ih*1/6',
+    '-frames',
+    '100',
     "pipe:1",
   ];
 }
@@ -190,6 +200,7 @@ function getTransParam() {
  */
 function getFlvParams() {
   return [
+
     "-preset",
     "medium",
     "-vprofile",
@@ -213,6 +224,8 @@ function getFlvParams() {
     // "19",
     "-c:v",
     getTransParam(),
+    "-c:a",
+    "aac",
     //      config.basePath+"/hls/" + config.streamChannel + "/480p/live.flv",
     "rtmp://localhost:1935/" + config.streamChannel + "/live"
   ];
