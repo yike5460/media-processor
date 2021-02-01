@@ -31,8 +31,9 @@
     "axios": "^0.21.1",
     "chalk": "^4.0.0",
     "lodash": "^4.17.19",
+    "node-media-server": "2.2.4",
     "redis": "^3.0.2",
-    "node-media-server": "2.2.4"
+    "silly-datetime": "^0.1.2"
   },
   "engines": {
     "node": ">=8.0.0"

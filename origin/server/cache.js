@@ -9,6 +9,7 @@ serverCache.on('error', (err) => {
   console.error(err);
 });
 const serverGet = promisify(serverCache.get).bind(serverCache);
+const smembers=promisify(serverCache.smembers).bind(serverCache);
 
 // Configure local cache.
 const localCache = new NodeCache();
@@ -19,7 +20,7 @@ const localCache = new NodeCache();
 const get = async (key) => {
   let value = localCache.get(key);
   if (_.isNil(value)) {
-    value = await serverGet(key);
+    value = await smembers(key);
     if (!_.isNil(value)) {
       localCache.set(key, value, 1);
     }

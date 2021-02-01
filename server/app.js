@@ -125,14 +125,14 @@ const init = async () => {
         //   eventName: "start",
         //   metaData: metaData,
         // };
-      //  await axios.get('http://localhost:8000/api/streams/stream/'+name, { timeout: 2000 })
-      //   .then(function (response) {
-      //     logger.log(response.data);
-      //   })
-      //   .catch(function (error) {
-      //     //invoke task stop
-      //     console.log("get api status error: " + error);
-      //   })
+        //  await axios.get('http://localhost:8000/api/streams/stream/'+name, { timeout: 2000 })
+        //   .then(function (response) {
+        //     logger.log(response.data);
+        //   })
+        //   .catch(function (error) {
+        //     //invoke task stop
+        //     console.log("get api status error: " + error);
+        //   })
         await startTasks(name, url, SERVER_ADDRESS, metaData).catch(error => console.log(error.message));
       }
     });
@@ -206,19 +206,17 @@ const init = async () => {
  */
 const removeCache = async (channelName, metaData) => {
   const isCluster = (metaData.isCluster || 'false') === 'true';
-  let clusterNumber = new Number(metaData.clusterNumber || '5');
-  clusterNumber--;
+  // let clusterNumber = new Number(metaData.clusterNumber || '5');
+  // clusterNumber--;
   logger.log("remove channel " + channelName + " from cache");
-  var channels = new Array();
-  channels.push(channelName);
   if (isCluster) {
-    for (let index = 0; index < clusterNumber; index++) {
-      channels.push(channelName + "-" + index)
-    }
+    const addressSets = await cache.smembers(channelName);
+    addressSets.forEach(async address => {
+      logger.log("remove address " + address + " from cache");
+      await cache.srem(channelName, address);
+    });
   }
-  channels.forEach(async channel => {
-    await cache.del(channel);
-  });
+  await cache.del(channelName);
 }
 /**
  * 
@@ -228,40 +226,41 @@ const removeCache = async (channelName, metaData) => {
  * @param {*} metaData 
  */
 const startTasks = async (channelName, inputURL, address, metaData) => {
-
-  const isCluster = (metaData.isCluster || 'false') === 'true';
-  let clusterNumber = new Number(metaData.clusterNumber || '5');
+  //is cluster model
+  const isCluster = String((metaData.isCluster || 'false')) === 'true';
+  let clusterNumber = new Number(metaData.clusterNumber || 2);
   clusterNumber--;
   var params = new Array();
-   params.push({
+  params.push({
     id: channelName,
     url: inputURL,
     address: address,
     eventName: "start",
     metaData: metaData,
     isMaster: 'true',//is a master task
+    isCluster: metaData.isCluster || 'false'
   });
   if (isCluster) {
-    for (let index = 0; index < clusterNumber; index++) {
-      const param = {
-        id: channelName + "-" + index,
-        url: inputURL,
-        address: address,
-        eventName: "start",
-        metaData: metaData,
-        isMaster: 'false',
-      };
-       params.push(param);
-    }
+    // for (let index = 0; index < clusterNumber; index++) {
+    const param = {
+      id: channelName,
+      url: inputURL,
+      address: address,
+      eventName: "start",
+      metaData: metaData,
+      isMaster: 'false',
+      isCluster: metaData.isCluster || 'true'
+    };
+    params.push(param);
   }
-  //  for (const param of params) {
-  //   await utils.timeout(2000);
-  //   await scheduler.invokeTask(param);
-  //  }
-   await params.forEach(async param => {
-    logger.log(param.id);
+  // }
+   for (const param of params) {
     await scheduler.invokeTask(param);
-  });
+   }
+  // await params.forEach(async param => {
+  //   logger.log(param.id);
+  //   await scheduler.invokeTask(param);
+  // });
 }
 /**
  * 
@@ -271,28 +270,28 @@ const startTasks = async (channelName, inputURL, address, metaData) => {
  */
 const stopTasks = async (channelName, inputURL, metaData) => {
 
-  const isCluster = (metaData.isCluster || 'false') === 'true';
-  let clusterNumber = new Number(metaData.clusterNumber || '5');
+  const isCluster = String((metaData.isCluster || 'false')) === 'true';
+  let clusterNumber = new Number(metaData.clusterNumber || 2);
   clusterNumber--;
   // logger.log("stop task:" + param.id);
   var params = new Array();
-   params.push({
+  params.push({
     id: channelName,
     url: inputURL,
     eventName: "stop",
   });
   if (isCluster) {
-    for (let index = 0; index < clusterNumber; index++) {
-      const param = {
-        id: channelName + "-" + index,
-        url: inputURL,
-        eventName: "stop",
-      };
-        params.push(param);
-    }
+    // for (let index = 0; index < clusterNumber; index++) {
+    const param = {
+      id: channelName,
+      url: inputURL,
+      eventName: "stop",
+    };
+    params.push(param);
   }
+  // }
   // for (const param of params) {
-    
+
   //   await scheduler.invokeTask(param);
   //  }
   await params.forEach(async param => {

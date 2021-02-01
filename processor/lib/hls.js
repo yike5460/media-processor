@@ -17,6 +17,7 @@ const on = (eventName, listener) => {
 };
 
 const VOD_APP_NAME = '720p';
+const FILE_PERMISSION = 'public-read'
 var rootDir='';
 
 // Function to create a unique VOD filename for each stream
@@ -53,7 +54,8 @@ const handlePlaylist = async (path, mediaRoot, streams, streamName, appName) => 
         Bucket: process.env.ASSETS_BUCKET||'video-streaming-assets-assetsbucket-1kf2tlxbhy4qz',
         Key: `${streamName}/${vodFilename}`,
         ContentType: 'application/x-mpegURL',
-        CacheControl: 'max-age=3600'
+        CacheControl: 'max-age=3600',
+        ACL: FILE_PERMISSION
       };
       await s3.putObject(params);
       
@@ -68,7 +70,8 @@ const handleSegment = async (path, mediaRoot) => {
     Bucket: bucket_name,
     Key: path,
     ContentType: 'video/MP2T',
-    CacheControl: 'max-age=31536000'
+    CacheControl: 'max-age=31536000',
+    ACL: FILE_PERMISSION
   };
   await s3.putObject(params);
 };
@@ -105,7 +108,6 @@ const onFile = async (absolutePath, type, mediaRoot, streams) => {
       const paths = _.split(path, '/');
       const streamName = _.nth(paths, 0);
       const appName = _.nth(paths, 1);
-
       if (_.isEqual(appName, VOD_APP_NAME)) {
       logger.log(`File ${path} has been ${type}`);
         // Only upload 720p
@@ -118,7 +120,7 @@ const onFile = async (absolutePath, type, mediaRoot, streams) => {
           appName);
       }
     }
-    if (_.endsWith(path, '.mp4')||_.endsWith(path, '.jpg')||_.endsWith(path, '.jpeg')) {
+    if (_.endsWith(path, '.mp4')||_.endsWith(path, '.jpg')||_.endsWith(path, '.jpeg')||_.endsWith(path, 'vod-index.m3u8')) {
       const paths = _.split(path, '/');
       const streamName = _.nth(paths, 0);
     //  logger.log(`File ${path} has been ${type}`);

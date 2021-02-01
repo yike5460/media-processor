@@ -23,7 +23,7 @@ function getVideoParams() {
     "-segment_format_options",
     "movflags=+faststart",
     "-reset_timestamps",
-    "1", 
+    "1",
     "-strict",
     "-2",
     // "-vf","scale=-1:320",
@@ -85,7 +85,7 @@ function getMotionParams() {
     "+delete_segments+omit_endlist",
     config.pathToHLS,
     /* output pam image that is used as source for motion detection analysis */
-    "-map",  "0:v",
+    "-map", "0:v",
     "-an",
     "-c:v",
     "pam",
@@ -102,6 +102,52 @@ function getMotionParams() {
   ];
 }
 
+
+function getLiveBasePath() {
+  if (config.isCluster)
+    return config.livePath + "/livestreaming/" + config.streamChannel
+  else
+    return config.basePath + "/livestreaming/" + config.streamChannel
+}
+
+function getMBRParam(code,w,h,bv,maxrate,bufsize,ba,filename){
+return [
+  '-vf', `scale=w=${w}:h=${h}:force_original_aspect_ratio=decrease`,
+  '-c:a', 'aac',
+  '-ar', '48000',
+  '-c:v', code,
+  '-profile:v', 'main',
+  '-crf', '20',
+  '-sc_threshold', '0',
+  '-g', '48',
+  '-keyint_min', '48',
+  '-hls_time', '4',
+  '-b:v', bv,
+  '-maxrate', maxrate,
+  '-bufsize', bufsize,
+  '-b:a', ba,
+  '-hls_segment_filename' ,
+  `${getLiveBasePath()}/${filename}_%03d.ts`, 
+  `${getLiveBasePath()}/${filename}.m3u8`
+]
+}
+
+function getMBRParams() {
+  let params=new Array();
+  params=params.concat(getMBRParam('libx264','640','360','800k','856k','1200k','96k','360p'));
+  // params=params.concat(getMBRParam('842','480','1400k','1498k','2100k','128k','480p'));
+  //params= params.concat(getMBRParam('1280','720','2800k','2996k','4200k','128k','720p'));
+  // params=params.concat(getMBRParam('1920','1080','5000k','5350k','7500k','192k','1080p'));
+  params=params.concat ([
+    '-f', 'hls',
+    '-hls_time', '2',
+    '-hls_list_size', '5',
+    '-hls_flags', 'independent_segments',
+    '-hls_segment_type', 'mpegts',
+    '-remove_at_exit', '1',
+  ]);
+  return params;
+}
 /**
  * get HLS params
  * @returns {(string|*|number)[]}
@@ -114,8 +160,9 @@ function getHLSParams() {
     // '-codec:a', 'mp3',
     '-profile:v',
     'main',
-    '-level',
-    '3.0',
+    '-lhls', '1',
+    '-streaming', '1',
+    '-hls_playlist', '1',
     "-hls_init_time", "1",
     "-preset", "veryfast",
     "-tune",
@@ -137,16 +184,36 @@ function getHLSParams() {
     "-strict",
     "-2",
     "-hls_segment_filename",
-    config.basePath + "/hls/" + config.streamChannel + "/480p/%03d.ts",
-    config.basePath + "/hls/" + config.streamChannel + "/480p/index.m3u8"
+    getLiveBasePath() + "/480p/%03d.ts",
+    getLiveBasePath() + "/480p/index.m3u8"
   ];
 }
 
+function getCMAFParams() {
+  return [
+    '-c:v', 'copy',
+    '-b:v', '500k',
+    '-ldash', '1',
+    '-adaptation_sets', 'id=0,streams=v id=1,streams=a',
+    '-streaming', '1',
+    '-use_template', '1',
+    '-use_timeline', '0',
+    '-seg_duration', '4',
+    '-remove_at_exit', '1',
+    '-window_size', '5',
+    '-hls_playlist', '1',
+    "-tune", "zerolatency",
+    '-f', 'dash',
+    // "-strict",
+    // "-2",
+    getLiveBasePath() + "/manifest.mpd",
+  ];
+}
 /**
  * get cmaf params
  * @returns {string[]}
  */
-function getCMAFParams() {
+function getCMAF1Params() {
   return [
     '-map', '0',
     '-map', '0',
@@ -155,14 +222,14 @@ function getCMAFParams() {
     '-map', '0',
     '-c:a', 'aac',
     '-c:v', 'libx264',
-    '-b:v:0', '800k',
+    '-b:v:0', '1000k',
     '-s:v:0', '1280x720',
     '-profile:v:0', 'main',
-    '-b:v:1', '500k',
-    '-s:v:1', '720x576',
+    '-b:v:1', '800k',
+    '-s:v:1', '960x540',
     '-profile:v:1', 'main',
-    '-b:v:2', '300k',
-    '-s:v:2', '320x170',
+    '-b:v:2', '500k',
+    '-s:v:2', '640x360',
     '-profile:v:2', 'main',
     // '-bf', '1',
     // '-keyint_min', '120',
@@ -170,12 +237,13 @@ function getCMAFParams() {
     '-sc_threshold', '0',
     '-b_strategy', '0',
     // '-ar:a:1', '22050',
-    '-use_timeline', '1',
+    '-use_timeline', '0',
     '-use_template', '1',
     '-window_size', '5',
     '-adaptation_sets', 'id=0,streams=v id=1,streams=a',
     '-hls_playlist', '1',
-    // "-tune", "zerolatency",
+    "-tune", "zerolatency",
+    // '-min_seg_duration','10000000', 
     // "-flags","low_delay",
     '-seg_duration', '4',
     '-streaming', '1',
@@ -183,7 +251,7 @@ function getCMAFParams() {
     '-f', 'dash',
     // "-strict",
     // "-2",
-    config.basePath + "/hls/" + config.streamChannel + "/manifest.mpd",
+    getLiveBasePath() + "/manifest.mpd",
   ];
 }
 
@@ -205,6 +273,8 @@ function getFlvParams() {
     "medium",
     "-vprofile",
     "baseline",
+    // "-profile:v",
+    // "basline",
     "-fflags",
     "nobuffer",
     "-f",
@@ -224,8 +294,8 @@ function getFlvParams() {
     // "19",
     "-c:v",
     getTransParam(),
-    "-c:a",
-    "aac",
+    // "-c:a",
+    // "aac",
     //      config.basePath+"/hls/" + config.streamChannel + "/480p/live.flv",
     "rtmp://localhost:1935/" + config.streamChannel + "/live"
   ];
@@ -311,7 +381,24 @@ getParams = function () {
   return params;
 };
 
-
+getFLVParams = function () {
+  var params = [
+    "-loglevel",
+    config.logLevel,
+    /* use hardware acceleration */
+    "-hwaccel",
+    "auto", //vda, videotoolbox, none, auto
+    "-abort_on",
+    "empty_output",
+    "-i",
+    // 'rtsp://freja.hiof.no:1935/rtplive/definst/hessdalen03.stream',
+    config.inputURL,
+  ];
+  if (config.isWatermark) params = params.concat(getWatermark());
+  params = params.concat(getFlvParams());
+  logger.log("----ffmpeg flv params:" + params);
+  return params;
+}
 
 getLiveParams = function () {
   var params = [
@@ -328,7 +415,6 @@ getLiveParams = function () {
   ];
   if (config.isWatermark) params = params.concat(getWatermark());
   if (config.isLive) params = params.concat(getHLSParams());
-  if (config.isFLV) params = params.concat(getFlvParams());
   if (config.isCMAF) params = params.concat(getCMAFParams());
   // params=params.concat(['-y', 'pipe:1']);
 
@@ -370,8 +456,11 @@ getRelayParams = function () {
   return params;
 }
 
+
+
 module.exports = {
   getParams,
   getLiveParams,
+  getFLVParams,
   getRelayParams
 };

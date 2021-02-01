@@ -1,34 +1,30 @@
-const config = require("./lib/config");
 const _ = require("lodash");
 const axios = require('axios');
 const ejs = require("ejs");
 const fs = require("fs");
+const NodeMediaServer = require("node-media-server");
+const { exec } = require('child_process');
 const CP = require("child_process");
+const config = require("./lib/config");
+const db = require("./lib/db");
 const hls = require("./lib/hls");
 const abr = require("./lib/abr");
 const ecs = require("./lib/ecs");
 const cache = require("./lib/cache");
 const logger = require("./lib/logger");
+const fsTool = require("./lib/fs");
 const motionDetect = require("./lib/motion");
 const options = require("./lib/ffmpeg");
 const path = require("path");
-const NodeMediaServer = require("node-media-server");
 const spawn = CP.spawn;
+const RETRY_THRESHOLD = 10;
 
-const generateTemplate = async () => {
-  const channel = config.inputURL.split("/").pop();
-  console.log(JSON.stringify(process.argv));
-  const templateFile = "flv.template";
-  const outputFile =
-    config.basePath + "/hls/" + config.streamChannel + "/flv.html";
-  const template = fs.readFileSync(templateFile, "utf8");
-  //console.log(template);
-  const output = ejs.render(template, { channel }, {});
-  //console.log('output-------'+output);
-  fs.writeFileSync(outputFile, output);
-};
+//live streaming  path
+const liveStreamingPath = config.isCluster ?
+  config.livePath + "/livestreaming/" + config.streamChannel + "/" :
+  config.basePath + "/livestreaming/" + config.streamChannel + "/";
 
-//
+//node media server param
 const nmsConfig = {
   rtmp: {
     port: 1935,
@@ -43,40 +39,19 @@ const nmsConfig = {
   },
 };
 
-
-const init = async () => {
+var SERVER_ADDRESS;
+/**
+ * init video processor function 
+ */
+const initServer = async () => {
   try {
-    const SERVER_ADDRESS =
-      process.env.NODE_ENV === "production" ? await ecs.getServer() : "";
+    SERVER_ADDRESS = process.env.NODE_ENV === "production" ? await ecs.getServer() : "";
+    await initRecordResources();
+    await initLiveResources();
+    //reload nginx
+    if (config.isCluster)
+      await generateNginxConf();
 
-    await mkdirsSync(config.basePath + "/hls/" + config.streamChannel + "/480p");
-    await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/720p");
-    await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/mp4");
-    await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/images");
-    await mkdirsSync(
-      config.basePath + "/record/" + config.streamChannel + "/motion/images"
-    );
-    await mkdirsSync(
-      config.basePath + "/record/" + config.streamChannel + "/motion/mp4"
-    );
-
-    await fs.copyFileSync(
-      "index.html",
-      config.basePath + "/hls/" + config.streamChannel + "/index.html"
-    );
-
-
-      await fs.copyFileSync(
-        "hls.html",
-        config.basePath + "/hls/" + config.streamChannel + "/hls.html"
-      );
-      await fs.copyFileSync(
-        "dash.html",
-        config.basePath + "/hls/" + config.streamChannel + "/dash.html"
-      );
-  
-      await generateTemplate();
-  
     const motion = config.isMotion;
     let p2p;
     let pd;
@@ -84,41 +59,62 @@ const init = async () => {
     p2p = result.p2p;
     pd = result.pd;
     //start flv server
-    if (config.isFLV) {
+   // if (config.isFLV) {
       var nms = new NodeMediaServer(nmsConfig);
       nms.run();
-    }
-    //
+    //}
+
     if (config.isMaster) {
       if (config.isImage || config.isMotion || config.isVideo || config.isOnDemand) {
-        logger.log('start recording process');
+        logger.log('start recording process on master task');
         await runRecordProcess(motion, p2p, pd);
         this.streams = new Map();
         this.streams.set(config.streamChannel, Date.now());
         // Start the VOD S3 file watcher and sync.
         await hls.monitorDir(config.basePath, this.streams);
       }
+      if (config.IS_RELAY) {
+        logger.log('*** start relay process on master task ***');
+        await runRelayProcess();
+      }
+      if (config.isLive || config.isCMAF) {
+        logger.log('********* start hls live streaming process on master task*********');
+        await runLiveProcess(options.getLiveParams());
+        await abr.createPlaylist(config.isCluster ? config.livePath + "/livestreaming" : config.basePath + "/livestreaming",
+          config.streamChannel);
+      }
+      if (config.isFLV) {
+        if (!config.isCluster) {
+          logger.log('********* start flv live streaming process on master task *********');
+          await runLiveProcess(options.getFLVParams());
+          await axios.get('http://localhost:8000/api/server', { timeout: 2000 })
+            .then(function (response) {
+              logger.log(response.data);
+            })
+            .catch(function (error) {
+              //invoke task stop
+              logger.log("get api status error: " + error);
+            })
+        }
+      }
     }
-    if (config.IS_RELAY) {
-      logger.log('start relay process');
-      await runRelayProcess();
+    else {
+      if (config.isFLV) {
+        logger.log('********* start flv live streaming process on slave task *********');
+        await runLiveProcess(options.getFLVParams());
+        await axios.get('http://localhost:8000/api/server', { timeout: 2000 })
+          .then(function (response) {
+            logger.log(response.data);
+          })
+          .catch(function (error) {
+            //invoke task stop
+            logger.log("get api status error: " + error);
+          })
+      }
     }
-     
     if (config.isFLV || config.isLive || config.isCMAF) {
-      logger.log('*** start live process ***');
-      await runLiveProcess();
-      await abr.createPlaylist(config.basePath + "/hls", config.streamChannel);
-      logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
       //add channel and ip to cache
-      await cache.set(config.streamChannel, SERVER_ADDRESS);
-      await axios.get('http://localhost:8000/api/server', { timeout: 2000 })
-        .then(function (response) {
-          logger.log(response.data);
-        })
-        .catch(function (error) {
-          //invoke task stop
-          console.log("get api status error: " + error);
-        })
+      await addChannel();
     }
 
   } catch (err) {
@@ -127,34 +123,45 @@ const init = async () => {
   }
 };
 
-init();
+initServer();
 
+
+let retryLiveCount = 1;
 /**
  * 
  * @param {*} spawn 
  */
-const runLiveProcess = async () => {
-  // function runLiveProcess() {
-  const liveProcess = spawn("ffmpeg", options.getLiveParams(), {
+const runLiveProcess = async (params) => {
+
+  //const params = options.getLiveParams();
+  const liveProcess = spawn("ffmpeg", params, {
     stdio: ["pipe", "pipe", "pipe"],
   });
+
   liveProcess.on("data", function (data) {
     logger.log("ffmpeg2 PARENT got message:", JSON.stringify(data));
   });
 
-  liveProcess.on("exit", function (code, signal) {
-    //logger.log("waiting 30s to restart live process");
-    var serverStatus;
+  liveProcess.on("exit", function async(code, signal) {
+    logger.log("Exit live process params:"+params);
     const serverUrl = 'http://' + config.address + ':8000/api/server';
     console.log("Checking Server Status...");
     // Make a request for a user with a given ID
     axios.get(serverUrl, { timeout: 2000 })
       .then(function (response) {
-        logger.log("check status success,waiting 30s to restart live process");
-        setTimeout(runLiveProcess, config.retryTimeout);
+        logger.log("Check status success,waiting 30s to restart live process");
+        if (retryLiveCount === RETRY_THRESHOLD) {
+          return new Error(error);
+        }    
+        retryLiveCount++;
+        //initLiveResources();
+        setTimeout(runLiveProcess, config.retryTimeout,params);
       })
       .catch(function (error) {
         //invoke task stop
+        clearResources();
+        if(config.isMaster)
+        db.deleteItem(config.streamChannel);
         ecs.shutdown();
         console.log("check status false,ffmpeg stream exit with code " + code);
       })
@@ -166,8 +173,9 @@ const runLiveProcess = async () => {
 
   liveProcess.on("close", function (code) {
     //stop task
+    fsTool.rmdirSync(liveStreamingPath);
     // setTimeout(runLiveProcess, config.retryTimeout);
-    console.log("ffmpeg stream closed with code " + code);
+    logger.log("ffmpeg stream closed with code " + code);
   });
 
   liveProcess.stderr.on("data", function (data) {
@@ -186,7 +194,7 @@ const runLiveProcess = async () => {
  * @param {*} p2p 
  * @param {*} pd 
  */
-const runRecordProcess= async (motion, p2p, pd) => {
+const runRecordProcess = async (motion, p2p, pd) => {
   const ffmpeg = spawn("ffmpeg", options.getParams(), {
     stdio: ["pipe", "pipe", "pipe"],
   });
@@ -239,20 +247,7 @@ const runRelayProcess = async () => {
 
   relayProcess.on("exit", function (code, signal) {
     //logger.log("waiting 30s to restart live process");
-    var serverStatus;
-    const serverUrl = 'http://' + config.address + ':8000/api/server';
-    console.log("Checking Server Status...");
-    // Make a request for a user with a given ID
-    axios.get(serverUrl, { timeout: 2000 })
-      .then(function (response) {
-        logger.log("check status success,waiting 30s to restart live process");
-        setTimeout(runLiveProcess, config.retryTimeout);
-      })
-      .catch(function (error) {
-        //invoke task stop
-        ecs.shutdown();
-        console.log("check status false,ffmpeg stream exit with code " + code);
-      })
+    console.log("relay process exit......");
   });
 
   relayProcess.on("error", function (err) {
@@ -260,8 +255,7 @@ const runRelayProcess = async () => {
   });
 
   relayProcess.on("close", function (code) {
-    //stop task
-    // setTimeout(runLiveProcess, config.retryTimeout);
+
     console.log("ffmpeg relay stream closed with code " + code);
   });
 
@@ -275,6 +269,35 @@ const runRelayProcess = async () => {
   relayProcess.stdout;
 }
 
+async function initRecordResources() {
+  await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/720p");
+  await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/mp4");
+  await mkdirsSync(config.basePath + "/record/" + config.streamChannel + "/images");
+  await mkdirsSync(
+    config.basePath + "/record/" + config.streamChannel + "/motion/images"
+  );
+  await mkdirsSync(
+    config.basePath + "/record/" + config.streamChannel + "/motion/mp4"
+  );
+}
+
+async function initLiveResources() {
+  await mkdirsSync(liveStreamingPath + "480p");
+  await fs.copyFileSync(
+    "index.html",
+    liveStreamingPath + "index.html"
+  );
+  await fs.copyFileSync(
+    "hls.html",
+    liveStreamingPath + "hls.html"
+  );
+  await fs.copyFileSync(
+    "dash.html",
+    liveStreamingPath + "dash.html"
+  );
+  await generateFLVTemplate();
+}
+
 function mkdirsSync(dirname) {
   if (fs.existsSync(dirname)) {
     return true;
@@ -285,3 +308,60 @@ function mkdirsSync(dirname) {
     }
   }
 }
+const clearResources = async () => {
+  //clear hls files
+  console.log("remove dir:" + liveStreamingPath);
+  await fsTool.rmdirSync(liveStreamingPath);
+  console.log("remove cache from channel:" + config.streamChannel);
+  await cache.srem(config.streamChannel, SERVER_ADDRESS)
+}
+
+const addChannel = async () => {
+  if (!config.isCluster) {
+    logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
+    await cache.sadd(config.streamChannel, SERVER_ADDRESS);
+  }
+  else {
+    if (!config.isMaster) {
+      logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
+      await cache.sadd(config.streamChannel, SERVER_ADDRESS);
+    }
+  }
+}
+
+const generateFLVTemplate = async () => {
+  const channel = config.streamChannel;
+  console.log(JSON.stringify(process.argv));
+  const templateFile = "flv.template";
+  const outputFile =
+    liveStreamingPath + "flv.html";
+  const template = fs.readFileSync(templateFile, "utf8");
+  //console.log(template);
+  const output = ejs.render(template, { channel }, {});
+  //console.log('output-------'+output);
+  fs.writeFileSync(outputFile, output);
+};
+
+const generateNginxConf = async () => {
+  // const channel = config.inputURL.split("/").pop();
+  // console.log(JSON.stringify(process.argv));
+  // const templateFile = "nginx.conf.template";
+  // const outputFile = config.nginxConf;
+  // const template = fs.readFileSync(templateFile, "utf8");
+  // //console.log(template);
+  // const output = ejs.render(template, { channel }, {});
+  // fs.writeFileSync(outputFile, output);
+
+  await mkdirsSync(liveStreamingPath + "480p");
+  await fs.copyFileSync(
+    "nginx.conf.cluster", config.nginxConf
+  );
+  exec('/usr/sbin/nginx -s reload', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec nginx error: ${error}`);
+      return;
+    }
+    console.log(`${stdout}`);
+    console.log(`${stderr}`);
+  });
+};

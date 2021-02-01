@@ -55,8 +55,6 @@ http {
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 1s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-
-      include /etc/nginx/nginx.cors.conf;
       proxy_pass http://node-backend/$1$is_args$args;
     }
 
@@ -67,8 +65,7 @@ http {
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 60s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-      include /etc/nginx/nginx.cors.conf;
-      proxy_pass http://node-backend/$1$is_args$args;
+       proxy_pass http://node-backend/$1$is_args$args;
     }
     
     location ~ ^/(.*\.m4s)$ {
@@ -77,8 +74,7 @@ http {
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 60s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-      include /etc/nginx/nginx.cors.conf;
-      proxy_pass http://node-backend/$1$is_args$args;
+       proxy_pass http://node-backend/$1$is_args$args;
     }
 
     location ~ ^/(.*\.mpd)$ {
@@ -87,8 +83,7 @@ http {
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 1s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-      include /etc/nginx/nginx.cors.conf;
-      proxy_pass http://node-backend/$1$is_args$args;
+       proxy_pass http://node-backend/$1$is_args$args;
     }
 
       location ~ ^/(.*\.html)$ {
@@ -97,21 +92,16 @@ http {
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 600s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-      include /etc/nginx/nginx.cors.conf;
-      proxy_pass http://node-backend/$1$is_args$args;
+       proxy_pass http://node-backend/$1$is_args$args;
     }
 
     location ~ ^/(.*\.flv)$ {
-      add_header Content-Type "video/x-flv";
-      add_header Connection "close";
-      add_header Cache-Control "no-cache";
       proxy_cache CONTENTCACHE;
       proxy_cache_lock on;
       proxy_cache_key $scheme$proxy_host$uri;
-      proxy_cache_valid 1s;
+      proxy_cache_valid 3s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-    include /etc/nginx/nginx.cors.conf;
-    proxy_pass http://node-backend/$1$is_args$args;
+     proxy_pass http://node-backend/$1$is_args$args;
     }
     location ~ ^/(.*\.js)$ {
       proxy_cache CONTENTCACHE;
@@ -119,8 +109,7 @@ http {
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 600s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-      include /etc/nginx/nginx.cors.conf;
-      proxy_pass http://node-backend/$1$is_args$args;
+       proxy_pass http://node-backend/$1$is_args$args;
     }
 
     location / {
@@ -129,8 +118,7 @@ http {
       proxy_cache_key $scheme$proxy_host$uri;
       proxy_cache_valid 60s;
       proxy_cache_use_stale error timeout invalid_header updating http_500 http_502 http_503 http_504;
-      include /etc/nginx/nginx.cors.conf;
-      proxy_pass http://node-backend;
+       proxy_pass http://node-backend;
     }
 
     location /healthcheck {

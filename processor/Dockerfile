@@ -1,5 +1,7 @@
-FROM jrottenberg/ffmpeg:4.1-alpine
+FROM alfg/ffmpeg
 
+# Update apk
+RUN apk update
 #
 # node setup
 # From https://github.com/nodejs/docker-node/blob/d071b895dd1b8da6c566f45b971825fe5b087b21/10/alpine3.11/Dockerfile
@@ -214,6 +216,7 @@ RUN apk add --no-cache tzdata \
 #
 # App setup
 #
+
 RUN apk add --no-cache supervisor
 
 WORKDIR /usr/src/app

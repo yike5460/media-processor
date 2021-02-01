@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require("path")
 
 const functions = {};
 
@@ -23,7 +24,7 @@ functions.readFile = (file) => new Promise((resolve, reject) => {
   });
 });
 
-functions.createReadStream = (file) => 
+functions.createReadStream = (file) =>
   fs.createReadStream(file);
 
 functions.rename = (oldPath, newPath) => new Promise((resolve, reject) => {
@@ -47,32 +48,34 @@ functions.unlink = (file) => new Promise((resolve, reject) => {
   });
 });
 
+
+
+
 functions.rmdirSync = (path) => {
-  if( fs.existsSync(path) ) {
-    fs.readdirSync(path).forEach(function(file,index){
-      var curPath = path + "/" + file;
-      if(fs.lstatSync(curPath).isDirectory()) { // recurse
-        functions.rmdirSync(curPath);
-      } else { // delete file
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
+  if (fs.existsSync(path)) {
+    try {
+      console.log(`begin to delete ${path}!`);
+      fs.rmdirSync(path, { recursive: true });
+      console.log(`${path} is deleted!`);
+    } catch (err) {
+      console.error(`Error while deleting ${path}.`);
+    }
   }
 };
 
 
-functions.rmFile= (path) => {
-  console.log('---delete file'+path);
-  if( fs.existsSync(path) ) {
-    fs.unlinkSync(path,function(error){
-      if(error){
-          console.log(error);
-          return false;
+functions.rmFile = (path) => {
+  console.log('---delete file' + path);
+  if (fs.existsSync(path)) {
+    fs.unlinkSync(path, function (error) {
+      if (error) {
+        console.log(error);
+        return false;
       }
-      console.log('---delete file'+path);
-  })
-}}
+      console.log('---delete file' + path);
+    })
+  }
+}
 
 functions.exists = (file) => new Promise((resolve) => {
   fs.access(file, fs.constants.F_OK, (err) => {

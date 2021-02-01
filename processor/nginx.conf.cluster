@@ -39,40 +39,40 @@ http {
       add_header Cache-Control "no-cache";
       add_header 'Access-Control-Allow-Origin' '*';
       add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS';
-      root /media/<%= channel%>;
+      root /media/livestreaming;
     }
 
     location ~ \.html {
       add_header Cache-Control "max-age=600";
-      root /media/<%= channel%>;
+      root /media/livestreaming;
     }
 
     location ~ \.js {
       add_header Cache-Control "max-age=600";
       add_header 'Access-Control-Allow-Origin' '*';
       add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS';
-      root /media/<%= channel%>;
+      root /media/livestreaming;
     }
 
     location ~ \.ts {
       add_header Cache-Control "max-age=600";
       add_header 'Access-Control-Allow-Origin' '*';
       add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS';
-      root /media/<%= channel%>;
+      root /media/livestreaming;
     }
 
     location ~ \.m4s {
       add_header Cache-Control "max-age=600";
       add_header 'Access-Control-Allow-Origin' '*';
       add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS';
-      root /media/<%= channel%>;
+      root /media/livestreaming;
     }
 
     location ~ \.mpd {
       add_header Cache-Control "no-cache";
       add_header 'Access-Control-Allow-Origin' '*';
       add_header 'Access-Control-Allow-Methods' 'GET,POST,OPTIONS';
-      root /media/<%= channel%>;
+      root /media/livestreaming;
     }
 
     location /nginx_status {

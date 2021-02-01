@@ -1,18 +1,21 @@
 module.exports = Object.freeze({
   inputURL: process.env.INPUT_URL || "rtmp://58.200.131.2:1935/livetv/natlgeo",
   basePath: process.env.NODE_ENV === "production" ? "/dev/shm" : "media",
+  livePath:process.env.NODE_ENV === "production" ? "/media" : "media",
+  nginxConf:process.env.NODE_ENV === "production" ? "/etc/nginx/nginx.conf" : "nginx.conf",
+  
   streamChannel: process.env.CHANNEL_NAME || "natlgeo",
 
   address: process.env.ADDRESS || "127.0.0.1",
-  isMaster: (process.env.IS_MASTER || 'false')=== 'true',
-
+  isMaster: (process.env.IS_MASTER || 'true')=== 'true',
+  isCluster: (process.env.IS_CLUSTER || 'false')=== 'true',
   pathToHLS: (process.env.NODE_ENV === "production" ? "/dev/shm" : "media") + "/index.m3u8",
   channel: process.env.CHANNEL || 'test05',
   isMotion: (process.env.IS_MOTION || 'false')=== 'true',
-  isVideo: (process.env.IS_VIDEO || 'true')=== 'true',
+  isVideo: (process.env.IS_VIDEO || 'false')=== 'true',
   isImage: (process.env.IS_IMAGE|| 'false')=== 'true' ,
   isOnDemand: (process.env.IS_ONDEMAND || 'false')=== 'true',
-  isLive: (process.env.IS_HLS || 'false')=== 'true',
+  isLive: (process.env.IS_HLS || 'true')=== 'true',
   isFLV: (process.env.IS_FLV || 'false')=== 'true',
   isCMAF: (process.env.IS_CMAF || 'false')=== 'true',
 

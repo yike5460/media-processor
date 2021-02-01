@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 let dynamo = new AWS.DynamoDB.DocumentClient();
 
-const TABLE_NAME = 'ip-camera';
+const TABLE_NAME = process.env.TABLE_NAME || "video-streaming";
 
 module.exports.initializateDynamoClient = newDynamo => {
 	dynamo = newDynamo;
@@ -26,7 +26,7 @@ module.exports.saveItem = item => {
 module.exports.getItem = itemId => {
 	const params = {
 		Key: {
-			deviceUUID: itemId
+			UUID: itemId
 		},
 		TableName: TABLE_NAME
 	};
@@ -40,17 +40,15 @@ module.exports.getItem = itemId => {
 			return error;
 		});
 };
-
-module.exports.deleteItem = itemId => {
-	const params = {
-		Key: {
-			deviceUUID: itemId
-		},
-		TableName: TABLE_NAME
-	};
-
-	return dynamo.delete(params).promise();
-};
+module.exports.deleteItem=(itemId)=> {
+    const params = {
+        Key: {
+            UUID: itemId
+        },
+        TableName: TABLE_NAME
+    };
+    return dynamo.delete(params).promise();
+}
 
 module.exports.updateItem = (itemId, item) => {
 	
@@ -77,7 +75,7 @@ module.exports.updateItem = (itemId, item) => {
 	const params = {
 		TableName: TABLE_NAME,
 		Key: {
-			deviceUUID: itemId
+			UUID: itemId
 		},
 		ConditionExpression: 'attribute_exists(deviceUUID)',
 		UpdateExpression: updateexp,
