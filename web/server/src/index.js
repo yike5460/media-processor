@@ -11,6 +11,7 @@ const region = process.env.AWS_REGION || "cn-northwest-1";
 
 const ddb = new AWS.DynamoDB.DocumentClient({ region: region });
 const tableName = "video-metadata";
+const onlineTableName="video-streaming";
 // Constants
 const PORT = process.env.PORT || 8080;
 const HOST = '0.0.0.0';
@@ -30,6 +31,23 @@ app.use('/login', (req, res) => {
   res.send({
     token: 'test123'
   });
+});
+
+app.get('/videostreams/online', async (req, res) => {
+  res.set('Content-Type', 'application/json');
+  //  console.info('received:', event);
+  var params = {
+    TableName: onlineTableName
+  };
+  const data = await ddb.scan(params).promise();
+  const items = data.Items;
+
+  const response = {
+    statusCode: 200,
+    data: items
+  };
+  console.log(response);
+  res.send(response);
 });
 // API
 app.get('/videostreams', async (req, res) => {
@@ -128,7 +146,7 @@ const updateItem = async (itemId, item,res) => {
   }
 
  // console.log("update expression and expressionAttributeValues");
- console.log(updateexp, expattvalues);
+ //console.log(updateexp, expattvalues);
 
   const params = {
     TableName: tableName,

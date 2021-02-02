@@ -14,7 +14,9 @@ class Player extends React.Component {
                     controls
                     config={{
                         file: {
-
+                            enableWorker: true,
+                            enableStashBuffer: false,
+                            stashInitialSize: 128,
                         },
                       }}
                 />

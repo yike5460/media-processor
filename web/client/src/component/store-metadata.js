@@ -23,10 +23,13 @@ function App() {
     //   }},
     { title: "名称", field: "videoname" },
     { title: "截图", field: "isImage", type: 'boolean', initialEditValue: false, render: rowData => rowData.isImage === true ? <Switch size="small" checked={true}/> : <Switch size="small" checked={false}/> },
-    { title: "视频录制", field: "isVideo", type: 'boolean', initialEditValue: false, render: rowData => rowData.isVideo === true ? <Switch size="small" checked={true}/> : <Switch size="small" checked={false}/> },
-    { title: "HLS点播", field: "isOnDemand", type: 'boolean', initialEditValue: false, render: rowData => rowData.isOnDemand === true ?<Switch size="small" checked={true}/> : <Switch size="small" checked={false}/> },
+    { title: "MP4录制", field: "isVideo", type: 'boolean', initialEditValue: false, render: rowData => rowData.isVideo === true ? <Switch size="small" checked={true}/> : <Switch size="small" checked={false}/> },
+    { title: "HLS录制", field: "isOnDemand", type: 'boolean', initialEditValue: false, render: rowData => rowData.isOnDemand === true ?<Switch size="small" checked={true}/> : <Switch size="small" checked={false}/> },
     { title: "截图频率", field: "image_time", type: 'numeric', initialEditValue: '30' },
-    { title: "视频录制频率", field: "video_time", type: 'numeric', initialEditValue: '60' },
+    { title: "MP4录制频率", field: "video_time", type: 'numeric', initialEditValue: '60' },
+    { title: "HLS录制输出频率", field: "ondemand_time", type: 'numeric', initialEditValue: '60' },
+    { title: "HLS录制文件数量", field: "ondemand_list_size", type: 'numeric', initialEditValue: '1' },
+
   ]
   const [data, setData] = useState([]); //table data
   //for error handling

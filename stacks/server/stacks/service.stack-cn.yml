@@ -57,7 +57,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Ref AWS::StackName
-      RetentionInDays: 365
+
 
   # Task Role
   TaskRole:

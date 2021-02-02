@@ -65,6 +65,13 @@ logger "red" "*** create assets ***"
 logger "red" "*** create assets succeed ***"
 }
 
+efs()
+{
+logger "red" "*** create efs ***"
+./stack-up.sh efs 
+logger "red" "*** create efs succeed ***"
+}
+
 dynamodb()
 {
 logger "red" "*** create dynamodb ***"
@@ -134,6 +141,7 @@ main() {
 welcome
 vpc
 assets
+efs
 dynamodb
 security
 redis
@@ -143,7 +151,7 @@ proxy
 processor
 server
 origin
-#web
+web
 }
 
 main

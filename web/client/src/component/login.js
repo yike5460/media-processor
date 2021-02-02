@@ -123,7 +123,7 @@ export default function Login({ setToken }) {
     }, [state.username, state.password]);
 
     const handleLogin = async (e) => {
-        e.preventDefault();
+      //  e.preventDefault();
         if (state.username === 'admin' && state.password === 'admin') {
             //   const  username=state.username;
             //   const  password=state.password;

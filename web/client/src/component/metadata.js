@@ -4,8 +4,9 @@ import Grid from '@material-ui/core/Grid'
 import MaterialTable from "material-table";
 import Refresh from '@material-ui/icons/Refresh';
 import AccountCircle from '@material-ui/icons/AccountCircle';
- import List from '@material-ui/core/List';
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
@@ -13,13 +14,15 @@ import ImageIcon from '@material-ui/icons/Image';
 import axios from 'axios'
 import Alert from '@material-ui/lab/Alert';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
-import 'react-tabs/style/react-tabs.css';
-import Iframe from 'react-iframe'
 import Player from './player';
 import ClapprPlayer from './clappr-player';
 import Switch from '@material-ui/core/Switch';
 import tableIcons from './tableIcon'
-
+import QRCode from 'qrcode.react';
+import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
+import Link from '@material-ui/core/Link';
+import Button from '@material-ui/core/Button';
 
 
 const api = axios.create({
@@ -28,6 +31,7 @@ const api = axios.create({
 
 
 function App() {
+  const preventDefault = (event: React.SyntheticEvent) => event.preventDefault();
   var columns = [
     // {title: "视频流ID", field: "id",editable: 'never',cellStyle:{backgroundColor: "green" }},
     // {title: "签名KEY",  field: "key",editable: 'never',      headerStyle: {
@@ -39,9 +43,9 @@ function App() {
     { title: "推流域名", field: "pushDNS" },
     { title: "播放域名", field: "pullDNS" },
     { title: "过期时间", field: "outdate", type: 'date' },
-    { title: "FLV输出", field: "isFlv", type: 'boolean', initialEditValue: true, render: rowData => rowData.isFlv === true ?   <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
-    { title: "HLS输出", field: "isHls", type: 'boolean', initialEditValue: false, render: rowData => rowData.isHls === true ?   <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
-    { title: "CMAF输出", field: "isCMAF", type: 'boolean', render: rowData => rowData.isCMAF === true ?   <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
+    { title: "FLV输出", field: "isFlv", type: 'boolean', initialEditValue: true, render: rowData => rowData.isFlv === true ? <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
+    { title: "HLS输出", field: "isHls", type: 'boolean', initialEditValue: false, render: rowData => rowData.isHls === true ? <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
+    { title: "CMAF输出", field: "isCMAF", type: 'boolean', render: rowData => rowData.isCMAF === true ? <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
     { title: "HLS输出数量", field: "hls_list_size", type: 'numeric', initialEditValue: '6' },
     { title: "HLS输出频率", field: "hls_time", type: 'numeric', initialEditValue: '3' },
   ]
@@ -162,7 +166,6 @@ function App() {
   }
 
   const handleRowDelete = (oldData, resolve) => {
-
     api.delete("/videostreams/" + oldData.id)
       .then(res => {
         const dataDelete = [...data];
@@ -251,6 +254,11 @@ function App() {
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText primary="推流地址:" secondary={`rtmp://${rowData.pushDNS}:1935/stream/${rowData.id}?sign=${rowData.key}`} />
+                          <QRCode
+                            value={`rtmp://${rowData.pushDNS}:1935/stream/${rowData.id}?sign=${rowData.key}`}   //value参数为生成二维码的链接
+                            size={60} //二维码的宽高尺寸
+                            fgColor="#000000"  //二维码的颜色
+                          />
                         </ListItem>
                         <ListItem>
                           <ListItemAvatar>
@@ -259,6 +267,11 @@ function App() {
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText primary="HLS拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/live.m3u8`} />
+                          <Link target="_blank" href={`http://${rowData.pullDNS}/${rowData.id}/index.html`} >
+                          <Button variant="contained" color="primary">
+                              播放
+                            </Button>
+                          </Link>
                         </ListItem>
                         <ListItem>
                           <ListItemAvatar>
@@ -267,6 +280,11 @@ function App() {
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText primary="FLV拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/live.flv`} />
+                          <Link target="_blank" href={`http://${rowData.pullDNS}/${rowData.id}/flv.html`} >
+                          <Button variant="contained" color="primary">
+                              播放
+                            </Button>
+                          </Link>
                         </ListItem>
                         <ListItem>
                           <ListItemAvatar>
@@ -275,6 +293,11 @@ function App() {
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText primary="CMAF HLS拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/master.m3u8`} />
+                          <Link target="_blank" href={`http://${rowData.pullDNS}/${rowData.id}/hls.html`} >
+                          <Button variant="contained" color="primary">
+                              播放
+                            </Button>
+                          </Link>
                         </ListItem>
                         <ListItem>
                           <ListItemAvatar>
@@ -283,18 +306,13 @@ function App() {
                             </Avatar>
                           </ListItemAvatar>
                           <ListItemText primary="CMAF DASH拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/manifest.mpd`} />
+                          <Link target="_blank" href={`http://${rowData.pullDNS}/${rowData.id}/dash.html`} >
+                            <Button variant="contained" color="primary">
+                              播放
+                            </Button>
+                          </Link>
                         </ListItem>
-
                       </List>
-                      {/* <Typography variant="body1" display="block" gutterBottom>
-                        推流地址:rtmp://{rowData.pushDNS}:1935/stream/{rowData.id}?sign={rowData.key}
-                      </Typography>
-                      <Typography variant="body1" display="block" gutterBottom>
-                        HLS拉流地址:<a href={`http://${rowData.pullDNS}/${rowData.id}/index.html`} target="_blank" rel="noopener noreferrer">http://{rowData.pullDNS}/{rowData.id}/live.m3u8</a>
-                      </Typography>
-                      <Typography variant="body1" display="block" gutterBottom>
-                        FLV拉流地址:<a href={`http://${rowData.pullDNS}/${rowData.id}/flv.html`} target="_blank" rel="noopener noreferrer">http://{rowData.pullDNS}/{rowData.id}/live.flv</a>
-                      </Typography> */}
                     </div>
                   )
                 },
@@ -309,41 +327,88 @@ function App() {
                         <TabList>
                           <Tab >FLV播放</Tab>
                           <Tab >HLS播放</Tab>
-                          <Tab >CMAF播放</Tab>
+                          <Tab >CMAF HLS播放</Tab>
+                          <Tab >CMAF DASH播放</Tab>
                         </TabList>
                         <TabPanel >
-                          {/* <Player
-                            url={`http://${rowData.pullDNS}/${rowData.id}/live.flv`}
-                          /> */}
-                          <Iframe
-                            id="flv"
-                            allowFullScreen
-                            display="FLV"
-                            width="70%"
-                            height="360"
-                            position="relative"
-                            src={`http://${rowData.pullDNS}/${rowData.id}/flv.html`}
-                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                          <ListItem><QRCode
+                            value={`http://${rowData.pullDNS}/${rowData.id}/live.flv`}  //value参数为生成二维码的链接
+                            size={100} //二维码的宽高尺寸
+                            fgColor="#000000"  //二维码的颜色
+                            includeMargin={true}
                           />
-                        </TabPanel>
-                        <TabPanel>
-                        <Player
-                            url={`http://${rowData.pullDNS}/${rowData.id}/live.m3u8`}
-                          />
-                        </TabPanel>
-                        <TabPanel>
- 
-                        <ClapprPlayer src={`http://${rowData.pullDNS}/${rowData.id}/master.m3u8`} />
-                     
+                            <ListItemText primary="拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/live.flv`} />
+                            <ListItemIcon></ListItemIcon>
+                          </ListItem>
+                          <Card raised={true}>
+                            <CardContent>
+                              <Player url={`http://${rowData.pullDNS}/${rowData.id}/live.flv`} />
+                            </CardContent>
+                          </Card>
                           {/* <Iframe
-                            id="CMAF"
-                            width="100%"
-                            height="360"
-                            display="initial"
-                            position="relative"
-                            url={`http://${rowData.pullDNS}/${rowData.id}/hls.html`}
-                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                          /> */}
+                              id="flv"
+                              allowfullscreen="true"
+                              display="FLV"
+                              width="100%"
+                              height="400"
+                              frameborder="0" border="0" marginwidth="1" marginheight="2" scrolling="no"
+                              position="relative"
+                              src={`http://${rowData.pullDNS}/${rowData.id}/flv.html`}
+                            />                   */}
+
+                        </TabPanel>
+                        <TabPanel>
+                          <ListItem><QRCode
+                            value={`http://${rowData.pullDNS}/${rowData.id}/live.m3u8`}  //value参数为生成二维码的链接
+                            size={100} //二维码的宽高尺寸
+                            fgColor="#000000"  //二维码的颜色
+                            includeMargin={true}
+                          />
+                            <ListItemText primary="拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/live.m3u8`} />
+                            <ListItemIcon></ListItemIcon>
+                          </ListItem>
+                          <Card raised={true}>
+                            <CardContent>
+                              <ClapprPlayer
+                                src={`http://${rowData.pullDNS}/${rowData.id}/live.m3u8`}
+                              />
+                            </CardContent>
+                          </Card>
+                        </TabPanel>
+                        <TabPanel>
+                          <ListItem>
+                            <QRCode
+                              value={`http://${rowData.pullDNS}/${rowData.id}/master.m3u8`}  //value参数为生成二维码的链接
+                              size={100} //二维码的宽高尺寸
+                              fgColor="#000000"  //二维码的颜色
+                              includeMargin={true}
+                            />
+                            <ListItemText primary="拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/master.m3u8`} />
+
+                          </ListItem>
+                          <Card raised={true}>
+                            <CardContent>
+                              <ClapprPlayer src={`http://${rowData.pullDNS}/${rowData.id}/master.m3u8`} />
+
+                            </CardContent>
+                          </Card>
+                        </TabPanel>
+                        <TabPanel>
+                          <ListItem><QRCode
+                            value={`http://${rowData.pullDNS}/${rowData.id}/manifest.mpd`}  //value参数为生成二维码的链接
+                            size={100} //二维码的宽高尺寸
+                            fgColor="#000000"  //二维码的颜色
+                            includeMargin={true}
+                          />
+                            <ListItemText primary="拉流地址:" secondary={`http://${rowData.pullDNS}/${rowData.id}/manifest.mpd`} />
+                          </ListItem>
+                          <Card raised={true}>
+                            <CardContent>
+                              <ClapprPlayer
+                                src={`http://${rowData.pullDNS}/${rowData.id}/manifest.mpd`}
+                              />
+                            </CardContent>
+                          </Card>
                         </TabPanel>
                       </Tabs>
                     </div>
@@ -368,10 +433,7 @@ function App() {
             }}
           />
         </Grid>
-
       </Grid>
-
-
     </div>
 
   );

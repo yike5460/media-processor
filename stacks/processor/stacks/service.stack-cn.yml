@@ -12,6 +12,11 @@ Parameters:
     Type: String
     Description: Security Stack Name
 
+  EFSStack:
+    Default: 'video-streaming-efs'
+    Type: String
+    Description: EFS Stack Name
+
   ECSStack:
     Default: 'video-processing-ecs'
     Type: String
@@ -113,6 +118,14 @@ Resources:
       # Between 4GB and 16GB in 1GB increments - Available cpu values: 2048 (2 vCPU)
       # Between 8GB and 30GB in 1GB increments - Available cpu values: 4096 (4 vCPU)
       Memory: 4GB
+      volumes:
+       - efsVolumeConfiguration:
+          fileSystemId: 
+                Fn::ImportValue:
+                  !Sub "${EFSStack}-EFS"
+          transitEncryption: DISABLED
+          rootDirectory: "/"
+         name: media
       ContainerDefinitions:
         - Name: !Ref AWS::StackName
           Image: "public.ecr.aws/l6z1v6o9/video-streaming-processor"
@@ -140,6 +153,9 @@ Resources:
                   !Sub "${RedisStack}-RedisCluster"
             - Name: MEDIA_ROOT
               Value: '/usr/src/app/media'
+          mountPoints:
+            - containerPath: "/media"
+              sourceVolume: media
           LogConfiguration:
             LogDriver: awslogs
             Options:

@@ -13,8 +13,13 @@ import { Toolbar } from "@material-ui/core";
 import App from './metadata';
 import StoreMetaData from './store-metadata';
 import WaterMark from './watermark.js';
-import Motion from './motion.js';
-import DnsForm from './dnsEditor.js';
+import Online from './online.js';
+// import Motion from './motion.js';
+// import DnsForm from './dnsEditor.js';
+// import TaskConfig from './taskconfig'
+// import CardMedia from './cardmedia'
+import Relay from './relay'
+
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -84,9 +89,10 @@ export default function ScrollableTabsButtonAuto() {
                         <Tab label="配置管理" {...a11yProps(0)} />
                         <Tab label="录制管理" {...a11yProps(1)} />
                         <Tab label="水印配置" {...a11yProps(2)} />
-                        <Tab label="移动侦测" {...a11yProps(3)} />
-                        {/* <Tab label="域名配置" {...a11yProps(4)} /> */}
-
+                        {/* <Tab label="移动侦测" {...a11yProps(3)} /> */}
+                        <Tab label="视频中继" {...a11yProps(3)}/>
+                        <Tab label="在线视频" {...a11yProps(4)}/>
+                        {/* <Tab label="任务设置" {...a11yProps(5)}/> */}
                     </Tabs>
                 </Toolbar>
             </AppBar>
@@ -100,12 +106,15 @@ export default function ScrollableTabsButtonAuto() {
                 <WaterMark />
             </TabPanel>
             <TabPanel value={value} index={3}>
-                <Motion />
+            <Relay/>
             </TabPanel>
-            {/* <TabPanel value={value} index={4}>
-              <DnsForm/>
+            <TabPanel value={value} index={4}>
+              <Online />
+            </TabPanel>
+            {/* <TabPanel value={value} index={5}>
+            <TaskConfig/>
             </TabPanel> */}
-
+{/* page footer */}
             <AppBar position="static" color="inherit">
                 <Container maxWidth="md">
                     <Toolbar>

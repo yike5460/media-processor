@@ -14,6 +14,7 @@ Resources:
       FileSystemTags:
         - Key: Name
           Value: !Ref 'AWS::StackName'
+      # PerformanceMode: maxIO
 
   EFSMountTarget1:
     Type: AWS::EFS::MountTarget
@@ -54,6 +55,8 @@ Outputs:
   EFS:
     Description: The created EFS 
     Value: !Ref EFSFileSystem
+    Export:
+      Name: !Sub '${AWS::StackName}-EFS'
 
   EFSMountTarget1:
     Description: The EFS MountTarget
