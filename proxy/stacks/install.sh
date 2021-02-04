@@ -1,5 +1,5 @@
 #!/bin/bash
-: ${REGION:=$(aws configure get region)}
+: ${REGION:=$(aws ec2 describe-availability-zones --output text --query 'AvailabilityZones[0].[RegionName]')}
 : ${ACCOUNT_ID:=$(aws sts get-caller-identity|jq -r ".Account")}
 ###########################################################
 ###########                                     ###########
@@ -125,6 +125,9 @@ service
 }
 
 case $1 in
+    welcome)
+    welcome
+    ;;
     get-login)
     get-login
     ;;
