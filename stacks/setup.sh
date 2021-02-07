@@ -141,9 +141,9 @@ main() {
 welcome
 vpc
 assets
-efs
 dynamodb
 security
+efs
 redis
 ecs
 get-login
