@@ -55,7 +55,7 @@ const startTasks = async (event) => {
             logger.log("get task with:" + JSON.stringify(taskItem));
             await taskItem.taskARN.forEach(taskarn => {
                 arns.push(taskarn);
-            })   
+            })
         }
         var time = sd.format(new Date(), 'YYYY-MM-DD HH:mm');
         var item = new Object();
@@ -115,7 +115,7 @@ function getECSParam(event) {
 
 function getEC2Params(event) {
     const metaData = event.metaData;
-    const task_num =parseInt(metaData.clusterNumber || taskNumber);
+    const task_num = parseInt(metaData.clusterNumber || taskNumber);
     return {
         cluster: clusterName,
         taskDefinition: taskName,
@@ -136,10 +136,10 @@ function getEC2Params(event) {
                 name: containerName,
                 environment: getEnv(event)
             }],
-            cpu: (event.isMaster==='true')?String(metaData.cpu || "2048"):String(metaData.slave_cpu || "512"),
-            memory: (event.isMaster==='true')?String(metaData.memory || "4GB"):String(metaData.slave_memory || "1024")
+            cpu: (event.isMaster === 'true') ? String(metaData.cpu || "2048") : String(metaData.slave_cpu || "512"),
+            memory: (event.isMaster === 'true') ? String(metaData.memory || "4GB") : String(metaData.slave_memory || "1024")
         },
-        count: (event.isMaster==='true') ? 1 : task_num,
+        count: (event.isMaster === 'true') ? 1 : task_num,
         launchType: "EC2",
         networkConfiguration: {
             awsvpcConfiguration: {
@@ -155,6 +155,24 @@ function getEC2Params(event) {
     };
 }
 
+function getCPU(event) {
+    const metaData = event.metaData;
+    if (event.isMaster === 'true')
+        return String(metaData.cpu || "2048");
+    if (event.isRecord === 'true')
+        return String(metaData.slave_cpu || "512");
+    else
+        return String(metaData.slave_cpu || "512");
+}
+
+function getMemory(event){
+   if (event.isMaster === 'true') 
+   return String(metaData.memory || "4GB") 
+   if(event.isRecord === 'true')
+   return String(metaData.slave_cpu || "512");
+   else
+   return  String(metaData.slave_memory || "1024")
+}
 
 function getFargateParams(event) {
     const metaData = event.metaData;
@@ -178,10 +196,10 @@ function getFargateParams(event) {
                 name: containerName,
                 environment: getEnv(event)
             }],
-            cpu: (event.isMaster==='true')?String(metaData.cpu || "2048"):String(metaData.slave_cpu || "512"),
-            memory: (event.isMaster==='true')?String(metaData.memory || "4GB"):String(metaData.slave_memory || "1024")
+            cpu: (event.isMaster === 'true') ? String(metaData.cpu || "2048") : String(metaData.slave_cpu || "512"),
+            memory: (event.isMaster === 'true') ? String(metaData.memory || "4GB") : String(metaData.slave_memory || "1024")
         },
-        count: (event.isMaster==='true') ? 1 : task_num,
+        count: (event.isMaster === 'true') ? 1 : task_num,
         launchType: "FARGATE",
         platformVersion: '1.4.0'
     };
@@ -200,6 +218,13 @@ function getEnv(event) {
         { name: "SEGMENT_TIME", "value": segmentTime },
         { name: "CHANNEL_NAME", "value": event.id },
         { name: "IS_MASTER", "value": String(event.isMaster || 'true') },
+        { name: "IS_CODEC", "value": String(event.isCodec || 'false') },
+        { name: "IS_RECORD", "value": String(event.isRecord || 'false') },
+        { name: "CODEC", "value": String(metaData.codec || 'libx264') },
+        { name: "IS_LD", "value": String(metaData.ld || 'false') },
+        { name: "IS_SD", "value": String(metaData.sd || 'false') },
+        { name: "IS_HD", "value": String(metaData.hd || 'false') },
+        { name: "IS_UD", "value": String(metaData.ud || 'false') },
         { name: "IS_CLUSTER", "value": String(event.isCluster || 'false') },
         { name: "IS_FLV", "value": String(metaData.isFlv || 'false') },
         { name: "IS_HLS", "value": String(metaData.isHls || 'false') },
@@ -218,7 +243,7 @@ function getEnv(event) {
         { name: "MOTION_TIMEOUT", "value": String(metaData.motion_timeout || "60") },
         { name: "MOTION_DIFF", "value": String(metaData.motion_diff || "10") },
         //ondemand video
-        { name: "ONDEMAND_LIST_SIZE", "value": String(metaData.ondemand_list_size || "1") },
+        { name: "ONDEMAND_LIST_SIZE", "value": String(metaData.ondemand_list_size || "2") },
         { name: "ONDEMAND_TIME", "value": String(metaData.ondemand_time || "60") },
 
         //water mark env
@@ -228,6 +253,11 @@ function getEnv(event) {
         { name: "WATERMARK_FONT_COLOR", "value": String(metaData.WaterMarkFontColor || "red") },
         { name: "WATERMARK_FONT_TOP", "value": String(metaData.WaterMarkTop || "10") },
         { name: "WATERMARK_FONT_LEFT", "value": String(metaData.WaterMarkLeft || "10") },
+        
+        { name: "IS_IMAGE_WATERMARK", "value": String(metaData.isImageWaterMark || "false") },
+        { name: "IMAGE_URL", "value": String(metaData.ImageURL || "test") },
+        { name: "IMAGE_WIDTH", "value": String(metaData.ImageWidth || "100") },
+        { name: "IMAGE_HEIGHT", "value": String(metaData.ImageHeight || "50") },
         //relay  env
         { name: "IS_RELAY", "value": String(metaData.isRelay || "false") },
         { name: "RELAY_URL", "value": String(metaData.relayURL || "rtmp://localhost:1935") }
@@ -279,5 +309,6 @@ function deleteItem(itemId) {
 }
 
 module.exports = {
-    invokeTask
+    invokeTask,
+    deleteItem
 };

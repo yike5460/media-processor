@@ -103,6 +103,7 @@ const init = async () => {
         await session.reject();
       }
     });
+    
 
     nms.on("postPublish", async (id, StreamPath, args) => {
       logger.log(
@@ -226,8 +227,10 @@ const removeCache = async (channelName, metaData) => {
  * @param {*} metaData 
  */
 const startTasks = async (channelName, inputURL, address, metaData) => {
-  //is cluster model
+  //delete db record
+  await scheduler.deleteItem(channelName);
   const isCluster = String((metaData.isCluster || 'false')) === 'true';
+  const isCodec = String((metaData.isCodec || 'false')) === 'true';
   let clusterNumber = new Number(metaData.clusterNumber || 2);
   clusterNumber--;
   var params = new Array();
@@ -238,30 +241,67 @@ const startTasks = async (channelName, inputURL, address, metaData) => {
     eventName: "start",
     metaData: metaData,
     isMaster: 'true',//is a master task
+    isCodec: 'false',
+    isRecord: 'false',
     isCluster: metaData.isCluster || 'false'
   });
+
+  const isNeedRecord = isRecord(metaData);
+  console.log('---'+isNeedRecord);
+  if (isNeedRecord) {
+    logger.log("begin to add record task parameter");
+    params.push({
+      id: channelName,
+      url: inputURL,
+      address: address,
+      eventName: "start",
+      metaData: metaData,
+      isMaster: 'false',//is a master task
+      isCodec: 'false',
+      isRecord: 'true',// record task
+      isCluster: metaData.isCluster || 'false'
+    });
+  }
   if (isCluster) {
+    logger.log("begin to add cluster task parameter");
     // for (let index = 0; index < clusterNumber; index++) {
-    const param = {
+    params.push({
       id: channelName,
       url: inputURL,
       address: address,
       eventName: "start",
       metaData: metaData,
       isMaster: 'false',
+      isCodec: 'false',
+      isRecord: 'false',
       isCluster: metaData.isCluster || 'true'
-    };
-    params.push(param);
+    });
+    if (isCodec) {
+      logger.log("begin to add codes task parameter");
+      params.push({
+        id: channelName,
+        url: inputURL,
+        address: address,
+        eventName: "start",
+        metaData: metaData,
+        isMaster: 'true',
+        isCodec: 'true',
+        isRecord: 'false',
+        isCluster: metaData.isCluster || 'true'
+      });
+    }
   }
+
   // }
-   for (const param of params) {
+  for (const param of params) {
     await scheduler.invokeTask(param);
-   }
+  }
   // await params.forEach(async param => {
   //   logger.log(param.id);
   //   await scheduler.invokeTask(param);
   // });
 }
+
 /**
  * 
  * @param {*} channelName 
@@ -270,9 +310,11 @@ const startTasks = async (channelName, inputURL, address, metaData) => {
  */
 const stopTasks = async (channelName, inputURL, metaData) => {
 
-  const isCluster = String((metaData.isCluster || 'false')) === 'true';
-  let clusterNumber = new Number(metaData.clusterNumber || 2);
-  clusterNumber--;
+  // const isCluster = String((metaData.isCluster || 'false')) === 'true';
+  // const isCodec = String((metaData.isCodec || 'false')) === 'true';
+
+  // let clusterNumber = new Number(metaData.clusterNumber || 2);
+  // clusterNumber--;
   // logger.log("stop task:" + param.id);
   var params = new Array();
   params.push({
@@ -280,15 +322,25 @@ const stopTasks = async (channelName, inputURL, metaData) => {
     url: inputURL,
     eventName: "stop",
   });
-  if (isCluster) {
-    // for (let index = 0; index < clusterNumber; index++) {
-    const param = {
-      id: channelName,
-      url: inputURL,
-      eventName: "stop",
-    };
-    params.push(param);
-  }
+
+  // if (isCluster) {
+  //   // for (let index = 0; index < clusterNumber; index++) {
+  //   const param = {
+  //     id: channelName,
+  //     url: inputURL,
+  //     eventName: "stop",
+  //   };
+  //   params.push(param);
+  //   if (isCodec) {
+  //     // for (let index = 0; index < clusterNumber; index++) {
+  //     const param = {
+  //       id: channelName,
+  //       url: inputURL,
+  //       eventName: "stop",
+  //     };
+  //     params.push(param);
+  //   }
+  // }
   // }
   // for (const param of params) {
 
@@ -298,6 +350,18 @@ const stopTasks = async (channelName, inputURL, metaData) => {
     logger.log(param.id);
     await scheduler.invokeTask(param);
   });
+}
+
+const isRecord =  (metaData) => {
+  const isVideo = String(metaData.isVideo || 'false') === 'true';
+  const isImage = String(metaData.isImage || 'false') === 'true';
+  const isMotion = String(metaData.isMotion || 'false') === 'true';
+  const isOnDemand = String(metaData.isOnDemand || 'false') === 'true';
+
+  if (isVideo || isImage || isMotion || isOnDemand)
+    return true;
+  else
+    return false;
 }
 /**
  * start app

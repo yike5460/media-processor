@@ -25,6 +25,7 @@ module.exports = Object.freeze({
   isSD: (process.env.IS_SD || 'false')=== 'true',
   isHD: (process.env.IS_HD || 'false')=== 'true',
   isUD: (process.env.IS_UD || 'false')=== 'true',
+  
   isWatermark: (process.env.IS_WATERMARK || 'false')=== 'true',
   waterMarkText: process.env.WATERMARK_TEXT || '水印',
   waterMarkFontSize: process.env.WATERMARK_FONT_SIZE || '20',
