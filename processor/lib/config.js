@@ -15,16 +15,27 @@ module.exports = Object.freeze({
   isVideo: (process.env.IS_VIDEO || 'false')=== 'true',
   isImage: (process.env.IS_IMAGE|| 'false')=== 'true' ,
   isOnDemand: (process.env.IS_ONDEMAND || 'false')=== 'true',
-  isLive: (process.env.IS_HLS || 'true')=== 'true',
+  isLive: (process.env.IS_HLS || 'false')=== 'true',
   isFLV: (process.env.IS_FLV || 'false')=== 'true',
-  isCMAF: (process.env.IS_CMAF || 'false')=== 'true',
-
+  isCMAF: (process.env.IS_CMAF || 'true')=== 'true',
+  isCodec: (process.env.IS_CODEC|| 'false')=== 'true' ,
+  isRecord: (process.env.IS_RECORD|| 'false')=== 'true' ,
+  codec: process.env.CODEC || 'libx264',
+  isLD: (process.env.IS_LD || 'true')=== 'true',
+  isSD: (process.env.IS_SD || 'false')=== 'true',
+  isHD: (process.env.IS_HD || 'false')=== 'true',
+  isUD: (process.env.IS_UD || 'false')=== 'true',
   isWatermark: (process.env.IS_WATERMARK || 'false')=== 'true',
   waterMarkText: process.env.WATERMARK_TEXT || '水印',
   waterMarkFontSize: process.env.WATERMARK_FONT_SIZE || '20',
   waterMarkFontColor: process.env.WATERMARK_FONT_COLOR || 'red',
   waterMarkTop: process.env.WATERMARK_FONT_TOP || '10',
   waterMarkLeft: process.env.WATERMARK_FONT_LEFT || '100',
+
+  isImageWaterMark: (process.env.IS_IMAGE_WATERMARK || 'true')=== 'true',
+  ImageURL: process.env.IMAGE_URL || "https://s3.cn-north-1.amazonaws.com.cn/signin-assets/roundtable/cn/AWS-logo-CN_Web-op-sinnet-Chinese.png",
+  ImageWidth: process.env.IMAGE_WIDTH || '100',
+  ImageHeight: process.env.IMAGE_HEIGHT || '50',
 
   imageTime: process.env.IMAGE_TIME || "10",
   videoTime: process.env.VIDEO_TIME || "10",
@@ -48,6 +59,5 @@ module.exports = Object.freeze({
   transCoding: process.env.TRANSCODING || "copy",
   pixFmt: process.env.PIX_FORMAT || "rgb24",
   buckName:process.env.ASSETS_BUCKET||'video-streaming-assets-assetsbucket-1kf2tlxbhy4qz',
-  retryTimeout:30000,
-
+  retryTimeout:5000,
 });

@@ -110,41 +110,57 @@ function getLiveBasePath() {
     return config.basePath + "/livestreaming/" + config.streamChannel
 }
 
-function getMBRParam(code,w,h,bv,maxrate,bufsize,ba,filename){
+function getMBRParam(codec,w,h,bv,maxrate,bufsize,ba,resolution){
 return [
   '-vf', `scale=w=${w}:h=${h}:force_original_aspect_ratio=decrease`,
   '-c:a', 'aac',
   '-ar', '48000',
-  '-c:v', code,
-  '-profile:v', 'main',
-  '-crf', '20',
-  '-sc_threshold', '0',
-  '-g', '48',
-  '-keyint_min', '48',
-  '-hls_time', '4',
+  '-c:v', codec,
+  '-preset', 'veryfast',
+  '-keyint_min', '24',
+   '-g', '48',
+   '-sc_threshold', '0',
   '-b:v', bv,
   '-maxrate', maxrate,
   '-bufsize', bufsize,
   '-b:a', ba,
+  '-hls_time', '12',
+  '-hls_list_size', '6',
+  "-hls_flags",
+  "delete_segments",
+  "-start_number",
+  Date.now(),
   '-hls_segment_filename' ,
-  `${getLiveBasePath()}/${filename}_%03d.ts`, 
-  `${getLiveBasePath()}/${filename}.m3u8`
+  `${getLiveBasePath()}/${resolution}/${resolution}_%03d.ts`, 
+  `${getLiveBasePath()}/${resolution}/index.m3u8`
 ]
 }
 
-function getMBRParams() {
-  let params=new Array();
-  params=params.concat(getMBRParam('libx264','640','360','800k','856k','1200k','96k','360p'));
-  // params=params.concat(getMBRParam('842','480','1400k','1498k','2100k','128k','480p'));
-  //params= params.concat(getMBRParam('1280','720','2800k','2996k','4200k','128k','720p'));
-  // params=params.concat(getMBRParam('1920','1080','5000k','5350k','7500k','192k','1080p'));
+getCodecParams=function() {
+  var params = [
+    "-loglevel",
+    config.logLevel,
+    /* use hardware acceleration */
+    "-hwaccel",
+    "auto", //vda, videotoolbox, none, auto
+    "-abort_on",
+    "empty_output",
+    "-i",
+    config.inputURL,
+  ];
+  const codec=config.codec;
+  if(config.isLD)
+  params=params.concat(getMBRParam(codec,'640','360','400k','600k','600k','64k','360p'));
+  if(config.isSD)
+  params=params.concat(getMBRParam(codec,'842','480','600k','900k','900k','64k','480p'));
+  if(config.isHD)
+  params= params.concat(getMBRParam(codec,'1280','720','1000k','1500k','1500k','128k','720p'));
+  if(config.isUD)
+  params=params.concat(getMBRParam(codec,'1920','1080','2000k','3000k','3000k','128k','1080p'));
   params=params.concat ([
     '-f', 'hls',
-    '-hls_time', '2',
-    '-hls_list_size', '5',
-    '-hls_flags', 'independent_segments',
-    '-hls_segment_type', 'mpegts',
-    '-remove_at_exit', '1',
+    "-tune",
+    "zerolatency",
   ]);
   return params;
 }
@@ -158,8 +174,7 @@ function getHLSParams() {
     "hls",
     //  '-codec:v','libx264',
     // '-codec:a', 'mp3',
-    '-profile:v',
-    'main',
+    '-c:v', getTransParam(),
     '-lhls', '1',
     '-streaming', '1',
     '-hls_playlist', '1',
@@ -184,17 +199,16 @@ function getHLSParams() {
     "-strict",
     "-2",
     "-hls_segment_filename",
-    getLiveBasePath() + "/480p/%03d.ts",
-    getLiveBasePath() + "/480p/index.m3u8"
+    getLiveBasePath() + "/%03d.ts",
+    getLiveBasePath() + "/live.m3u8"
   ];
 }
 
 function getCMAFParams() {
   return [
-    '-c:v', 'copy',
+    '-c:v', getTransParam(),
     '-b:v', '500k',
     '-ldash', '1',
-    '-adaptation_sets', 'id=0,streams=v id=1,streams=a',
     '-streaming', '1',
     '-use_template', '1',
     '-use_timeline', '0',
@@ -202,7 +216,12 @@ function getCMAFParams() {
     '-remove_at_exit', '1',
     '-window_size', '5',
     '-hls_playlist', '1',
-    "-tune", "zerolatency",
+    // '-keyint_min', '120',
+    '-g', '120',
+    '-sc_threshold', '0',
+    '-b_strategy', '0',
+    // "-preset", "veryfast",
+    // "-tune", "zerolatency",
     '-f', 'dash',
     // "-strict",
     // "-2",
@@ -256,7 +275,7 @@ function getCMAF1Params() {
 }
 
 function getTransParam() {
-  if (config.isWatermark)
+  if (config.isWatermark||config.isImageWaterMark)
     return "libx264";
   else return "copy"
 }
@@ -266,9 +285,8 @@ function getTransParam() {
  * get flv params
  * @returns {string[]}
  */
-function getFlvParams() {
+function getFlvParam() {
   return [
-
     "-preset",
     "medium",
     "-vprofile",
@@ -307,8 +325,16 @@ function getFlvParams() {
  */
 function getOnDemandParams() {
   return [
+
     "-f",
     "hls",
+    '-profile:v',
+    'main',
+    "-preset", "veryfast",
+    "-tune",
+    "zerolatency",
+    "-fflags",
+    "nobuffer",
     "-hls_time",
     config.ONDEMAND_TIME,
     "-hls_list_size",
@@ -343,8 +369,20 @@ function getDynamicText() {
     "color=color=black, drawtext=enable='gte(t,3)':fontfile=simhei.ttf:fontcolor=white:textfile=text.txt:reload=1:y=h-line_h-10:x=(W/tw)*n"
   ];
   // 如果要指定水印的大小，比如 384x216：
-
   // ffmpeg -i input.mp4 -i wm.png -filter_complex "[1:v]scale=384:216[wm];[0:v][wm]overlay=0:0"
+}
+
+ function getImageWaterMark()
+{
+  const imageName=config.ImageURL.split("/").pop()
+ const imagePath = config.basePath +'/'+ imageName
+ if (fs.existsSync(imagePath)) {
+  return [
+    "-i",imagePath,
+    "-filter_complex",`[1:v]scale=${config.ImageWidth}:${config.ImageHeight}[wm];[0:v][wm]overlay=main_w-overlay_w-20:20`
+  ]; }
+  else
+  return []; 
 }
 /**
  * return params according to medadata
@@ -369,6 +407,7 @@ getParams = function () {
     "-i",
     config.inputURL,
   ];
+  if (config.isImageWaterMark) params = params.concat(getImageWaterMark());
   if (config.isWatermark) params = params.concat(getWatermark());
   if (config.isMotion) params = params.concat(getMotionParams());
   if (config.isVideo) params = params.concat(getVideoParams());
@@ -381,7 +420,7 @@ getParams = function () {
   return params;
 };
 
-getFLVParams = function () {
+getFLVParams =  function () {
   var params = [
     "-loglevel",
     config.logLevel,
@@ -394,8 +433,9 @@ getFLVParams = function () {
     // 'rtsp://freja.hiof.no:1935/rtplive/definst/hessdalen03.stream',
     config.inputURL,
   ];
+  if (config.isImageWaterMark) params = params.concat(getImageWaterMark());
   if (config.isWatermark) params = params.concat(getWatermark());
-  params = params.concat(getFlvParams());
+  params = params.concat(getFlvParam());
   logger.log("----ffmpeg flv params:" + params);
   return params;
 }
@@ -413,6 +453,7 @@ getLiveParams = function () {
     // 'rtsp://freja.hiof.no:1935/rtplive/definst/hessdalen03.stream',
     config.inputURL,
   ];
+  if (config.isImageWaterMark) params = params.concat(getImageWaterMark());
   if (config.isWatermark) params = params.concat(getWatermark());
   if (config.isLive) params = params.concat(getHLSParams());
   if (config.isCMAF) params = params.concat(getCMAFParams());
@@ -462,5 +503,6 @@ module.exports = {
   getParams,
   getLiveParams,
   getFLVParams,
-  getRelayParams
+  getRelayParams,
+  getCodecParams,
 };
