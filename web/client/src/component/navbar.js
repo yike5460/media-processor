@@ -15,12 +15,30 @@ import StoreMetaData from './store-metadata';
 import WaterMark from './watermark.js';
 import Online from './online.js';
 // import Motion from './motion.js';
-// import DnsForm from './dnsEditor.js';
-// import TaskConfig from './taskconfig'
+import DnsForm from './dnsEditor.js';
+import Codec from './codec.js'
+import TaskConfig from './taskconfig'
 // import CardMedia from './cardmedia'
 import Relay from './relay'
+import Login from './login';
+import useToken from './useToken';
+import Link from '@material-ui/core/Link';
 
 
+ 
+
+function Copyright() {
+    return (
+      <Typography variant="body2" color="textSecondary" align="center" >
+        {'Copyright © '}
+        <Link color="inherit" href="#">
+          Your Website
+        </Link>{' '}
+        {new Date().getFullYear()}
+        {'.'}
+      </Typography>
+    );
+  }
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
     return (
@@ -29,8 +47,7 @@ function TabPanel(props) {
             hidden={value !== index}
             id={`scrollable-auto-tabpanel-${index}`}
             aria-labelledby={`scrollable-auto-tab-${index}`}
-            {...other}
-        >
+            {...other}>
             {value === index && (
                 <Box p={3}>
                     {children}
@@ -55,74 +72,101 @@ function a11yProps(index) {
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        flexGrow: 1,
-        width: '100%',
-        backgroundColor: theme.palette.background.paper,
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      
     },
-}));
+    main: {
+      marginTop: theme.spacing(8),
+      marginBottom: theme.spacing(2),
+    },
+    footer: {
+      padding: theme.spacing(3, 2),
+      marginTop: 'auto',
+      backgroundColor:
+        theme.palette.type === 'light' ? theme.palette.grey[200] : theme.palette.grey[800],
+    },
+      title: {
+        flexGrow: 1,
+        width: 180,
+      },
+  }));
 
 export default function ScrollableTabsButtonAuto() {
+    const { token, setToken } = useToken();
     const classes = useStyles();
     const [value, setValue] = React.useState(0);
-
     const handleChange = (event, newValue) => {
         setValue(newValue);
     };
-
+    if(!token) {
+        return <Login setToken={setToken} />
+      }  
     return (
         <div className={classes.root} >
-            <AppBar position="static" color="inherit">
-                <Toolbar>
-                    <AppsIcon />
-                    <Typography variant="h5" color="inherit">
-                        视频流管理
+            <AppBar position="static" color="inherit" >
+                <Toolbar >
+                    <AppsIcon fontSize="large" color="primary" />
+                    <Typography variant="h6"  color="primary" noWrap className={classes.title}>
+                        视频管理
                     </Typography>
-                    <Tabs
+                    <Tabs 
                         value={value}
                         onChange={handleChange}
                         indicatorColor="primary"
                         textColor="inherit"
                         variant="scrollable"
-                        scrollButtons="auto"
+                        scrollButtons="on"
                         aria-label="scrollable auto tabs example"
                     >
-                        <Tab label="配置管理" {...a11yProps(0)} />
-                        <Tab label="录制管理" {...a11yProps(1)} />
-                        <Tab label="水印配置" {...a11yProps(2)} />
+                         {/* <Tab icon={<VideoLabelIcon />} label="配置管理" {...a11yProps(0)} /> */}
+                        <Tab  label="视频直播" {...a11yProps(0)} />
+                        <Tab label="视频录制" {...a11yProps(1)} />
+                        <Tab label="视频转码" {...a11yProps(2)}/>
+                        <Tab label="视频水印" {...a11yProps(3)} />
+                        <Tab label="视频中继" {...a11yProps(4)}/>
                         {/* <Tab label="移动侦测" {...a11yProps(3)} /> */}
-                        <Tab label="视频中继" {...a11yProps(3)}/>
-                        <Tab label="在线视频" {...a11yProps(4)}/>
-                        {/* <Tab label="任务设置" {...a11yProps(5)}/> */}
-                    </Tabs>
+                        <Tab label="在线视频" {...a11yProps(5)}/>
+                        {/* <Tab label="任务设置" {...a11yProps(6)}/>   */}
+                        <Tab  label="域名配置" {...a11yProps(6)} />     
+                    </Tabs>               
                 </Toolbar>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <App />
+                <App/>
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <StoreMetaData />
             </TabPanel>
             <TabPanel value={value} index={2}>
-                <WaterMark />
+            <Codec/>
             </TabPanel>
             <TabPanel value={value} index={3}>
-            <Relay/>
+                <WaterMark />
             </TabPanel>
             <TabPanel value={value} index={4}>
+            <Relay/>
+            </TabPanel>
+            <TabPanel value={value} index={5}>
               <Online />
             </TabPanel>
-            {/* <TabPanel value={value} index={5}>
+            {/* <TabPanel value={value} index={6}>
             <TaskConfig/>
             </TabPanel> */}
+            <TabPanel value={value} index={6}>
+            <DnsForm/>
+            </TabPanel>
+
 {/* page footer */}
+
             <AppBar position="static" color="inherit">
-                <Container maxWidth="md">
-                    <Toolbar>
-                        <Typography align="center" variant="body1" >
-                        </Typography>
+                <Container >
+                    <Toolbar>      
                     </Toolbar>
                 </Container>
             </AppBar>
+            <Copyright />  
         </div>
     );
 }

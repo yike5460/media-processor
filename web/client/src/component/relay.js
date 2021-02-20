@@ -19,7 +19,7 @@ function App() {
     var columns = [
         { title: "名称", field: "videoname", editable: 'never' },
         { title: "直播中继", field: "isRelay",type: 'boolean', initialEditValue: false, render: rowData => rowData.isRelay === true ? <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
-        { title: "转播URL", field: "relayURL"}
+        { title: "转播URL", field: "relayURL",validate: rowData => rowData.relayURL === '' ? 'URL不能为空' : ''  }
      ]
     
     const [data, setData] = useState([]); //table data
@@ -146,8 +146,47 @@ function App() {
                             },
                         }}
                         align="center"
-                        title="配置管理"
+                        title="视频中继"
                         columns={columns}
+                        localization={{
+                            body: {
+                                emptyDataSourceMessage: "没有视频元数据",
+                                addTooltip: '新增',
+                                deleteTooltip: '删除',
+                                editTooltip: '编辑',
+                                filterRow: {
+                                    filterTooltip: '过滤'
+                                },
+                                editRow: {
+                                    deleteText: '确认删除?',
+                                    cancelTooltip: '取消',
+                                    saveTooltip: '确认'
+                                }
+                            },
+                            header: {
+                                actions: '修改'
+                            },
+                            pagination: {
+                                labelDisplayedRows: '{from}-{to} of {count}',
+                                labelRowsSelect: '行',
+                                labelRowsPerPage: '每页行数:',
+                                firstAriaLabel: '第一页',
+                                firstTooltip: '第一页',
+                                previousAriaLabel: '上页',
+                                previousTooltip: '上页',
+                                nextAriaLabel: '下页',
+                                nextTooltip: '下页',
+                                lastAriaLabel: '最后一页',
+                                lastTooltip: '最后一页'
+                            },
+                            toolbar: {
+                                exportTitle: '导出',
+                                exportAriaLabel: '导出',
+                                exportName: '导出到CSV',
+                                searchTooltip: '搜索',
+                                searchPlaceholder: '搜索'
+                            }
+                        }}
                         data={data}
                         icons={tableIcons}
                         style={{ padding: '0 10px' }}

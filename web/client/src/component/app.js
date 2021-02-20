@@ -1,28 +1,19 @@
 import React from 'react';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import './App.css';
-import Login from './login';
 import Navbar from './navbar';
-import useToken from './useToken';
+import Media from './cardmedia';
+import Dns from './dnsEditor';
 
 function App() {
-
-  const { token, setToken } = useToken();
-
-  if(!token) {
-    return <Login setToken={setToken} />
-  }
-
   return (
-    <div className="wrapper">
-      <BrowserRouter>
-        <Switch>
-          <Route path="/">
-            <Navbar />
-          </Route>
-        </Switch>
+      <BrowserRouter >
+      <Switch>
+      <Route path="/view" component={Media}/>
+      <Route path="/dns" component={Dns}/>
+      <Route path="/" component={Navbar}/>
+      </Switch>
       </BrowserRouter>
-    </div>
+   
   );
 }
 

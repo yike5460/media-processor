@@ -21,7 +21,7 @@ const spawn = CP.spawn;
 const RETRY_THRESHOLD = 5;
 
 //live streaming  path
-const liveStreamingPath = config.isCluster ?
+const liveStreamingPath = config.isCluster ||config.isCodec?
   config.livePath + "/livestreaming/" + config.streamChannel + "/" :
   config.basePath + "/livestreaming/" + config.streamChannel + "/";
 
@@ -50,7 +50,7 @@ const initServer = async () => {
     await initRecordResources();
     await initLiveResources();
     //reload nginx
-    if (config.isCluster)
+    if (config.isCluster||config.isCodec)
       await generateNginxConf();
     const motion = config.isMotion;
     let p2p;
@@ -73,12 +73,8 @@ const initServer = async () => {
       }
       return;
     }
-    //start flv server
-    // if (config.isFLV) {
-    var nms = new NodeMediaServer(nmsConfig);
-    nms.run();
-    //}
-    if (config.isCodec) {
+ 
+    if (config.isCodec&&config.taskType==='codec') {
       const params = options.getCodecParams();
       logger.log('********* start codec live streaming process with params:' + params);
       await mkdirsSync(liveStreamingPath + "360p");
@@ -86,9 +82,12 @@ const initServer = async () => {
       await mkdirsSync(liveStreamingPath + "720p");
       await mkdirsSync(liveStreamingPath + "1080p");
       await runLiveProcess(params, false);
-      await abr.createPlaylist(config.isCluster ? config.livePath + "/livestreaming" : config.basePath + "/livestreaming", config.streamChannel);
+      await abr.createPlaylist(config.livePath + "/livestreaming", config.streamChannel);
       return;
     }
+
+    var nms = new NodeMediaServer(nmsConfig);
+    nms.run();
 
     //
     if (config.isMaster) { //if is cluster mode

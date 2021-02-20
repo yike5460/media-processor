@@ -5,10 +5,9 @@ const _ = require("lodash");
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
-
+const ssm = require('./ssm');
 // connection with dynamodb
 const region = process.env.AWS_REGION || "cn-northwest-1";
-
 const ddb = new AWS.DynamoDB.DocumentClient({ region: region });
 const tableName = "video-metadata";
 const onlineTableName="video-streaming";
@@ -32,6 +31,26 @@ app.use('/login', (req, res) => {
     token: 'test123'
   });
 });
+
+app.get('/dns',async (req, res) => {
+  res.set('Content-Type', 'application/json');
+  const value= await ssm.getParam(['pullDNS','pushDNS']);
+  const data={};
+  data.pullDNS=value[0];
+  data.pushDNS=value[1];
+  const response = {
+    statusCode: 200,
+    data: data
+  };
+  res.json(response);
+});
+
+app.post('/dns', async(req, res) => {
+  let body = req.body;
+  await ssm.putParam('pullDNS',body.pullDNS);
+  await ssm.putParam('pushDNS',body.pushDNS);
+  res.send('success');
+})
 
 app.get('/videostreams/online', async (req, res) => {
   res.set('Content-Type', 'application/json');
@@ -71,7 +90,7 @@ app.put('/videostreams/:id', async (req, res) => {
 
   let streamId = req.params.id;
   let body = req.body;
-    updateItem(streamId, body,res)
+  updateItem(streamId, body,res)
 })
 
 //delete  an stream

@@ -67,63 +67,13 @@ function App() {
             //  
             const id = newData.id;
             const key = newData.key;
-            if (newData.masterSize === 'small') {
-                newData.cpu = 512;
-                newData.memory = 1024
-            }
-           else if (newData.masterSize === 'medium') {
-                newData.cpu = 1024;
-                newData.memory = 2048
-            }
-           else if (newData.masterSize === 'large') {
-                newData.cpu = 2048;
-                newData.memory = 4096
-            }
-           else if (newData.masterSize === 'xlarge') {
-                newData.cpu = 4096;
-                newData.memory = 8192
-            }
-            if (newData.slaveSize === 'micro') {
-                newData.slave_cpu = 256;
-                newData.slave_memory = 512
-            }
-           else if (newData.slaveSize === 'small') {
-                newData.slave_cpu = 512;
-                newData.slave_memory = 1024
-            }
-           else if (newData.slaveSize === 'medium') {
-                newData.slave_cpu = 1024;
-                newData.slave_memory = 2048
-            }
-           else if (newData.slaveSize === 'large') {
-                newData.slave_cpu = 2048;
-                newData.slave_memory = 4096
-            }
-           else if (newData.slaveSize === 'xlarge') {
-                newData.slave_cpu = 4096;
-                newData.slave_memory = 8192
-            }
+     
 
-            if (newData.slaveSize === 'small') {
-                newData.slave_cpu = 512;
-                newData.slave_memory = 1024
-            }
-           else if (newData.slaveSize === 'medium') {
-                newData.slave_cpu = 1024;
-                newData.slave_memory = 2048
-            }
-           else if (newData.slaveSize === 'large') {
-                newData.slave_cpu = 2048;
-                newData.slave_memory = 4096
-            }
-           else if (newData.slaveSize === 'xlarge') {
-                newData.slave_cpu = 4096;
-                newData.slave_memory = 8192
-            }
 
             delete newData['TimeStamp'];
             delete newData['key'];
             delete newData['id'];
+ 
             console.log(newData)
             api.put("/videostreams/" + id, newData)
                 .then(res => {
@@ -201,8 +151,47 @@ function App() {
                             },
                         }}
                         align="center"
-                        title="配置管理"
+                        title="任务配置"
                         columns={columns}
+                        localization={{
+                            body: {
+                                emptyDataSourceMessage: "没有视频元数据",
+                                addTooltip: '新增',
+                                deleteTooltip: '删除',
+                                editTooltip: '编辑',
+                                filterRow: {
+                                    filterTooltip: '过滤'
+                                },
+                                editRow: {
+                                    deleteText: '确认删除?',
+                                    cancelTooltip: '取消',
+                                    saveTooltip: '确认'
+                                }
+                            },
+                            header: {
+                                actions: '修改'
+                            },
+                            pagination: {
+                                labelDisplayedRows: '{from}-{to} of {count}',
+                                labelRowsSelect: '行',
+                                labelRowsPerPage: '每页行数:',
+                                firstAriaLabel: '第一页',
+                                firstTooltip: '第一页',
+                                previousAriaLabel: '上页',
+                                previousTooltip: '上页',
+                                nextAriaLabel: '下页',
+                                nextTooltip: '下页',
+                                lastAriaLabel: '最后一页',
+                                lastTooltip: '最后一页'
+                            },
+                            toolbar: {
+                                exportTitle: '导出',
+                                exportAriaLabel: '导出',
+                                exportName: '导出到CSV',
+                                searchTooltip: '搜索',
+                                searchPlaceholder: '搜索'
+                            }
+                        }}
                         data={data}
                         icons={tableIcons}
                         style={{ padding: '0 10px' }}

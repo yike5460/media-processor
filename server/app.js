@@ -229,10 +229,9 @@ const removeCache = async (channelName, metaData) => {
 const startTasks = async (channelName, inputURL, address, metaData) => {
   //delete db record
   await scheduler.deleteItem(channelName);
-  const isCluster = String((metaData.isCluster || 'false')) === 'true';
-  const isCodec = String((metaData.isCodec || 'false')) === 'true';
-  let clusterNumber = new Number(metaData.clusterNumber || 2);
-  clusterNumber--;
+  const isCluster = String(metaData.isCluster || 'false')=== 'true';
+  const isNeedCodec = String(metaData.isCodec || 'false') === 'true';
+  const isNeedRecord = isRecord(metaData);
   var params = new Array();
   params.push({
     id: channelName,
@@ -241,13 +240,11 @@ const startTasks = async (channelName, inputURL, address, metaData) => {
     eventName: "start",
     metaData: metaData,
     isMaster: 'true',//is a master task
-    isCodec: 'false',
+    isCodec: metaData.isCodec||'false',
     isRecord: 'false',
+    taskType:'master',
     isCluster: metaData.isCluster || 'false'
   });
-
-  const isNeedRecord = isRecord(metaData);
-  console.log('---'+isNeedRecord);
   if (isNeedRecord) {
     logger.log("begin to add record task parameter");
     params.push({
@@ -257,11 +254,28 @@ const startTasks = async (channelName, inputURL, address, metaData) => {
       eventName: "start",
       metaData: metaData,
       isMaster: 'false',//is a master task
-      isCodec: 'false',
+      isCodec:  metaData.isCodec||'false',
       isRecord: 'true',// record task
+      taskType:'record',
       isCluster: metaData.isCluster || 'false'
     });
   }
+
+  if (isNeedCodec) {
+    logger.log("begin to add codes task parameter");
+    params.push({
+      id: channelName,
+      url: inputURL,
+      address: address,
+      eventName: "start",
+      metaData: metaData,
+      isMaster: 'false',
+      isCodec: metaData.isCodec||'false',
+      isRecord: 'false',
+      taskType:'codec',
+      isCluster: metaData.isCluster || 'false'
+    });
+  } 
   if (isCluster) {
     logger.log("begin to add cluster task parameter");
     // for (let index = 0; index < clusterNumber; index++) {
@@ -272,25 +286,14 @@ const startTasks = async (channelName, inputURL, address, metaData) => {
       eventName: "start",
       metaData: metaData,
       isMaster: 'false',
-      isCodec: 'false',
+      isCodec:  metaData.isCodec||'false',
       isRecord: 'false',
+      taskType:'slave',
       isCluster: metaData.isCluster || 'true'
     });
-    if (isCodec) {
-      logger.log("begin to add codes task parameter");
-      params.push({
-        id: channelName,
-        url: inputURL,
-        address: address,
-        eventName: "start",
-        metaData: metaData,
-        isMaster: 'true',
-        isCodec: 'true',
-        isRecord: 'false',
-        isCluster: metaData.isCluster || 'true'
-      });
-    }
   }
+
+
 
   // }
   for (const param of params) {

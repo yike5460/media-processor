@@ -20,8 +20,12 @@ const api = axios.create({
 function App() {
     var columns = [
         { title: "名称", field: "videoname", editable: 'never' },
-        { title: "水印输出", field: "isWaterMark", type: 'boolean', initialEditValue: false, render: rowData => rowData.isWaterMark === true ? <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
-        { title: "水印文字", field: "WaterMarkText" },
+        { title: "文字水印", field: "isWaterMark", type: 'boolean', initialEditValue: false, render: rowData => rowData.isWaterMark === true ? <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
+        { title: "图片水印", field: "isImageWaterMark", type: 'boolean', initialEditValue: false, render: rowData => rowData.isImageWaterMark === true ? <Switch size="small" checked={true} /> : <Switch size="small" checked={false} /> },
+        { title: "图片URL", field: "ImageURL",validate: rowData => rowData.ImageURL === '' ? '图片URL不能为空' : ''   },
+        { title: "图片宽度", field: "ImageWidth",initialEditValue: 100,validate: rowData => rowData.ImageWidth === '' ? '宽度不能为空' : ''   },
+        { title: "图片高度", field: "ImageHeight",initialEditValue: 50,validate: rowData => rowData.ImageHeight === '' ? '高度不能为空' : ''   },
+        { title: "文字", field: "WaterMarkText",validate: rowData => rowData.WaterMarkText === '' ? '名称不能为空' : ''  },
         { title: "文字大小", field: "WaterMarkFontSize", type: 'numeric' },
         { title: "文字颜色", field: "WaterMarkFontColor" },
         { title: "上间距", field: "WaterMarkTop", type: 'numeric' },
@@ -150,8 +154,47 @@ function App() {
                             },
                         }}
                         align="center"
-                        title="配置管理"
+                        title="水印配置"
                         columns={columns}
+                        localization={{
+                            body: {
+                                emptyDataSourceMessage: "没有视频元数据",
+                                addTooltip: '新增',
+                                deleteTooltip: '删除',
+                                editTooltip: '编辑',
+                                filterRow: {
+                                    filterTooltip: '过滤'
+                                },
+                                editRow: {
+                                    deleteText: '确认删除?',
+                                    cancelTooltip: '取消',
+                                    saveTooltip: '确认'
+                                }
+                            },
+                            header: {
+                                actions: '修改'
+                            },
+                            pagination: {
+                                labelDisplayedRows: '{from}-{to} of {count}',
+                                labelRowsSelect: '行',
+                                labelRowsPerPage: '每页行数:',
+                                firstAriaLabel: '第一页',
+                                firstTooltip: '第一页',
+                                previousAriaLabel: '上页',
+                                previousTooltip: '上页',
+                                nextAriaLabel: '下页',
+                                nextTooltip: '下页',
+                                lastAriaLabel: '最后一页',
+                                lastTooltip: '最后一页'
+                            },
+                            toolbar: {
+                                exportTitle: '导出',
+                                exportAriaLabel: '导出',
+                                exportName: '导出到CSV',
+                                searchTooltip: '搜索',
+                                searchPlaceholder: '搜索'
+                            }
+                        }}
                         data={data}
                         icons={tableIcons}
                         style={{ padding: '0 10px' }}

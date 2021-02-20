@@ -28,6 +28,7 @@
     "qrcode.react": "^1.0.1",
     "react": "^16.13.1",
     "react-avatar": "^3.9.6",
+    "react-bootstrap-sweetalert": "^5.1.15",
     "react-dom": "^16.13.1",
     "react-iframe": "^1.8.0",
     "react-player": "^2.7.2",

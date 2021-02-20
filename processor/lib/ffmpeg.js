@@ -104,7 +104,7 @@ function getMotionParams() {
 
 
 function getLiveBasePath() {
-  if (config.isCluster)
+  if (config.isCluster||config.isCodec)
     return config.livePath + "/livestreaming/" + config.streamChannel
   else
     return config.basePath + "/livestreaming/" + config.streamChannel
@@ -148,6 +148,7 @@ getCodecParams=function() {
     "-i",
     config.inputURL,
   ];
+  
   const codec=config.codec;
   if(config.isLD)
   params=params.concat(getMBRParam(codec,'640','360','400k','600k','600k','64k','360p'));
@@ -379,7 +380,7 @@ function getDynamicText() {
  if (fs.existsSync(imagePath)) {
   return [
     "-i",imagePath,
-    "-filter_complex",`[1:v]scale=${config.ImageWidth}:${config.ImageHeight}[wm];[0:v][wm]overlay=main_w-overlay_w-20:20`
+    "-filter_complex",`[1:v]scale=${config.ImageWidth}:${config.ImageHeight}[wm];[0:v][wm]overlay=${config.waterMarkLeft}:${config.waterMarkTop}`
   ]; }
   else
   return []; 

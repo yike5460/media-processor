@@ -106,7 +106,6 @@ const stopTasks = async (event) => {
 }
 
 function getECSParam(event) {
-
     if (ecs_Type == "fargate")
         return getFargateParams(event);
     else
@@ -116,6 +115,7 @@ function getECSParam(event) {
 function getEC2Params(event) {
     const metaData = event.metaData;
     const task_num = parseInt(metaData.clusterNumber || taskNumber);
+    const taskSize=getTaskSize(event);
     return {
         cluster: clusterName,
         taskDefinition: taskName,
@@ -136,8 +136,10 @@ function getEC2Params(event) {
                 name: containerName,
                 environment: getEnv(event)
             }],
-            cpu: (event.isMaster === 'true') ? String(metaData.cpu || "2048") : String(metaData.slave_cpu || "512"),
-            memory: (event.isMaster === 'true') ? String(metaData.memory || "4GB") : String(metaData.slave_memory || "1024")
+            // cpu: (event.isMaster === 'true') ? String(metaData.cpu || "2048") : String(metaData.slave_cpu || "512"),
+            // memory: (event.isMaster === 'true') ? String(metaData.memory || "4GB") : String(metaData.slave_memory || "1024")
+            cpu: taskSize.cpu,
+            memory: taskSize.memory,
         },
         count: (event.isMaster === 'true') ? 1 : task_num,
         launchType: "EC2",
@@ -155,28 +157,65 @@ function getEC2Params(event) {
     };
 }
 
-function getCPU(event) {
+
+
+function getTaskSize(event) {
     const metaData = event.metaData;
-    if (event.isMaster === 'true')
-        return String(metaData.cpu || "2048");
-    if (event.isRecord === 'true')
-        return String(metaData.slave_cpu || "512");
-    else
-        return String(metaData.slave_cpu || "512");
+    if (event.isMaster === 'true') {
+        const size = metaData.masterSize||'large';
+        const TaskSize = getSize(size);
+        logger.log('-----the master task size is:'+JSON.stringify(TaskSize));
+        return TaskSize;
+    }
+    else if (event.isRecord === 'true') {
+        const size = metaData.recordSize||'small';
+        const TaskSize = getSize(size);
+        logger.log('-----the record task size is:'+JSON.stringify(TaskSize));
+        return TaskSize;
+    }
+    else if (event.taskType === 'codec') {
+        const size = metaData.codecSize||'medium';
+        const TaskSize = getSize(size);
+        logger.log('-----the codec task size is:'+JSON.stringify(TaskSize));
+        return TaskSize;
+    }
+    else {
+        const size = metaData.slaveSize||'micro';
+        const TaskSize = getSize(size);
+        logger.log('----- the slave task size is:'+JSON.stringify(TaskSize));
+        return TaskSize;
+    }
 }
 
-function getMemory(event){
-   if (event.isMaster === 'true') 
-   return String(metaData.memory || "4GB") 
-   if(event.isRecord === 'true')
-   return String(metaData.slave_cpu || "512");
-   else
-   return  String(metaData.slave_memory || "1024")
+function getSize(size) {
+    const taskSize = {}
+    if (size === 'micro') {
+        taskSize.cpu = '256';
+        taskSize.memory = '512'
+    }
+    else if (size === 'small') {
+        taskSize.cpu = '512';
+        taskSize.memory = '1024'
+    }
+    else if (size === 'medium') {
+        taskSize.cpu = '1024';
+        taskSize.memory = '2048'
+    }
+    else if (size === 'large') {
+        taskSize.cpu = '2048';
+        taskSize.memory = '4096'
+    }
+    else if (size === 'xlarge') {
+        taskSize.cpu = '4096';
+        taskSize.memory = '8192'
+    }
+    return taskSize;
 }
 
 function getFargateParams(event) {
     const metaData = event.metaData;
     const task_num = parseInt(metaData.clusterNumber || taskNumber);
+    const taskSize=getTaskSize(event);
     return {
         cluster: clusterName,
         taskDefinition: taskName,
@@ -196,10 +235,10 @@ function getFargateParams(event) {
                 name: containerName,
                 environment: getEnv(event)
             }],
-            cpu: (event.isMaster === 'true') ? String(metaData.cpu || "2048") : String(metaData.slave_cpu || "512"),
-            memory: (event.isMaster === 'true') ? String(metaData.memory || "4GB") : String(metaData.slave_memory || "1024")
+            cpu: taskSize.cpu,
+            memory: taskSize.memory,
         },
-        count: (event.isMaster === 'true') ? 1 : task_num,
+        count: (event.taskType === 'slave') ? task_num : 1,
         launchType: "FARGATE",
         platformVersion: '1.4.0'
     };
@@ -220,6 +259,7 @@ function getEnv(event) {
         { name: "IS_MASTER", "value": String(event.isMaster || 'true') },
         { name: "IS_CODEC", "value": String(event.isCodec || 'false') },
         { name: "IS_RECORD", "value": String(event.isRecord || 'false') },
+        { name: "TASK_TYPE", "value": String(event.taskType || 'master') },
         { name: "CODEC", "value": String(metaData.codec || 'libx264') },
         { name: "IS_LD", "value": String(metaData.ld || 'false') },
         { name: "IS_SD", "value": String(metaData.sd || 'false') },
@@ -253,7 +293,7 @@ function getEnv(event) {
         { name: "WATERMARK_FONT_COLOR", "value": String(metaData.WaterMarkFontColor || "red") },
         { name: "WATERMARK_FONT_TOP", "value": String(metaData.WaterMarkTop || "10") },
         { name: "WATERMARK_FONT_LEFT", "value": String(metaData.WaterMarkLeft || "10") },
-        
+
         { name: "IS_IMAGE_WATERMARK", "value": String(metaData.isImageWaterMark || "false") },
         { name: "IMAGE_URL", "value": String(metaData.ImageURL || "test") },
         { name: "IMAGE_WIDTH", "value": String(metaData.ImageWidth || "100") },

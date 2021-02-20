@@ -137,7 +137,7 @@ export default function Login({ setToken }) {
   });
             dispatch({
                 type: 'loginSuccess',
-                payload: 'Login Successfully'
+                payload: '登录成功'
             });
 
         } else {
@@ -173,7 +173,7 @@ export default function Login({ setToken }) {
     return (
         <form className={classes.container} noValidate autoComplete="off">
             <Card className={classes.card}>
-                <CardHeader className={classes.header} title="管理系统登陆" />
+                <CardHeader className={classes.header} title="视频管理系统" />
                 <CardContent>
                     <div>
                         <TextField

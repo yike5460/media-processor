@@ -20,6 +20,7 @@ module.exports = Object.freeze({
   isCMAF: (process.env.IS_CMAF || 'true')=== 'true',
   isCodec: (process.env.IS_CODEC|| 'false')=== 'true' ,
   isRecord: (process.env.IS_RECORD|| 'false')=== 'true' ,
+  taskType: (process.env.TASK_TYPE|| 'master') ,
   codec: process.env.CODEC || 'libx264',
   isLD: (process.env.IS_LD || 'true')=== 'true',
   isSD: (process.env.IS_SD || 'false')=== 'true',
