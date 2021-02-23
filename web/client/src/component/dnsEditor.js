@@ -20,7 +20,7 @@ function DnsForm() {
   );
 
   React.useEffect(() => {
-    api.get("/dns").then(res => { 
+    api.get("/streamdns").then(res => { 
     updateFields(res.data.data);
     }).catch(error => {
     

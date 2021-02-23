@@ -46,7 +46,7 @@ function App() {
 
     useEffect(() => {
         setIsLoading(true)
-        api.get("/dns").then(res => { 
+        api.get("/streamdns").then(res => { 
             setDNS(res.data.data);
             }).catch(error => { 
             }) 

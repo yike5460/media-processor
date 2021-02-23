@@ -139,7 +139,7 @@ const FormikForm = withFormik({
     enableReinitialize: true,
     handleSubmit: (values, { props, ...actions }) => {
         console.log(values);
-        api.post("/dns", values).then(res => {
+        api.post("/streamdns", values).then(res => {
             props.updateFields(values);
             actions.setStatus({
                 edit: false,

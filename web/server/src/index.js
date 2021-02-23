@@ -32,7 +32,7 @@ app.use('/login', (req, res) => {
   });
 });
 
-app.get('/dns',async (req, res) => {
+app.get('/streamdns',async (req, res) => {
   res.set('Content-Type', 'application/json');
   const value= await ssm.getParam(['pullDNS','pushDNS']);
   const data={};
@@ -45,7 +45,7 @@ app.get('/dns',async (req, res) => {
   res.json(response);
 });
 
-app.post('/dns', async(req, res) => {
+app.post('/streamdns', async(req, res) => {
   let body = req.body;
   await ssm.putParam('pullDNS',body.pullDNS);
   await ssm.putParam('pushDNS',body.pushDNS);
