@@ -10,15 +10,15 @@
   "author": "Peter Coles",
   "license": "MIT",
   "dependencies": {
-    "aws-sdk": "^2.672.0",
-    "express": "^4.17.1",
+    "aws-sdk": "^2.853.0",
     "axios": "^0.21.1",
-    "uuid": "8.3.0",
-    "lodash": "^4.17.20"
+    "express": "^4.17.1",
+    "lodash": "^4.17.21",
+    "uuid": "8.3.0"
   },
   "devDependencies": {
-    "nodemon": "^1.19.0",
-    "chai": "^4.2.0",
-    "mocha": "^6.1.4"
+    "chai": "^4.3.0",
+    "mocha": "^6.1.4",
+    "nodemon": "^1.19.4"
   }
 }

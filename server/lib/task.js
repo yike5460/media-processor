@@ -174,7 +174,7 @@ function getTaskSize(event) {
         return TaskSize;
     }
     else if (event.taskType === 'codec') {
-        const size = metaData.codecSize||'medium';
+        const size = metaData.codecSize||'large';
         const TaskSize = getSize(size);
         logger.log('-----the codec task size is:'+JSON.stringify(TaskSize));
         return TaskSize;
