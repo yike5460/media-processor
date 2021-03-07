@@ -1,3 +1,5 @@
+Description: >
+  (SO8015) - live stream solution. Version v1.0.0
 AWSTemplateFormatVersion: '2010-09-09'
 Description: Live Streaming Server
 Parameters:

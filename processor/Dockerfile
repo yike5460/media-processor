@@ -106,8 +106,8 @@ RUN apk add --no-cache --virtual .build-deps-yarn curl gnupg tar \
 #
 LABEL maintainer="NGINX Docker Maintainers <docker-maint@nginx.com>"
 
-ENV NGINX_VERSION 1.19.5
-ENV NJS_VERSION   0.4.4
+ENV NGINX_VERSION 1.19.7
+ENV NJS_VERSION   0.5.1
 ENV PKG_RELEASE   1
 
 RUN set -x \

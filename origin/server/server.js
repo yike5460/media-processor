@@ -16,9 +16,17 @@ app.get('/healthcheck', async (req, res) => {
   return res.status(200).send('OK');
 });
 
+app.get('/api/servers', async (req, res) => {
+  const servers= await cache.getServers();
+ // console.log("server response:"+servers)
+  if (_.isNil(servers)) 
+  res.send([]);
+  else
+  res.send(servers);
+});
+
 app.get('/*', async (req, res) => {
  // console.log(req.path);
-
   // Validate stream.
   const pathParts = _.split(_.trim(req.path, '/'), '/');
   const streamName = _.nth(pathParts, 0);

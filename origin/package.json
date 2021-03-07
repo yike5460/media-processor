@@ -16,7 +16,9 @@
   "author": "heyang",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.853.0",
+    "async": "^3.2.0",
+    "aws-sdk": "^2.858.0",
+    "axios": "^0.21.1",
     "ejs": "^3.1.6",
     "express": "^4.17.1",
     "express-session": "1.17.1",

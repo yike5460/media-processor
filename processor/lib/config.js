@@ -1,4 +1,5 @@
 module.exports = Object.freeze({
+  ServerList:"OnlineServer",
   inputURL: process.env.INPUT_URL || "rtmp://58.200.131.2:1935/livetv/natlgeo",
   basePath: process.env.NODE_ENV === "production" ? "/dev/shm" : "media",
   livePath:process.env.NODE_ENV === "production" ? "/media" : "media",

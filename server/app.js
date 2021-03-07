@@ -152,7 +152,6 @@ const init = async () => {
         const timeoutMs = _.isEqual(process.env.NODE_ENV, "development")
           ? 1000
           : 2 * 1000;
-
         await removeCache(name, metaData).catch(error => console.log(error.message));
         // const values = await cache.smembers(name);
         // await values.forEach(element => {
@@ -210,14 +209,22 @@ const removeCache = async (channelName, metaData) => {
   // let clusterNumber = new Number(metaData.clusterNumber || '5');
   // clusterNumber--;
   logger.log("remove channel " + channelName + " from cache");
-  if (isCluster) {
+  // if (isCluster) {
     const addressSets = await cache.smembers(channelName);
     addressSets.forEach(async address => {
       logger.log("remove address " + address + " from cache");
       await cache.srem(channelName, address);
+      logger.log("remove address " + address + " from onlineserver");
+      await cache.srem("OnlineServer",address);
     });
-  }
+  // }
   await cache.del(channelName);
+  await notify(channelName);
+ // await cache.del("OnlineServer");
+}
+
+const notify=async(channelName)=>{
+  await cache.publish('OnlineStatus',JSON.stringify({channel:channelName,action:"offline"}));
 }
 /**
  * 

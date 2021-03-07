@@ -93,7 +93,7 @@ const initServer = async () => {
     if (config.isMaster) { //if is cluster mode
       if (config.IS_RELAY) {
         logger.log('*** start relay process on master task ***');
-        await runRelayProcess();
+        await runRelayProcess();//add retry function
       }
       if (config.isLive || config.isCMAF) {
         logger.log('********* start hls live streaming process on master task*********');
@@ -165,7 +165,6 @@ const runLiveProcess = async (params, clear) => {
     // Make a request for a user with a given ID
     axios.get(serverUrl, { timeout: 2000 })
       .then(function (response) {
-
         if (retryLiveCount === RETRY_THRESHOLD) {
           return new Error(error);
         }
@@ -223,7 +222,6 @@ const runRecordProcess = async (motion, p2p, pd) => {
     // Make a request for a user with a given ID
     axios.get(serverUrl, { timeout: 2000 })
       .then(function (response) {
-
         if (retryLiveCount === RETRY_THRESHOLD) {
           return new Error(error);
         }
@@ -341,23 +339,44 @@ function mkdirsSync(dirname) {
     }
   }
 }
+
+
 const clearResources = async () => {
   //clear hls files
   console.log("remove dir:" + liveStreamingPath);
   await fsTool.rmdirSync(liveStreamingPath);
   console.log("remove cache from channel:" + config.streamChannel);
   await cache.srem(config.streamChannel, SERVER_ADDRESS)
+  console.log("remove address from onlineserver:" + SERVER_ADDRESS);
+  await cache.srem("OnlineServer",SERVER_ADDRESS)
+  await notify('offline');
+}
+
+const removeChannel=async()=>{
+  console.log("remove cache from channel:" + config.streamChannel);
+  await cache.srem(config.streamChannel, SERVER_ADDRESS)
+  console.log("remove address from onlineserver:" + SERVER_ADDRESS);
+  await cache.srem("OnlineServer",SERVER_ADDRESS)
+}
+
+const notify=async(event)=>{
+  await cache.publish('OnlineStatus',JSON.stringify({channel:config.streamChannel,action:event}));
 }
 
 const addChannel = async () => {
   if (!config.isCluster) {
     logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
     await cache.sadd(config.streamChannel, SERVER_ADDRESS);
+    logger.log('add Online server --- address:' + SERVER_ADDRESS);
+    await cache.sadd("OnlineServer",SERVER_ADDRESS);
+    await notify('online');
   }
   else {
     if (!config.isMaster) {
       logger.log('add channel:' + config.streamChannel + '- address:' + SERVER_ADDRESS);
       await cache.sadd(config.streamChannel, SERVER_ADDRESS);
+      logger.log('add Online server --- address:' + SERVER_ADDRESS);
+      await cache.sadd("OnlineServer",SERVER_ADDRESS)
     }
   }
 }

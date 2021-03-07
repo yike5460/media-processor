@@ -11,11 +11,13 @@ const del = promisify(cache.del).bind(cache);
 const get = promisify(cache.get).bind(cache);
 const smembers=promisify(cache.smembers).bind(cache);
 const srem=promisify(cache.srem).bind(cache);
+const publish =promisify(cache.publish).bind(cache);
 
 module.exports = {
   set,
   del,
   get,
   smembers,
-  srem
+  srem,
+  publish
 };
