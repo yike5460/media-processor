@@ -274,8 +274,22 @@ const runRelayProcess = async () => {
   });
 
   relayProcess.on("exit", function (code, signal) {
-    //logger.log("waiting 30s to restart live process");
-    console.log("relay process exit......");
+    logger.log("Exit relay process ");
+    const serverUrl = 'http://' + config.address + ':8000/api/server';
+    console.log("Checking Server Status...");
+    // Make a request for a user with a given ID
+    axios.get(serverUrl, { timeout: 2000 })
+      .then(function (response) {
+        if (retryLiveCount === RETRY_THRESHOLD) {
+          return new Error(error);
+        }
+        retryLiveCount++;
+        logger.log("Check media server status success,waiting " + config.retryTimeout * retryLiveCount + "s to restart relay process");
+        setTimeout(runRelayProcess, config.retryTimeout * retryLiveCount);
+      })
+      .catch(function (error) {
+        console.log("check status false,ffmpeg stream exit with code " + code);
+      })
   });
 
   relayProcess.on("error", function (err) {
