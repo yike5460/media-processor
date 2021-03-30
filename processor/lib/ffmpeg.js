@@ -7,7 +7,7 @@ function getVideoParams() {
   return [
     //   '-an',
     "-c:v",
-    config.transCoding,
+    getTransParam(),
     // "-map",
     // "0",
     "-f",
@@ -44,7 +44,7 @@ function getImageParams() {
     //   "-map",  "0:v",
     "-an",
     "-c:a",
-    "copy",
+    getTransParam(),
     "-vf",
     "fps=1/" + config.imageTime,
     "-strict",
@@ -104,39 +104,39 @@ function getMotionParams() {
 
 
 function getLiveBasePath() {
-  if (config.isCluster||config.isCodec)
+  if (config.isCluster || config.isCodec)
     return config.livePath + "/livestreaming/" + config.streamChannel
   else
     return config.basePath + "/livestreaming/" + config.streamChannel
 }
 
-function getMBRParam(codec,w,h,bv,maxrate,bufsize,ba,resolution){
-return [
-  '-vf', `scale=w=${w}:h=${h}:force_original_aspect_ratio=decrease`,
-  '-c:a', 'aac',
-  '-ar', '48000',
-  '-c:v', codec,
-  '-preset', 'veryfast',
-  '-keyint_min', '24',
-   '-g', '48',
-   '-sc_threshold', '0',
-  '-b:v', bv,
-  '-maxrate', maxrate,
-  '-bufsize', bufsize,
-  '-b:a', ba,
-  '-hls_time', '12',
-  '-hls_list_size', '6',
-  "-hls_flags",
-  "delete_segments",
-  "-start_number",
-  Date.now(),
-  '-hls_segment_filename' ,
-  `${getLiveBasePath()}/${resolution}/${resolution}_%03d.ts`, 
-  `${getLiveBasePath()}/${resolution}/index.m3u8`
-]
+function getMBRParam(codec, w, h, bv, maxrate, bufsize, ba, resolution) {
+  return [
+    '-vf', `scale=w=${w}:h=${h}:force_original_aspect_ratio=decrease`,
+    '-c:a', 'aac',
+    '-ar', '48000',
+    '-c:v', codec,
+    '-preset', 'veryfast',
+    '-keyint_min', '24',
+    '-g', '48',
+    '-sc_threshold', '0',
+    '-b:v', bv,
+    '-maxrate', maxrate,
+    '-bufsize', bufsize,
+    '-b:a', ba,
+    '-hls_time', '12',
+    '-hls_list_size', '6',
+    "-hls_flags",
+    "delete_segments",
+    "-start_number",
+    Date.now(),
+    '-hls_segment_filename',
+    `${getLiveBasePath()}/${resolution}/${resolution}_%03d.ts`,
+    `${getLiveBasePath()}/${resolution}/index.m3u8`
+  ]
 }
 
-getCodecParams=function() {
+getCodecParams = function () {
   var params = [
     "-loglevel",
     config.logLevel,
@@ -148,17 +148,17 @@ getCodecParams=function() {
     "-i",
     config.inputURL,
   ];
-  
-  const codec=config.codec;
-  if(config.isLD)
-  params=params.concat(getMBRParam(codec,'640','360','400k','600k','600k','64k','360p'));
-  if(config.isSD)
-  params=params.concat(getMBRParam(codec,'842','480','600k','900k','900k','64k','480p'));
-  if(config.isHD)
-  params= params.concat(getMBRParam(codec,'1280','720','1000k','1500k','1500k','128k','720p'));
-  if(config.isUD)
-  params=params.concat(getMBRParam(codec,'1920','1080','2000k','3000k','3000k','128k','1080p'));
-  params=params.concat ([
+
+  const codec = config.codec;
+  if (config.isLD)
+    params = params.concat(getMBRParam(codec, '640', '360', '400k', '600k', '600k', '64k', '360p'));
+  if (config.isSD)
+    params = params.concat(getMBRParam(codec, '842', '480', '600k', '900k', '900k', '64k', '480p'));
+  if (config.isHD)
+    params = params.concat(getMBRParam(codec, '1280', '720', '1000k', '1500k', '1500k', '128k', '720p'));
+  if (config.isUD)
+    params = params.concat(getMBRParam(codec, '1920', '1080', '2000k', '3000k', '3000k', '128k', '1080p'));
+  params = params.concat([
     '-f', 'hls',
     "-tune",
     "zerolatency",
@@ -276,7 +276,7 @@ function getCMAF1Params() {
 }
 
 function getTransParam() {
-  if (config.isWatermark||config.isImageWaterMark)
+  if (config.isWatermark || config.isImageWaterMark)
     return "libx264";
   else return "copy"
 }
@@ -373,17 +373,17 @@ function getDynamicText() {
   // ffmpeg -i input.mp4 -i wm.png -filter_complex "[1:v]scale=384:216[wm];[0:v][wm]overlay=0:0"
 }
 
- function getImageWaterMark()
-{
-  const imageName=config.ImageURL.split("/").pop()
- const imagePath = config.basePath +'/'+ imageName
- if (fs.existsSync(imagePath)) {
-  return [
-    "-i",imagePath,
-    "-filter_complex",`[1:v]scale=${config.ImageWidth}:${config.ImageHeight}[wm];[0:v][wm]overlay=${config.waterMarkLeft}:${config.waterMarkTop}`
-  ]; }
+function getImageWaterMark() {
+  const imageName = config.ImageURL.split("/").pop()
+  const imagePath = config.basePath + '/' + imageName
+  if (fs.existsSync(imagePath)) {
+    return [
+      "-i", imagePath,
+      "-filter_complex", `[1:v]scale=${config.ImageWidth}:${config.ImageHeight}[wm];[0:v][wm]overlay=${config.waterMarkLeft}:${config.waterMarkTop}`
+    ];
+  }
   else
-  return []; 
+    return [];
 }
 /**
  * return params according to medadata
@@ -421,7 +421,7 @@ getParams = function () {
   return params;
 };
 
-getFLVParams =  function () {
+getFLVParams = function () {
   var params = [
     "-loglevel",
     config.logLevel,
@@ -463,7 +463,8 @@ getLiveParams = function () {
   logger.log("----ffmpeg live params:" + params);
   return params;
 };
-
+//ffmpeg -re -i Big_Buck_Bunny_alt.webm  -f tee -vcodec libx264 -acodec aac -map 0  
+//"[f=flv:onfail=ignore]rtmp://52.82.49.107:1935/stream/|[f=flv:onfail=ignore]rtmp://push.live.solutions.aws.a2z.org.cn:1935/stream/"
 getRelayParams = function () {
   var params = [
     "-loglevel",
@@ -483,6 +484,7 @@ getRelayParams = function () {
     "baseline",
     "-f",
     "flv",
+    //"tee",
     "-y",
     "-tune",
     "zerolatency",
@@ -490,13 +492,29 @@ getRelayParams = function () {
     "discardcorrupt",
     "-flags",
     "low_delay",
+    // "-vcodec", "libx264",
+    // "-acodec", "aac",
     "-c:v",
     "copy",
-    config.RELAY_URL
+    // "-map", "0" ,
+ config.RELAY_URL
   ];
   logger.log("----ffmpeg relay params:" + params);
   return params;
 }
+
+
+const getURLParam = (urls) => {
+  var params = "";
+  const urlList = urls.split(',');
+  for (var i = 0; i < urlList.length; i++) {
+    params=params.concat(
+      "[f=flv:onfail=ignore]" + urlList[i]+"|"
+    );
+  }
+  return params;
+}
+
 
 
 
