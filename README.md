@@ -2,7 +2,7 @@
 
 AWS容器直播方案是一个端到端的基于 AWS ECS Fargate的无服务直播方案，该方案通过aws cloudformation一键部署可以轻松在aws上实现一个高可用和弹性伸缩的视频流直播平台，可以轻松实现直播视频流的推送、转码，水印，点播和分发功能。
 
-<img src="./images/image-20201225114954302.png" alt="[Image: 图片.png]" style="zoom:50%;" />
+<img src="./images/image-20201225114954302.png" alt="[Image: 图片.png]" width="300" height="200"  />
 
 ## 功能：
 
