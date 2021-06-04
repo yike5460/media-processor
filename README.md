@@ -117,7 +117,7 @@ $ sam deploy --guided
 
 ![image-20201225112730424](./images/image-20201225112730424.png)
 **获取直播控制台地址：**
-进入AWS ECS控制台，获取video-streaming-web任务的public ip，浏览器输入该IP地址 即可进入直播控制台：
+进入AWS ECS控制台，获取video-streaming-web任务的public ip，浏览器输入http://IP地址:8000 即可进入直播控制台：
 ![image-20210604111445971](./images/get-console.png)
 
 **直播推拉流域名设置**
