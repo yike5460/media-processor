@@ -11,6 +11,10 @@ Parameters:
   PublicSubnet2ID:
     Type: AWS::EC2::Subnet::Id
     Description: Public Subnet Id for the second Availability Zone
+  OriginContainerPort:
+    Type: String
+    Description: Origin Container Port
+    Default: 80
   CNAME:
     Type: String
     Description: Initial Alias for CloudFront
@@ -96,7 +100,7 @@ Resources:
         - Name: !Sub 'video-streaming-origin'
           Image: "public.ecr.aws/l6z1v6o9/video-streaming-origin"
           PortMappings:
-            - ContainerPort: 80
+            - ContainerPort: !Ref OriginContainerPort
           Environment:
             - Name: AWS_REGION
               Value: !Ref AWS::Region
@@ -120,13 +124,14 @@ Resources:
         - !Ref PublicSubnet2ID
       SecurityGroups:
         - Fn::ImportValue: !Sub "SecurityGroup-OriginLoadBalancerSecurityGroup"
-  DefaultTargetGroup:
+
+  OriginTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn: LoadBalancer
     Properties:
       Name: !Sub 'Origin-TargetGroup'
       VpcId: !Ref VpcID
-      Port: 80
+      Port: !Ref OriginContainerPort
       Protocol: HTTP
       Matcher:
         HttpCode: 200-299
@@ -142,20 +147,20 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - LoadBalancer
-      - DefaultTargetGroup
+      - OriginTargetGroup
     Properties:
       LoadBalancerArn: !Ref LoadBalancer
-      Port: 80
+      Port: !Ref OriginContainerPort
       Protocol: 'HTTP'
       DefaultActions:
         - Type: forward
-          TargetGroupArn: !Ref DefaultTargetGroup
+          TargetGroupArn: !Ref OriginTargetGroup
 
   # LoadBalancerListenerHttps:
   #   Type: AWS::ElasticLoadBalancingV2::Listener
   #   DependsOn:
   #     - LoadBalancer
-  #     - DefaultTargetGroup
+  #     - OriginTargetGroup
   #   Properties:
   #     LoadBalancerArn: !Ref LoadBalancer
   #     Port: 443
@@ -164,13 +169,13 @@ Resources:
   #       - CertificateArn: !Ref SSLArn
   #     DefaultActions:
   #       - Type: forward
-  #         TargetGroupArn: !Ref DefaultTargetGroup
+  #         TargetGroupArn: !Ref OriginTargetGroup
 
   Service:
     Type: AWS::ECS::Service
     DependsOn: 
       - LoadBalancer
-      - DefaultTargetGroup
+      - OriginTargetGroup
       - LoadBalancerListenerHttp
       # - LoadBalancerListenerHttps
     Properties:
@@ -193,12 +198,10 @@ Resources:
       HealthCheckGracePeriodSeconds: 30
       LoadBalancers:
         - ContainerName: !Sub 'video-streaming-origin'
-          ContainerPort: 80
-          TargetGroupArn: !Ref DefaultTargetGroup
+          ContainerPort: !Ref OriginContainerPort
+          TargetGroupArn: !Ref OriginTargetGroup
 
-  #
   # CloudFront
-  #
   CDN:
     Type: 'AWS::CloudFront::Distribution'
     Properties:
@@ -274,15 +277,17 @@ Outputs:
     Value: !Ref 'CloudWatchLogsGroup'
     Export:
       Name: !Sub '${AWS::StackName}-CloudWatchLogsGroup'
-  # Domain:
-  #   Value: !Ref 'Domain'
-  #   Export:
-  #     Name: !Sub '${AWS::StackName}-Domain'
-  CDNDomain:
-    Value: !GetAtt CDN.DomainName
+  CloudFrontDomain:
+    Value: !GetAtt CDN.DNSName
     Export:
-      Name: !Sub '${AWS::StackName}-CDNDomain'
-  LBDomain:
+      Name: !Sub '${AWS::StackName}-CloudFrontDomain'
+  OriginLoadBalancerURL:
     Value: !GetAtt LoadBalancer.DNSName
     Export:
-      Name: !Sub '${AWS::StackName}-LBDomain'
+      Name: !Sub '${AWS::StackName}-OriginLoadBalancerURL'
+  OriginLoadBalancerAlias:
+    # Not currently supported by AWS CloudFormation
+    # Value: !GetAtt LoadBalancer.DistributionConfig.CNAMEs
+    Value: !Ref CNAME
+    Export:
+      Name: !Sub '${AWS::StackName}-OriginLoadBalancerAlias'

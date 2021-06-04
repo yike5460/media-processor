@@ -37,21 +37,21 @@ Resources:
           Properties:
             Path: /videostream
             Method: get
-  DynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: video-metadata
-      AttributeDefinitions:
-      - AttributeName: id
-        AttributeType: S
-      KeySchema:
-      - AttributeName: id
-        KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: 1
-        WriteCapacityUnits: 1
-      StreamSpecification:
-        StreamViewType: NEW_IMAGE
+  # DynamoDBTable:
+  #   Type: AWS::DynamoDB::Table
+  #   Properties:
+  #     TableName: video-metadata
+  #     AttributeDefinitions:
+  #     - AttributeName: id
+  #       AttributeType: S
+  #     KeySchema:
+  #     - AttributeName: id
+  #       KeyType: HASH
+  #     ProvisionedThroughput:
+  #       ReadCapacityUnits: 1
+  #       WriteCapacityUnits: 1
+  #     StreamSpecification:
+  #       StreamViewType: NEW_IMAGE
 Outputs:
   WebEndpoint:
     Description: API Gateway endpoint URL for Prod stage

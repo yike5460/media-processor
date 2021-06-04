@@ -153,7 +153,7 @@ Resources:
       #       !Sub '${SecurityStack}-ServerLoadBalancerSecurityGroup'
       Type: network
 
-  DefaultTargetGroup:
+  ServerTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn: LoadBalancer
     Properties:
@@ -170,20 +170,20 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::Listener
     DependsOn:
       - LoadBalancer
-      - DefaultTargetGroup
+      - ServerTargetGroup
     Properties:
       LoadBalancerArn: !Ref LoadBalancer
       Port: 1935
       Protocol: 'TCP'
       DefaultActions:
         - Type: forward
-          TargetGroupArn: !Ref DefaultTargetGroup
+          TargetGroupArn: !Ref ServerTargetGroup
 
   Service:
     Type: AWS::ECS::Service
     DependsOn: 
       - LoadBalancer
-      - DefaultTargetGroup
+      - ServerTargetGroup
       - LoadBalancerListenerTcp
     Properties:
       ServiceName: !Sub 'video-streaming-server'
@@ -206,7 +206,7 @@ Resources:
       LoadBalancers:
         - ContainerName: !Sub 'video-streaming-server'
           ContainerPort: 1935
-          TargetGroupArn: !Ref DefaultTargetGroup
+          TargetGroupArn: !Ref ServerTargetGroup
 
 Outputs:
   Service:
@@ -221,3 +221,7 @@ Outputs:
     Value: !Ref 'CloudWatchLogsGroup'
     Export:
       Name: !Sub '${AWS::StackName}-CloudWatchLogsGroup'
+  ServerLoadBalancerURL:
+    Value: !GetAtt LoadBalancer.DNSName
+    Export:
+      Name: !Sub '${AWS::StackName}-ServerLoadBalancerURL'

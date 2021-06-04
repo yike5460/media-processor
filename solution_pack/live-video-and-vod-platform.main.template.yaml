@@ -222,6 +222,7 @@ Resources:
     DependsOn:
     - SecurityGroup
     - ECS
+    - Origin
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: https://live-video-and-vod-platform-template.s3.cn-north-1.amazonaws.com.cn/templates/web.template
@@ -235,6 +236,15 @@ Resources:
 
   ## live video & VOD platform console url
 Outputs:
-  LiveVideoConsole:
-    Description: LiveVideo URL refer to public IP address of ECS service below
-    Value: !GetAtt [Web, Outputs.Service]
+  LiveVideoPushStreamURL:
+    Description: Live Video Push Stream URL
+    Value: !GetAtt [MediaServer, Outputs.ServerLoadBalancerURL]
+  LiveVideoPullStreamURL:
+    Description: Live Video Pull Stream URL
+    Value: !GetAtt [Origin, Outputs.CloudFrontDomain]
+  LiveVideoPullStreamAlias:
+    Description: Live Video Pull Stream URL Alias
+    Value: !GetAtt [Origin, Outputs.OriginLoadBalancerAlias]
+  LiveVideoConsoleURL:
+    Description: Live Video Management Console Address
+    Value: !GetAtt [Web, Outputs.WebLoadBalancerURL]
