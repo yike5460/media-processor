@@ -15,10 +15,14 @@ Parameters:
     Type: Number
     Default: '1'
     Description: Desired task count
-  ContainerPort:
+  WebContainerPort:
     Type: String
-    Description: Container Port
+    Description: Web Container Port
     Default: 80
+  ServerContainerPort:
+    Type: String
+    Description: Server Container Port
+    Default: 8080
 
 Resources:
   CloudWatchLogsGroup:
@@ -92,7 +96,7 @@ Resources:
         - Name: "video-streaming-web"
           Image: "public.ecr.aws/l6z1v6o9/video-streaming-web:latest"
           PortMappings:
-            - ContainerPort: !Ref ContainerPort
+            - ContainerPort: !Ref WebContainerPort
           Environment:
             - Name: AWS_REGION
               Value: !Ref AWS::Region
@@ -111,7 +115,7 @@ Resources:
         - Name: "video-streaming-web-server"
           Image: "public.ecr.aws/l6z1v6o9/video-streaming-web-server:latest"
           PortMappings:
-            - ContainerPort: 8080
+            - ContainerPort: !Ref ServerContainerPort
           Environment:
             - Name: AWS_REGION
               Value: !Ref AWS::Region
@@ -128,8 +132,53 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
 
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub 'Web-LoadBalancer'
+      Subnets:
+        - !Ref PublicSubnet1ID
+        - !Ref PublicSubnet2ID
+      SecurityGroups:
+        - Fn::ImportValue: !Sub "SecurityGroup-ProxyContainerSecurityGroup"
+
+  ConsoleTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    DependsOn: LoadBalancer
+    Properties:
+      Name: !Sub 'Console-TargetGroup'
+      VpcId: !Ref VpcID
+      Port: !Ref WebContainerPort
+      Protocol: HTTP
+      Matcher:
+        HttpCode: 200-299
+      TargetType: ip
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: '/healthcheck'
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 10
+
+  LoadBalancerListenerConsole:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    DependsOn:
+      - LoadBalancer
+      - ConsoleTargetGroup
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: !Ref WebContainerPort
+      Protocol: 'HTTP'
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref ConsoleTargetGroup
+
   Service:
     Type: AWS::ECS::Service
+    DependsOn:
+      - LoadBalancer
+      - ConsoleTargetGroup
+      - LoadBalancerListenerConsole
     Properties:
       ServiceName: !Sub 'video-streaming-web'
       Cluster:
@@ -146,6 +195,10 @@ Resources:
             - !Ref PublicSubnet2ID
           SecurityGroups:
             - Fn::ImportValue: !Sub 'SecurityGroup-ProxyContainerSecurityGroup'
+      LoadBalancers:
+        - ContainerName: !Sub 'video-streaming-web'
+          ContainerPort: !Ref WebContainerPort
+          TargetGroupArn: !Ref ConsoleTargetGroup
 
 Outputs:
   Service:
@@ -160,3 +213,7 @@ Outputs:
     Value: !Ref 'CloudWatchLogsGroup'
     Export:
       Name: !Sub '${AWS::StackName}-CloudWatchLogsGroup'
+  WebLoadBalancerURL:
+    Value: !GetAtt LoadBalancer.DNSName
+    Export:
+      Name: !Sub '${AWS::StackName}-WebLoadBalancerURL'
