@@ -29,7 +29,7 @@ Parameters:
   ContainerPort:
     Type: String
     Description: Container Port
-    Default: 8000
+    Default: 80
 
 Resources:
 
