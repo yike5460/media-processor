@@ -154,7 +154,7 @@ Resources:
         HttpCode: 200-299
       TargetType: ip
       HealthCheckIntervalSeconds: 30
-      HealthCheckPath: '/healthcheck'
+      HealthCheckPath: '/'
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
