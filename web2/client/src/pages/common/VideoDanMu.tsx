@@ -84,11 +84,12 @@ const VideoDanMu: React.FC<VideoDanMuProps> = (props: VideoDanMuProps) => {
           <div className="danmaku-wrapper" />
         </div>
         <ReactPlayer
+          muted={true}
           fluid={false}
           width="100%"
           height={window.screen.height * 0.32 - 30}
           className="react-player"
-          playing
+          playing={true}
           controls
           url={videoUrl}
         />
