@@ -44,7 +44,7 @@ const Live: React.FC<RouteComponentProps<MatchParams>> = (
         <div className="live-wrap pr">
           <div className="video">
             <VideoDanMu
-              videoUrl={`http://${appConfig?.pullDNS}/${id}/live.flv`}
+              videoUrl={`http://${appConfig?.pullDNS}/${id}/live.m3u8`}
             />
           </div>
           <div className="comment">
