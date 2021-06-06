@@ -1,0 +1,316 @@
+* {
+  box-sizing: border-box;
+}
+.App {
+  min-width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+.ls-header {
+  width: 100%;
+  height: 50px;
+  background-color: #36454f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+}
+.ls-header .s-name {
+  font-size: 18px;
+  font-weight: bold;
+  display: inline-block;
+  padding-left: 10px;
+  flex-shrink: 0;
+}
+.ls-header .nav {
+  flex-grow: 1;
+  text-align: right;
+}
+.ls-header .nav a {
+  color: #fff;
+  display: inline-block;
+  padding: 5px 0px;
+  margin: 0 20px 0 20px;
+  text-decoration: none;
+}
+.ls-header .nav a.active {
+  color: #48aff0;
+  font-weight: bold;
+}
+.ls-pages {
+  width: 100%;
+  padding: 10px 10px;
+  background-color: #0e1316;
+  color: #eee;
+  flex: 1;
+}
+.box {
+  background-color: #1c2730;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+.box .box-title {
+  text-align: left;
+  font-size: 14px;
+  font-weight: bold;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  color: #ccc;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+.box .split {
+  padding-bottom: 5px;
+  border-top: 2px solid rgba(0, 0, 0, 0.3);
+}
+.ls-main-wrap {
+  display: flex;
+}
+.ls-main-wrap .ls-left {
+  width: 350px;
+}
+.ls-main-wrap .ls-left .time {
+  text-align: center;
+  font-size: 48px;
+}
+.ls-main-wrap .ls-left .time .clock {
+  padding: 20px 0;
+}
+.ls-main-wrap .ls-l-video {
+  flex: 2;
+}
+.ls-main-wrap .ls-l-video .channel-item {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  padding: 5px 0 10px 0;
+}
+.ls-main-wrap .ls-l-video .channel-item .icon {
+  width: 70px;
+  text-align: center;
+}
+.ls-main-wrap .ls-l-video .channel-item .info {
+  font-size: 12px;
+}
+.ls-main-wrap .ls-l-video .channel-item .info .desc {
+  padding: 3px 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+.ls-main-wrap .ls-l-video .channel-item .info .expire {
+  color: rgba(255, 255, 255, 0.8);
+}
+.ls-main-wrap .ls-l-comments {
+  flex: 3;
+}
+.ls-main-wrap .ls-l-comments .comment-item {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  padding: 5px 0 5px 0;
+}
+.ls-main-wrap .ls-l-comments .comment-item .icon {
+  padding-top: 5px;
+  width: 50px;
+  text-align: center;
+}
+.ls-main-wrap .ls-l-comments .comment-item .info {
+  font-size: 12px;
+  color: #bbb;
+}
+.ls-main-wrap .ls-l-comments .comment-item .info .desc {
+  padding: 3px 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+.ls-main-wrap .ls-l-comments .comment-item .info .p-time {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+.ls-main-wrap .ls-main {
+  padding: 0 0 0 0px;
+  flex: 1;
+  display: flex;
+}
+.ls-main-wrap .ls-main .live-video {
+  flex: 1;
+  padding-left: 10px;
+}
+.ls-main-wrap .ls-main .file-video {
+  flex: 1;
+}
+.ls-main-wrap .ls-main .video .title {
+  font-size: 14px;
+  font-weight: bold;
+  padding: 0 0 10px 0;
+}
+.ls-main-wrap .ls-main .video .live {
+  height: 32vh;
+  background-color: #000;
+  overflow: hidden;
+}
+.ls-main-wrap .ls-main .video .live .live-icon {
+  position: absolute;
+  padding: 5px 0 5px 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  z-index: 9;
+  width: 100%;
+}
+.ls-main-wrap .ls-main .channel {
+  height: calc(68vh - 132px);
+}
+.ls-main-wrap .ls-main .channel .more-setting-btn {
+  padding: 10px 0 0px;
+  text-align: center;
+}
+.ls-main-wrap .ls-main .channel .qr-code .qr-code-live {
+  position: absolute;
+  right: 0;
+  display: none;
+  padding: 10px;
+  background-color: #fff;
+  z-index: 99;
+}
+.ls-main-wrap .ls-main .channel .qr-code:hover .qr-code-live {
+  display: inline-block;
+}
+.ls-main-wrap .ls-right {
+  width: 150px;
+  padding-left: 10px;
+}
+.ls-main-wrap .ls-right .number {
+  text-align: center;
+  font-size: 32px;
+  font-weight: bold;
+  letter-spacing: -1px;
+}
+.water-settings {
+  display: flex;
+  flex-wrap: wrap;
+}
+.water-settings .item {
+  width: 33%;
+  display: flex;
+  align-items: center;
+}
+.water-settings .item label {
+  width: 70px;
+  flex-shrink: 0;
+  text-align: right;
+  padding-right: 3px;
+}
+.live-wrap {
+  width: 600px;
+  margin: 0 auto;
+  background-color: #1c2730;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px;
+  min-height: calc(100vh - 80px);
+}
+.live-wrap .video {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  margin-bottom: 10px;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+.live-wrap .comment {
+  font-size: 16px;
+  display: flex;
+  flex-direction: row;
+  margin: 10px 0;
+  align-items: flex-start;
+}
+.live-wrap .comment .label {
+  width: 100px;
+  align-items: center;
+  padding-top: 10px;
+  padding-left: 10px;
+}
+.live-wrap .comment .input {
+  flex: 1;
+}
+.live-wrap .button {
+  margin-top: 10px;
+}
+.live-wrap .button button {
+  width: 100%;
+  padding: 10px 20px;
+  background-color: #dd761c !important;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+}
+.ws-status {
+  z-index: 99;
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  font-size: 10px;
+}
+.ws-status > span {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 100%;
+}
+.ws-status .online {
+  background-color: #076933;
+}
+.ws-status .offline {
+  background-color: #f00;
+}
+.danmu-outer {
+  width: 100%;
+  height: 30vh;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.danmu-outer .danmaku-wrapper {
+  width: 100%;
+  height: calc(32vh - 60px);
+  margin: 0 auto;
+  z-index: 99;
+}
+.table-list {
+  margin-top: 10px;
+  padding: 10px 10px 10px;
+  flex: 1;
+}
+.detail-item {
+  margin-bottom: 10px;
+}
+.detail-item .item-title {
+  color: #ccc;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 10px 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+.detail-item .detail-form {
+  align-items: center;
+  padding: 10px;
+}
+.detail-item .detail-form .form-item {
+  margin-top: 10px;
+  display: flex;
+  width: 100%;
+}
+.detail-item .detail-form .form-item .form-label {
+  color: #999;
+  width: 100px;
+  padding-top: 5px;
+  text-align: right;
+}
+.detail-item .detail-form .form-item .form-input {
+  flex: 1;
+}
+.detail-button button {
+  padding: 10px 40px;
+  background-color: #dd761c !important;
+  border: 0;
+  color: #fff;
+  cursor: pointer;
+}
+@media (max-width: 768px) {
+  .live-wrap {
+    width: 100%;
+ }
+}

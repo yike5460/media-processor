@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./App.scss";
+import "./App.css";
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import Axios from "common/http";
 import Home from "pages/home/Home";
