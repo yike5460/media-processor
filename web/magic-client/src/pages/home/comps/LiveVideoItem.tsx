@@ -6,11 +6,12 @@ import VideoBridge from "./VideoBridge";
 import WaterPrint from "./WaterPrint";
 import { Icon, IconName } from "@blueprintjs/core";
 import QRCode from "qrcode.react";
-import ReactPlayer from "react-player/file";
 
 import AppContext from "context/AppContext";
 import { StreamType } from "assets/types/types";
 import QRCodeImg from "assets/images/QRcode.svg";
+// import useWebSocketLite from "hooks/useWebSocketHook";
+import VideoDanMu from "pages/common/VideoDanMu";
 
 interface LiveVideoPropsType {
   icon: IconName;
@@ -22,6 +23,11 @@ interface LiveVideoPropsType {
 const LiveVideoItem: React.FC<LiveVideoPropsType> = (
   props: LiveVideoPropsType
 ): JSX.Element => {
+  // use our hook
+  // const ws = useWebSocketLite({
+  //   socketUrl: "ws://localhost:8080",
+  // });
+
   const appConfig = useContext(AppContext);
   const { icon, title, srcType, streamData } = props;
 
@@ -40,10 +46,6 @@ const LiveVideoItem: React.FC<LiveVideoPropsType> = (
     }
   }, [streamData]);
 
-  // if (!streamData) {
-  //   return <div>Loading</div>;
-  // }
-
   return (
     <div className="live-video flex flex-col">
       <div className="video box mb-0">
@@ -52,18 +54,7 @@ const LiveVideoItem: React.FC<LiveVideoPropsType> = (
         </div>
         <div className="live pr flex flex-col">
           <div className="live-icon">{srcType}</div>
-          <div className="player-wrapper">
-            {/* {videoUrl} */}
-            <ReactPlayer
-              fluid={false}
-              width="100%"
-              height={window.screen.height * 0.32 - 30}
-              className="react-player"
-              playing
-              controls
-              url={videoUrl}
-            />
-          </div>
+          <VideoDanMu videoUrl={videoUrl} />
         </div>
       </div>
       <div className="channel box over-y-auto">
@@ -86,6 +77,7 @@ const LiveVideoItem: React.FC<LiveVideoPropsType> = (
               </span>
             </span>
           </div>
+
           <div className="split">
             <PullStream streamData={streamData} />
           </div>

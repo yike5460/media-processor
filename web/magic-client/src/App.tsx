@@ -1,24 +1,35 @@
 import React, { useState, useEffect } from "react";
 import "./App.scss";
-import { HashRouter as Router, Route, Link, Switch } from "react-router-dom";
+import { HashRouter as Router, Route, Switch } from "react-router-dom";
 import Axios from "common/http";
 import Home from "pages/home/Home";
 import Login from "pages/login/Login";
+import List from "pages/list/List";
+import Live from "pages/live/Live";
+import Detail from "pages/detail/Detail";
 import Settings from "pages/settings/Settings";
-import Logo from "assets/images/logo.svg";
+
 import "@blueprintjs/core/lib/css/blueprint.css";
 
 import AppContext from "context/AppContext";
+import WSContext from "context/WSContext";
 import { AppConfigType } from "assets/types/types";
+import useWebSocketLite from "hooks/useWebSocketHook";
 
 function App(): JSX.Element {
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [appConfig, setAppConfig] = useState<AppConfigType>();
 
+  const ws = useWebSocketLite({
+    socketUrl: "ws://localhost:8080",
+  });
+
   useEffect(() => {
     setLoadingConfig(true);
     Axios.get("/streamdns").then((res) => {
+      // setTimeout(() => {
       setLoadingConfig(false);
+      // }, 2000);
       console.info("RES:", res);
       setAppConfig(res.data.data);
     });
@@ -34,24 +45,16 @@ function App(): JSX.Element {
     <div className="App bp3-dark">
       <Router>
         <AppContext.Provider value={appConfig}>
-          <div className="ls-header">
-            <img src={Logo} width="30" />
-            <div className="ls-logo">
-              <span className="s-name">亚马逊云科技低延迟直播方案</span>
-            </div>
-            <nav className="nav">
-              <Link to="/">首页</Link>
-              {/* <Link to="/login">Login</Link> */}
-              <Link to="/settings">系统设置</Link>
-            </nav>
-          </div>
-          <div className="ls-pages">
+          <WSContext.Provider value={ws}>
             <Switch>
               <Route exact path="/" component={Home} />
               <Route exact path="/login" component={Login} />
+              <Route exact path="/list" component={List} />
+              <Route exact path="/live/:id" component={Live} />
+              <Route exact path="/detail/:id" component={Detail} />
               <Route exact path="/settings" component={Settings} />
             </Switch>
-          </div>
+          </WSContext.Provider>
         </AppContext.Provider>
       </Router>
     </div>

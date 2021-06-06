@@ -1,6 +1,7 @@
 export interface StreamType {
   id: string;
   key: string;
+  videoname: string;
   description: string;
   outdate: string;
   isImage: boolean;
@@ -8,6 +9,12 @@ export interface StreamType {
   isOnDemand: boolean;
   isRelay: boolean;
   relayURL: string;
+}
+
+export interface DanMuType {
+  userName: string;
+  content: string;
+  videoId: string;
 }
 
 export interface AppConfigType {

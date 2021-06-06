@@ -15,5 +15,6 @@ server/lib/task.json
 
 .DS_Store
 .env
+.vscode
 node_modules
 build
