@@ -86,10 +86,10 @@ push()
 
 if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]]; 
       then 
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web-server:latest  
+  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web2-server:latest  
 
       else
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web-server:latest  
+  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2-server:latest  
 
 fi
 }
