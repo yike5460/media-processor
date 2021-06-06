@@ -15,7 +15,7 @@ Resources:
   Repository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: "video-streaming-web"
+      RepositoryName: "video-streaming-web2"
       LifecyclePolicy:
         LifecyclePolicyText: |
           {
@@ -38,7 +38,7 @@ Resources:
   ServerRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: video-streaming-web-server
+      RepositoryName: video-streaming-web2-server
       LifecyclePolicy:
         LifecyclePolicyText: |
           {
