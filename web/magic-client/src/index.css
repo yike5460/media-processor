@@ -1,0 +1,155 @@
+body {
+  background-color: #202B33;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.pb-20 {
+  padding-bottom: 20px;
+}
+
+.app-loading {
+  color: #fff;
+  margin: 100px auto;
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.over-y-auto {
+  overflow-y: auto;
+}
+
+.pr-10 {
+  padding-right: 10px !important;
+}
+
+.pr-60 {
+  padding-right: 60px !important;
+}
+
+.pt-10 {
+  padding-top: 6px;
+}
+
+.ml-5 {
+margin-left: 5px;
+}
+
+.mb-0 {
+  margin-bottom: 0 !important;
+}
+
+.mt-5 {
+  margin-top: 5px;
+}
+
+.mr-5 {
+  margin-right: 5px;
+}
+
+.mt-10 {
+  margin-top: 10px;
+}
+
+.mr-10 {
+  margin-right: 10px;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex1 {
+  flex: 1;
+}
+
+.pr {
+  position: relative;
+}
+
+.blue-bg {
+  background-color: #1c2730 !important;
+}
+
+.flex-overflow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+
+.qr-code {
+  position: absolute;
+  right: 10px;
+  margin-top: 9px;
+  cursor: pointer;
+}
+
+.pt-input {
+  padding: 5px 10px;
+  min-height: 24px;
+  margin: 5px 0;
+  border:1px solid #202B33;
+  background-color: #394B59;
+  width: 100%;
+  padding-right: 40px;
+  color: #ccc;
+}
+
+.pt-detail-input {
+  padding: 5px 10px;
+  min-height: 24px;
+  /* margin: 5px 0; */
+  border:1px solid #202B33;
+  background-color: #394B59;
+  width: 100%;
+  padding-right: 40px;
+  color: #ccc;
+}
+
+.react-player {
+  /* padding-top: 56.25%;  */
+  position: relative;
+}
+
+.react-player > div {
+  position: absolute;
+}
+
+.react-player video {
+  position: relative;
+  left: 0;
+  top: 0;
+  transform: none;
+  bottom: 0;
+}

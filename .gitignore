@@ -13,3 +13,8 @@ server/docker-compose.yml
 .idea/httpRequests/http-requests-log.http
 server/lib/task.json
 
+.DS_Store
+.env
+.vscode
+node_modules
+build

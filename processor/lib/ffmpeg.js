@@ -112,11 +112,12 @@ function getLiveBasePath() {
 
 function getMBRParam(codec, w, h, bv, maxrate, bufsize, ba, resolution) {
   return [
+    "-crf","23" ,
     '-vf', `scale=w=${w}:h=${h}:force_original_aspect_ratio=decrease`,
     '-c:a', 'aac',
     '-ar', '48000',
     '-c:v', codec,
-    '-preset', 'veryfast',
+    '-preset', 'ultrafast',
     '-keyint_min', '24',
     '-g', '48',
     '-sc_threshold', '0',
@@ -124,8 +125,8 @@ function getMBRParam(codec, w, h, bv, maxrate, bufsize, ba, resolution) {
     '-maxrate', maxrate,
     '-bufsize', bufsize,
     '-b:a', ba,
-    '-hls_time', '12',
-    '-hls_list_size', '6',
+    '-hls_time', '2',
+    '-hls_list_size', '4',
     "-hls_flags",
     "delete_segments",
     "-start_number",
