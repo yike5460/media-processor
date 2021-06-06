@@ -75,7 +75,7 @@
   font-size: 48px;
 }
 .ls-main-wrap .ls-left .time .clock {
-  padding: 20px 0;
+  padding: 10px 0;
 }
 .ls-main-wrap .ls-l-video {
   flex: 2;
@@ -101,6 +101,11 @@
 }
 .ls-main-wrap .ls-l-comments {
   flex: 3;
+}
+.ls-main-wrap .ls-statistic .number{
+  font-size: 24px;
+  text-align: center;
+  font-weight: bold;
 }
 .ls-main-wrap .ls-l-comments .comment-item {
   display: flex;

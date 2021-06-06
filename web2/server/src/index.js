@@ -64,7 +64,9 @@ function setupWebSocket(server) {
       console.log("wss.clients:", wss.clients);
       // ctx.send(`you said ${message}`);
       for (let c of wss.clients.values()) {
-        c.send(JSON.stringify(JSON.parse(message)));
+        const messageObj = JSON.parse(message);
+        messageObj.clientCount = wss.clients.size;
+        c.send(JSON.stringify(messageObj));
       }
     });
 
@@ -74,7 +76,7 @@ function setupWebSocket(server) {
     });
 
     // sent a message that we're good to proceed
-    ctx.send(JSON.stringify({ msg: "connection established." }));
+    ctx.send(JSON.stringify({ msg: "connection established.", clientCount: wss.clients.size }));
   });
 }
 
