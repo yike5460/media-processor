@@ -85,7 +85,7 @@ const VideoDanMu: React.FC<VideoDanMuProps> = (props: VideoDanMuProps) => {
         </div>
         <ReactPlayer
           playsinline={true}
-          // muted={true}
+          muted={true}
           fluid={false}
           width="100%"
           height={window.screen.height * 0.32 - 30}
