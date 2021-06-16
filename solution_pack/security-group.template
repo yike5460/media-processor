@@ -19,14 +19,14 @@ Resources:
       Description: Access to Redis from the Origin
       GroupId: !Ref RedisSecurityGroup
       SourceSecurityGroupId: !Ref OriginContainerSecurityGroup
-      IpProtocol: -1
+      IpProtocol: '-1'
   RedisSecurityGroupIngressServer:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: Access to Redis from the Server
       GroupId: !Ref RedisSecurityGroup
       SourceSecurityGroupId: !Ref ServerContainerSecurityGroup
-      IpProtocol: -1
+      IpProtocol: '-1'
 
   # Media Server SG
   ServerLoadBalancerSecurityGroup:
@@ -63,28 +63,28 @@ Resources:
       Description: Access to the Server from the Load Balancer
       GroupId: !Ref ServerContainerSecurityGroup
       SourceSecurityGroupId: !Ref ServerLoadBalancerSecurityGroup
-      IpProtocol: -1
+      IpProtocol: '-1'
   ServerSecurityGroupIngressProxy:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: Access to the Server from the Proxy
       GroupId: !Ref ServerContainerSecurityGroup
       SourceSecurityGroupId: !Ref ProxyContainerSecurityGroup
-      IpProtocol: -1
+      IpProtocol: '-1'
   ServerSecurityGroupIngressOrigin:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: Access to the Server from the Origin
       GroupId: !Ref ServerContainerSecurityGroup
       SourceSecurityGroupId: !Ref OriginContainerSecurityGroup
-      IpProtocol: -1
+      IpProtocol: '-1'
   ServerSecurityGroupIngressProcessor:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
       Description: Access to the Server from the Process
       GroupId: !Ref ServerContainerSecurityGroup
       SourceSecurityGroupId: !Ref ServerContainerSecurityGroup
-      IpProtocol: -1
+      IpProtocol: '-1'
 
   # Origin SG
   OriginLoadBalancerSecurityGroup:
@@ -144,24 +144,24 @@ Outputs:
   RedisSecurityGroup:
     Value: !Ref 'RedisSecurityGroup'
     Export:
-      Name: !Sub 'SecurityGroup-RedisSecurityGroup'
+      Name: 'SecurityGroup-RedisSecurityGroup'
   ServerLoadBalancerSecurityGroup:
     Value: !Ref 'ServerLoadBalancerSecurityGroup'
     Export:
-      Name: !Sub 'SecurityGroup-ServerLoadBalancerSecurityGroup'
+      Name: 'SecurityGroup-ServerLoadBalancerSecurityGroup'
   OriginLoadBalancerSecurityGroup:
     Value: !Ref 'OriginLoadBalancerSecurityGroup'
     Export:
-      Name: !Sub 'SecurityGroup-OriginLoadBalancerSecurityGroup'
+      Name: 'SecurityGroup-OriginLoadBalancerSecurityGroup'
   OriginContainerSecurityGroup:
     Value: !Ref 'OriginContainerSecurityGroup'
     Export:
-      Name: !Sub 'SecurityGroup-OriginContainerSecurityGroup'
+      Name: 'SecurityGroup-OriginContainerSecurityGroup'
   ProxyContainerSecurityGroup:
     Value: !Ref 'ProxyContainerSecurityGroup'
     Export:
-      Name: !Sub 'SecurityGroup-ProxyContainerSecurityGroup'
+      Name: 'SecurityGroup-ProxyContainerSecurityGroup'
   ServerContainerSecurityGroup:
     Value: !Ref 'ServerContainerSecurityGroup'
     Export:
-      Name: !Sub 'SecurityGroup-ServerContainerSecurityGroup'
+      Name: 'SecurityGroup-ServerContainerSecurityGroup'

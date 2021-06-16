@@ -17,6 +17,6 @@ Resources:
         #   AttributeName: "Artist"
         #   KeyType: "RANGE"
       ProvisionedThroughput: 
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
       TableName: "video-streaming"

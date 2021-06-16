@@ -3,12 +3,10 @@ Description: Asset Resources
 
 Resources: 
   AssetsBucket:
-    Description: S3 Bucket
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: 'Private'
   StaticBucket:
-    Description: S3 Bucket
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: 'Private'
@@ -31,4 +29,4 @@ Outputs:
   AssetsBucket:
     Value: !Ref 'AssetsBucket'
     Export:
-      Name: !Sub 'Assets-AssetsBucket'
+      Name: 'Assets-AssetsBucket'

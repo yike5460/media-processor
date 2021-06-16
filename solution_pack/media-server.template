@@ -23,6 +23,14 @@ Parameters:
     Type: String
     Description: Http Port
     Default: 8000
+  QSRegion:
+    Description: Region for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+
+Conditions:
+  UsingDefaultRegion: !Equals [!Ref QSRegion, 'aws-cn-quickstart']
 
 Resources:
   CloudWatchLogsGroup:
@@ -67,12 +75,14 @@ Resources:
               Service: ecs-tasks.amazonaws.com
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
-        - 'arn:aws-cn:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
-  
+        - !Sub
+          - 'arn:${Region}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+          - Region: !If [ UsingDefaultRegion, 'aws-cn', 'aws' ]
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Sub 'video-streaming-server'
+      Family: 'video-streaming-server'
       TaskRoleArn: !GetAtt TaskRole.Arn
       ExecutionRoleArn: !GetAtt ExecutionRole.Arn
       NetworkMode: awsvpc
@@ -83,7 +93,7 @@ Resources:
       # 1024 (1 vCPU) - Available memory values: 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB
       # 2048 (2 vCPU) - Available memory values: Between 4GB and 16GB in 1GB increments
       # 4096 (4 vCPU) - Available memory values: Between 8GB and 30GB in 1GB increments
-      Cpu: 2048
+      Cpu: '2048'
       # 0.5GB, 1GB, 2GB - Available cpu values: 256 (.25 vCPU)
       # 1GB, 2GB, 3GB, 4GB - Available cpu values: 512 (.5 vCPU)
       # 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB - Available cpu values: 1024 (1 vCPU)
@@ -91,7 +101,7 @@ Resources:
       # Between 8GB and 30GB in 1GB increments - Available cpu values: 4096 (4 vCPU)
       Memory: 4GB
       ContainerDefinitions:
-        - Name: !Sub 'video-streaming-server'
+        - Name: 'video-streaming-server'
           Image: "public.ecr.aws/l6z1v6o9/video-streaming-server"
           PortMappings:
             - ContainerPort: !Ref RtmpPort
@@ -109,12 +119,10 @@ Resources:
               Value: !Ref AWS::AccountId
             - Name: ASSETS_BUCKET
               Value:
-                Fn::ImportValue:
-                  !Sub "Assets-AssetsBucket"
+                Fn::ImportValue: 'Assets-AssetsBucket'
             - Name: CACHE_DOMAIN
               Value:
-                Fn::ImportValue:
-                  !Sub "Redis-RedisCluster"
+                Fn::ImportValue: 'Redis-RedisCluster'
             - Name: MEDIA_ROOT
               Value: '/usr/src/app/media'
             - Name: ECS_TYPE
@@ -131,8 +139,7 @@ Resources:
               Value: !Ref PublicSubnet2ID
             - Name: SECURITY_GROUP
               Value:
-                Fn::ImportValue:
-                  !Sub "SecurityGroup-ServerContainerSecurityGroup"
+                Fn::ImportValue: 'SecurityGroup-ServerContainerSecurityGroup'
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -144,7 +151,7 @@ Resources:
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub 'MediaServer-LoadBalancer'
+      Name: 'MediaServer-LoadBalancer'
       Subnets: 
         - !Ref PublicSubnet1ID
         - !Ref PublicSubnet2ID
@@ -157,14 +164,14 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     DependsOn: LoadBalancer
     Properties:
-      Name: !Sub 'MediaServer-TargetGroup'
+      Name: 'MediaServer-TargetGroup'
       VpcId: !Ref VpcID
       Port: 1935
       Protocol: TCP
       TargetType: ip
       HealthCheckPath: '/api/server'
       HealthCheckProtocol: HTTP
-      HealthCheckPort: 8000
+      HealthCheckPort: '8000'
 
   LoadBalancerListenerTcp:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -186,10 +193,9 @@ Resources:
       - ServerTargetGroup
       - LoadBalancerListenerTcp
     Properties:
-      ServiceName: !Sub 'video-streaming-server'
+      ServiceName: 'video-streaming-server'
       Cluster:
-        Fn::ImportValue:
-          !Sub "ECS-ECSCluster"
+        Fn::ImportValue: 'ECS-ECSCluster'
       DesiredCount: !Ref DesiredCount
       HealthCheckGracePeriodSeconds: 8000000
       TaskDefinition: !Ref TaskDefinition
@@ -202,9 +208,9 @@ Resources:
             - !Ref PublicSubnet1ID
             - !Ref PublicSubnet2ID
           SecurityGroups:
-            - Fn::ImportValue: !Sub "SecurityGroup-ServerContainerSecurityGroup"
+            - Fn::ImportValue: 'SecurityGroup-ServerContainerSecurityGroup'
       LoadBalancers:
-        - ContainerName: !Sub 'video-streaming-server'
+        - ContainerName: 'video-streaming-server'
           ContainerPort: 1935
           TargetGroupArn: !Ref ServerTargetGroup
 
