@@ -20,16 +20,21 @@ function App(): JSX.Element {
   const [loadingConfig, setLoadingConfig] = useState(true);
   const [appConfig, setAppConfig] = useState<AppConfigType>();
 
+  const reg = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
+  const ip = reg?.exec(window.location.href)?.[0] || "";
+  // console.log("服务器ip", ip);
+
   const ws = useWebSocketLite({
-    socketUrl: "ws://localhost:8080",
+    socketUrl: "ws://" + ip + "/ws",
+    // socketUrl: "ws://" + "127.0.0.1:8080/",
   });
 
   useEffect(() => {
     setLoadingConfig(true);
     Axios.get("/streamdns").then((res) => {
-      // setTimeout(() => {
-      setLoadingConfig(false);
-      // }, 2000);
+      setTimeout(() => {
+        setLoadingConfig(false);
+      }, 500);
       console.info("RES:", res);
       setAppConfig(res.data.data);
     });

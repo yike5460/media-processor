@@ -26,15 +26,17 @@ const PullStream: React.FC<PullStreamPropType> = (
     {}
   );
   const appConfig = useContext(AppContext);
+  const reg = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
+  const ip = reg?.exec(window.location.href)?.[0] || "";
   useEffect(() => {
     setPullStreamURLMap({
       HLS: {
         raw: `http://${appConfig?.pullDNS}/${streamData?.id}/live.m3u8`,
-        html: `http://${appConfig?.pullDNS}/${streamData?.id}/index.html`,
+        html: `http://${ip}/#/live/${streamData?.id}`,
       },
       FLV: {
         raw: `http://${appConfig?.pullDNS}/${streamData?.id}/live.flv`,
-        html: `http://${appConfig?.pullDNS}/${streamData?.id}/flv.html`,
+        html: `http://${ip}/#/live/${streamData?.id}`,
       },
       CMAF_HLS: {
         raw: `http://${appConfig?.pullDNS}/${streamData?.id}/master.m3u8`,
@@ -42,7 +44,7 @@ const PullStream: React.FC<PullStreamPropType> = (
       },
       CMAF_DASH: {
         raw: `http://${appConfig?.pullDNS}/${streamData?.id}/manifest.mpd`,
-        html: `http://${appConfig?.pullDNS}/${streamData?.id}/dash.html`,
+        html: `http://${appConfig?.pullDNS}/${streamData?.id}/flv.html`,
       },
     });
   }, [streamData]);

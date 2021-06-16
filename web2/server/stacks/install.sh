@@ -65,7 +65,7 @@ fi
 
 build()
 {
-  docker build -t video-streaming-web-server ../  
+  docker build -t video-streaming-web2-server ../  
 }
 
 tag()
@@ -73,10 +73,10 @@ tag()
       logger "red" "*****************tag********************************"
     if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]]; 
       then 
- docker tag video-streaming-web-server $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web-server:latest   
+ docker tag video-streaming-web2-server $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web2-server:latest   
 
       else
- docker tag video-streaming-web-server $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web-server:latest   
+ docker tag video-streaming-web2-server $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2-server:latest   
 fi
 }
 
@@ -86,10 +86,10 @@ push()
 
 if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]]; 
       then 
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web-server:latest  
+  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web2-server:latest  
 
       else
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web-server:latest  
+  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2-server:latest  
 
 fi
 }

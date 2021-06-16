@@ -74,12 +74,9 @@ tag()
     if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]]; 
       then 
  docker tag video-streaming-web2 $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web2:latest   
- docker tag video-streaming-web2-server $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web2-server:latest   
 
       else
-docker tag video-streaming-web2 $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2:latest 
-docker tag video-streaming-web2-server $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2-server:latest   
-  
+ docker tag video-streaming-web2 $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2:latest   
 fi
 }
 
@@ -90,43 +87,23 @@ push()
 if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]]; 
       then 
   docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web2:latest  
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com.cn/video-streaming-web2-server:latest  
 
       else
   docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2:latest  
-  docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/video-streaming-web2-server:latest  
 
 fi
 }
 
-ecr()
-{
-logger "red" "*****************create ecr********************************"
- ./stack-up.sh ecr   
-}
 
-service()
-{
 
- logger "red" "*****************create service********************************"
-
-if [[ $REGION = "cn-northwest-1" ]] || [[ $REGION = "cn-north-1" ]];
-      then
- ./stack-up.sh service-cn
-      else
- ./stack-up.sh service
-fi
-
-}
+ 
 
 all() { 
 welcome
 get-login
-# build
+build
 tag
-ecr
 push
-service
 }
 
 case $1 in
@@ -142,9 +119,7 @@ case $1 in
     push)
     push
      ;;
-    service)
-    service
-        ;;
+ 
     all)
     all
         ;;
