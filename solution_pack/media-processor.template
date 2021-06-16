@@ -23,6 +23,14 @@ Parameters:
     Type: String
     Description: Http Port
     Default: 8000
+  QSRegion:
+    Description: Region for the Quick Start assets. This string can include
+      numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start
+      or end with a hyphen (-).
+    Type: String
+
+Conditions:
+  UsingDefaultRegion: !Equals [!Ref QSRegion, 'aws-cn-quickstart']
 
 Resources:
   CloudWatchLogsGroup:
@@ -68,12 +76,14 @@ Resources:
               Service: ecs-tasks.amazonaws.com
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
-        - 'arn:aws-cn:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
-  
+        - !Sub
+          - 'arn:${Region}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy'
+          - Region: !If [ UsingDefaultRegion, 'aws-cn', 'aws' ]
+
   TaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
-      Family: !Sub 'video-streaming-processor'
+      Family: 'video-streaming-processor'
       TaskRoleArn: !GetAtt TaskRole.Arn
       ExecutionRoleArn: !GetAtt ExecutionRole.Arn
       NetworkMode: awsvpc
@@ -84,23 +94,22 @@ Resources:
       # 1024 (1 vCPU) - Available memory values: 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB
       # 2048 (2 vCPU) - Available memory values: Between 4GB and 16GB in 1GB increments
       # 4096 (4 vCPU) - Available memory values: Between 8GB and 30GB in 1GB increments
-      Cpu: 2048
+      Cpu: '2048'
       # 0.5GB, 1GB, 2GB - Available cpu values: 256 (.25 vCPU)
       # 1GB, 2GB, 3GB, 4GB - Available cpu values: 512 (.5 vCPU)
       # 2GB, 3GB, 4GB, 5GB, 6GB, 7GB, 8GB - Available cpu values: 1024 (1 vCPU)
       # Between 4GB and 16GB in 1GB increments - Available cpu values: 2048 (2 vCPU)
       # Between 8GB and 30GB in 1GB increments - Available cpu values: 4096 (4 vCPU)
       Memory: 4GB
-      volumes:
-       - efsVolumeConfiguration:
-          fileSystemId: 
-            Fn::ImportValue:
-              !Sub "EFSStack-EFS"
-          transitEncryption: DISABLED
-          rootDirectory: "/"
-         name: media
+      Volumes:
+       - EFSVolumeConfiguration:
+          FilesystemId: 
+            Fn::ImportValue: 'EFSStack-EFS'
+          TransitEncryption: DISABLED
+          RootDirectory: "/"
+         Name: media
       ContainerDefinitions:
-        - Name: !Sub 'video-streaming-processor'
+        - Name: 'video-streaming-processor'
           Image: "public.ecr.aws/l6z1v6o9/video-streaming-processor"
           PortMappings:
             - ContainerPort: !Ref RtmpPort
@@ -118,17 +127,15 @@ Resources:
               Value: !Ref AWS::AccountId
             - Name: ASSETS_BUCKET
               Value:
-                Fn::ImportValue:
-                  !Sub "Assets-AssetsBucket"
+                Fn::ImportValue: 'Assets-AssetsBucket'
             - Name: CACHE_DOMAIN
               Value:
-                Fn::ImportValue:
-                  !Sub "Redis-RedisCluster"
+                Fn::ImportValue: 'Redis-RedisCluster'
             - Name: MEDIA_ROOT
               Value: '/usr/src/app/media'
-          mountPoints:
-            - containerPath: "/media"
-              sourceVolume: media
+          MountPoints:
+            - ContainerPath: "/media"
+              SourceVolume: media
           LogConfiguration:
             LogDriver: awslogs
             Options:

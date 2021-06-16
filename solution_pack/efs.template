@@ -46,8 +46,7 @@ Resources:
           FromPort: 2049
           ToPort: 2049
           SourceSecurityGroupId:
-            Fn::ImportValue:
-              !Sub "SecurityGroup-ServerContainerSecurityGroup"
+            Fn::ImportValue: 'SecurityGroup-ServerContainerSecurityGroup'
             # TBD
             # Fn::ImportValue:
             #   !Sub 'video-streaming-security-ServerContainerSecurityGroup'
@@ -57,7 +56,7 @@ Outputs:
     Description: The created EFS 
     Value: !Ref EFSFileSystem
     Export:
-      Name: !Sub 'EFSStack-EFS'
+      Name: 'EFSStack-EFS'
 
   EFSMountTarget1:
     Description: The EFS MountTarget

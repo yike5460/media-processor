@@ -6,7 +6,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Sub 'video-streaming'
+      ClusterName: 'video-streaming'
       ClusterSettings:
         - Name: containerInsights
           Value: enabled
@@ -15,4 +15,4 @@ Outputs:
   ECSCluster:
     Value: !Ref 'ECSCluster'
     Export:
-      Name: !Sub 'ECS-ECSCluster'
+      Name: 'ECS-ECSCluster'
