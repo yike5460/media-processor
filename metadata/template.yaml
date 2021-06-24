@@ -6,6 +6,11 @@ Description: >
 Globals:
   Function:
     Timeout: 3
+  Api:
+    EndpointConfiguration: REGIONAL
+    Cors: 
+      AllowOrigin: "'*'"
+      AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Requested-With,X-Requested-By,X-Api-Key'"
 Resources:
   getStreams:
     Type: AWS::Serverless::Function 

@@ -9,60 +9,93 @@ const tableName = "video-metadata";
 exports.handler = async (event) => {
   // TODO implement
   let data;
+
   try {
     switch (event.httpMethod) {
       case "GET":
-          if(_.isNull(event.pathParameters))
+        if (_.isNull(event.pathParameters))
           return getAllData(event)
-          else
-        data = await readData(event);
-        return { statusCode: 200, body: JSON.stringify(data) };
+        else
+          data = await readData(event);
+        return {
+          statusCode: 200, headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*' // replace with hostname of frontend (CloudFront)
+          }, body: JSON.stringify(data)
+        };
       case "POST":
         data = await createData(event);
-        return { statusCode: 200, body: JSON.stringify(data) };
+        return {
+          statusCode: 200, headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*' // replace with hostname of frontend (CloudFront)
+          }, body: JSON.stringify(data)
+        };
       case "PUT":
         data = await updateData(event);
-        return { statusCode: 200, body: JSON.stringify(data) };
+        return {
+          statusCode: 200, headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*' // replace with hostname of frontend (CloudFront)
+          }, body: JSON.stringify(data)
+        };
       case "DELETE":
         data = await deleteData(event);
-        return { statusCode: 200, body: JSON.stringify(data) };
+        return {
+          statusCode: 200, headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*' // replace with hostname of frontend (CloudFront)
+          }, body: JSON.stringify(data)
+        };
       default:
         return {
           statusCode: 404,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*' // replace with hostname of frontend (CloudFront)
+          },
           body: `Unsupported method "${event.httpMethod}"`,
         };
     }
   } catch (err) {
     console.log("error has accured: " + err);
+    return {
+      statusCode: 404,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*' // replace with hostname of frontend (CloudFront)
+      },
+      body: `Unsupported method "${err}"`,
+    };
   }
 };
 
 const getAllData = async (event) => {
-    if (event.httpMethod !== 'GET') {
-        throw new Error(`getAllItems only accept GET method, you tried: ${event.httpMethod}`);
-    }
-    // All log statements are written to CloudWatch
-    console.info('received:', event);
+  if (event.httpMethod !== 'GET') {
+    throw new Error(`getAllItems only accept GET method, you tried: ${event.httpMethod}`);
+  }
+  // All log statements are written to CloudWatch
+  console.info('received:', event);
 
-    var params = {
-        TableName : tableName
-    };
-    const data = await ddb.scan(params).promise();
-    const items = data.Items;
+  var params = {
+    TableName: tableName
+  };
+  const data = await ddb.scan(params).promise();
+  const items = data.Items;
 
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify(items)
-    };
-    // All log statements are written to CloudWatch
-    console.info(`response from: ${event.path} statusCode: ${response.statusCode} body: ${response.body}`);
-    return response;
+  const response = {
+    statusCode: 200,
+    body: JSON.stringify(items)
+  };
+  // All log statements are written to CloudWatch
+  console.info(`response from: ${event.path} statusCode: ${response.statusCode} body: ${response.body}`);
+  return response;
 }
 // Get order with uuid provided in url
 const readData = async (event) => {
-    // resource: '/stream',
-    // resource: '/stream/{id}',
-    //pathParameters is null
+  // resource: '/stream',
+  // resource: '/stream/{id}',
+  //pathParameters is null
   let streamId = event.pathParameters.id;
 
   let params = {
@@ -88,7 +121,7 @@ const createData = async (event) => {
   let date = Date.now();
   item.TimeStamp = addDays(date, 3);
   let exp = (new Date(item.outdate).getTime() / 1000 | 0);
-  item.key=getSignKey(exp,item.id);
+  item.key = getSignKey(exp, item.id);
   console.log(date);
   let params = {
     TableName: tableName,
@@ -113,16 +146,16 @@ const updateData = async (event) => {
 
   let streamId = event.pathParameters.id;
   let body = JSON.parse(event.body);
-//   let isFlv = body.isFlv;
-//   let isHls = body.isHls;
-//   let isVideo = body.isVideo;
-//   let isImage = body.isImage;
-//   let isMotion = body.isMotion;
-//   let isOnDemand = body.isOnDemand;
-//   let videoTime = body.video_time;
-//   let imageTime = body.image_time;
-//   let hlsTime = body.hls_time;
-//    let outdate = body.outdate;
+  //   let isFlv = body.isFlv;
+  //   let isHls = body.isHls;
+  //   let isVideo = body.isVideo;
+  //   let isImage = body.isImage;
+  //   let isMotion = body.isMotion;
+  //   let isOnDemand = body.isOnDemand;
+  //   let videoTime = body.video_time;
+  //   let imageTime = body.image_time;
+  //   let hlsTime = body.hls_time;
+  //    let outdate = body.outdate;
 
   return updateItem(streamId, body);
 };
@@ -203,12 +236,12 @@ const addDays = (date, days) => {
   return Math.floor(result.getTime() / 1000);
 };
 
-const getSignKey=(date,id)=>{
-const md5 = require('crypto').createHash('md5');
-let key = 'nodemedia2017privatekey';
-let exp = date;
-let streamId = '/stream/'+id;
-return (exp+'-'+md5.update(streamId+'-'+exp+'-'+key).digest('hex'));
+const getSignKey = (date, id) => {
+  const md5 = require('crypto').createHash('md5');
+  let key = 'nodemedia2017privatekey';
+  let exp = date;
+  let streamId = '/stream/' + id;
+  return (exp + '-' + md5.update(streamId + '-' + exp + '-' + key).digest('hex'));
 }
 
 // {
