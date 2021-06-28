@@ -44,7 +44,7 @@ Resources:
   TaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ecs-task-${AWS::StackName}-${AWS::Region}
+      RoleName: !Sub ecs-task-${AWS::StackName}
       Path: /
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -55,7 +55,7 @@ Resources:
                 - ecs-tasks.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: !Sub ecs-service-${AWS::StackName}-${AWS::Region}
+        - PolicyName: !Sub ecs-service-${AWS::StackName}
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -69,7 +69,7 @@ Resources:
   ExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub ecs-execution-${AWS::StackName}-${AWS::Region}
+      RoleName: !Sub ecs-execution-${AWS::StackName}
       AssumeRolePolicyDocument:
         Statement:
           - Effect: Allow

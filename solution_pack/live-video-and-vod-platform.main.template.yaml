@@ -1,5 +1,5 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: Apache-2.0
+# SPDX-License-Identifier: MIT
 Description: "(SO8015) - Contruct full functional live video and VOD platform with cloud native services in AWS. Version v1.0.0"
 
 Parameters:
@@ -121,6 +121,17 @@ Resources:
     Type: 'AWS::CloudFormation::Stack'
     Properties:
       TemplateURL: https://live-video-and-vod-platform-template.s3.cn-north-1.amazonaws.com.cn/templates/assets.template
+
+  CopyScripts:
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: https://live-video-and-vod-platform-template.s3.cn-north-1.amazonaws.com.cn/templates/copy-scripts.template
+
+  MetaData:
+    DependsOn: CopyScripts
+    Type: 'AWS::CloudFormation::Stack'
+    Properties:
+      TemplateURL: https://live-video-and-vod-platform-template.s3.cn-north-1.amazonaws.com.cn/templates/metadata.template
 
   DynamoDB:
     Type: 'AWS::CloudFormation::Stack'
